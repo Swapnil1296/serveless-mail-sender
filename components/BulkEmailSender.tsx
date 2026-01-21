@@ -103,6 +103,10 @@ export default function BulkEmailSender() {
     setResults([]);
 
     try {
+      console.log('🔍 Frontend Debug:');
+      console.log('   NEXT_PUBLIC_API_KEY:', process.env.NEXT_PUBLIC_API_KEY);
+      console.log('   API Key being sent:', process.env.NEXT_PUBLIC_API_KEY || '');
+      
       const response = await fetch('/api/send-bulk-emails', {
         method: 'POST',
         headers: {
