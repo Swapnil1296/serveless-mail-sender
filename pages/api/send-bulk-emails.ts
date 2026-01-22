@@ -28,14 +28,7 @@ const checkRateLimit = (ip: string): boolean => {
 
 const authenticateApiKey = (req: NextApiRequest): boolean => {
   const apiKey = req.headers['x-api-key'];
-  const envApiKey = process.env.API_KEY;
-  
-  console.log('🔍 API Key Debug:');
-  console.log('   Received header:', apiKey);
-  console.log('   Environment API_KEY:', envApiKey);
-  console.log('   Headers keys:', Object.keys(req.headers));
-  
-  return apiKey === envApiKey;
+  return apiKey === process.env.API_KEY;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
