@@ -98,7 +98,6 @@
 // export default FormattedText;
 
 import React, { useEffect, useState } from "react";
-import { Emoji } from "react-emoji-render";
 import CodeBlock from './CodeBlock';
 
 
