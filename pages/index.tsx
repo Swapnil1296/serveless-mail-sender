@@ -1,5 +1,5 @@
+import PortfolioLanding from '@/components/portfolio/PortfolioLanding';
 import Head from 'next/head';
-import PortfolioLanding from '@/components/PortfolioLanding';
 
 export default function Home() {
   return (
