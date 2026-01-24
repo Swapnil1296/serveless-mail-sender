@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Mail, Send, CheckCircle, XCircle, RefreshCw, Trash2, Clock, X } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns/format';
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 import { showAlert } from '@/lib/alerts';
 
 interface EmailLog {
@@ -242,7 +243,7 @@ export default function EmailLogsViewer() {
 
     setLoading(true);
     try {
-      const selectedEmails = pendingFollowups.filter(email => 
+      const selectedEmails = pendingFollowups.filter(email =>
         selectedPendingEmails.has(email._id)
       );
 
@@ -286,7 +287,7 @@ export default function EmailLogsViewer() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 relative">
             {/* Glowing background effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-2xl -z-10"></div>
-            
+
             <div className="flex items-center gap-3 sm:gap-4 relative">
               {/* Animated icon with glow */}
               <div className="relative">
@@ -295,7 +296,7 @@ export default function EmailLogsViewer() {
                   <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
               </div>
-              
+
               {/* Title with glitch effect */}
               <div className="relative">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white relative z-10 tracking-wider uppercase">
@@ -308,12 +309,12 @@ export default function EmailLogsViewer() {
                 <h1 className="absolute top-0 left-0 text-2xl sm:text-3xl md:text-4xl font-bold text-pink-400 opacity-50 animate-glitch-2 uppercase" style={{ clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)' }}>
                   Email Logs
                 </h1>
-                
+
                 {/* Decorative line under title */}
                 <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 mt-1"></div>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={checkPendingFollowups}
@@ -632,11 +633,10 @@ export default function EmailLogsViewer() {
                   {pendingFollowups.map((email) => (
                     <div
                       key={email._id}
-                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all gap-3 ${
-                        selectedPendingEmails.has(email._id)
+                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all gap-3 ${selectedPendingEmails.has(email._id)
                           ? 'bg-orange-500/20 border-orange-400/60'
                           : 'bg-gray-800/40 border-gray-600/40'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3 sm:gap-4 flex-1 w-full">
                         <input
@@ -662,11 +662,10 @@ export default function EmailLogsViewer() {
                       </div>
                       <button
                         onClick={() => togglePendingEmail(email._id)}
-                        className={`w-full sm:w-auto px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${
-                          selectedPendingEmails.has(email._id)
+                        className={`w-full sm:w-auto px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${selectedPendingEmails.has(email._id)
                             ? 'bg-red-600 hover:bg-red-500 text-white'
                             : 'bg-green-600 hover:bg-green-500 text-white'
-                        }`}
+                          }`}
                       >
                         {selectedPendingEmails.has(email._id) ? 'Remove' : 'Add'}
                       </button>

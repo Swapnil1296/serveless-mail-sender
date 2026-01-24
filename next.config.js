@@ -2,18 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-      experimental: {
-    serverActions: true,
-  },
-   compiler: {
+  compiler: {
     removeConsole: true,
-    
-  },
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-    responseLimit: false,
   },
 }
 

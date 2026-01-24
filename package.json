@@ -14,14 +14,17 @@
     "date-fns": "^3.6.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.363.0",
+    "marked": "^17.0.1",
     "mongoose": "^8.3.0",
     "next": "^14.2.0",
     "nodemailer": "^6.9.13",
+    "prism-react-renderer": "^2.4.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "sweetalert2": "^11.26.17",
     "swr": "^2.2.5",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
