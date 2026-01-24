@@ -1,16 +1,16 @@
 import Head from 'next/head';
-import BulkEmailSender from '@/components/BulkEmailSender';
+import PortfolioLanding from '@/components/PortfolioLanding';
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Bulk Email Sender - Next.js Serverless</title>
-        <meta name="description" content="Send bulk emails with Next.js serverless functions" />
+        <title>Swapnil Landage - Full Stack Developer</title>
+        <meta name="description" content="Full Stack Developer specializing in MERN stack" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <BulkEmailSender />
+      <PortfolioLanding />
     </>
   );
 }
