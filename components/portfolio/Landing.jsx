@@ -10,11 +10,10 @@ import UpcomingProjects from "./UpcomingProjects";
 import SocialLinks from "./SocialLinks";
 import Contact from "./Contact";
 import Footer from "./Footer";
-import ThemeToggle from "./ThemeToggle";
 import PersonalProjects from "./PersonalProjects";
 
-export default function Landing() {
-  const [darkMode, setDarkMode] = useState(true);
+export default function Landing({ isAuthenticated, loading, onButtonClick }) {
+  const [darkMode] = useState(true); // Force dark mode for cyberpunk
   const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
@@ -29,29 +28,31 @@ export default function Landing() {
     };
   }, []);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
   return (
-    <div 
-      className={`min-h-screen transition-colors duration-300 font-mono ${
-        darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
-      }`}
+    <div
+      className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-200"
     >
-      <Header darkMode={darkMode} scrollPosition={scrollPosition} />
+      <Header
+        darkMode={darkMode}
+        scrollPosition={scrollPosition}
+        isAuthenticated={isAuthenticated}
+        loading={loading}
+        onButtonClick={onButtonClick}
+      />
 
-      {/* Fixed position theme toggle */}
-      <div className="fixed top-24 right-4 z-50 md:top-6 md:right-6">
-        <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      </div>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
+        {/* Dynamic Background Elements */}
+        <div className="fixed inset-0 pointer-events-none opacity-20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,#3b82f6,transparent_50%)]"></div>
+          <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_120%,#a855f7,transparent_50%)]"></div>
+        </div>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
+            className="relative z-10"
           >
             <Introduction darkMode={darkMode} />
             <Proficiencies darkMode={darkMode} />

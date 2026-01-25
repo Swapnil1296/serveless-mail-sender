@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
-const Header = ({ darkMode, scrollPosition }) => {
+import { Lock, Terminal } from "lucide-react";
+
+const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
-    { id: "home", label: "Home" },
-    { id: "proficiencies", label: "Skills" },
-    { id: "experience", label: "Experience" },
-    { id: "projects", label: "Projects" },
-    { id: "upcoming", label: "Upcoming" },
-    { id: "contact", label: "Contact" },
+    { id: "home", label: "HOME" },
+    { id: "proficiencies", label: "SKILLS" },
+    { id: "experience", label: "EXPERIENCE" },
+    { id: "projects", label: "PROJECTS" },
+    { id: "upcoming", label: "UPCOMING" },
+    { id: "contact", label: "CONTACT" },
   ];
 
   const scrollToSection = (id) => {
@@ -26,71 +28,75 @@ const Header = ({ darkMode, scrollPosition }) => {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrollPosition > 50
-          ? darkMode
-            ? "bg-gray-900 shadow-lg shadow-gray-800/20"
-            : "bg-white shadow-lg"
-          : darkMode
-          ? "bg-gray-900"
-          : "bg-white"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-cyan-500/20 backdrop-blur-md ${scrollPosition > 50
+        ? "bg-black/80 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+        : "bg-transparent"
+        }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-6">
           <div className="flex items-center">
             <motion.div
-              whileHover={{ scale: 1.1 }}
-              className={`text-2xl font-bold ${
-                darkMode ? "text-blue-400" : "text-blue-600"
-              }`}
+              whileHover={{ scale: 1.05 }}
+              className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-400 relative group cursor-pointer"
             >
-              Portfolio
+              <span className="relative z-10">PORTFOLIO.SYS</span>
+              <div className="absolute inset-0 bg-cyan-400/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </motion.div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className={`text-sm font-medium transition-colors duration-300 hover:cursor-pointer ${
-                  darkMode ? "hover:text-blue-400" : "hover:text-blue-600"
-                }`}
+                className="text-[11px] font-bold tracking-widest text-cyan-100/70 hover:text-cyan-400 transition-colors relative group"
                 onClick={() => scrollToSection(item.id)}
               >
                 {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full"></span>
               </motion.button>
             ))}
+
+            {/* Uplink Button Integration */}
+            <motion.button
+              onClick={onButtonClick}
+              disabled={loading}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(6,182,212,0.4)" }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border-2 border-cyan-400/50 hover:border-cyan-400 transition-all group disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="w-3 h-3 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
+              ) : (
+                isAuthenticated ? <Terminal className="w-3.5 h-3.5 text-cyan-400" /> : <Lock className="w-3.5 h-3.5 text-cyan-400" />
+              )}
+              <span className="text-[10px] font-black tracking-widest text-white uppercase translate-y-[0.5px] neon-text-cyan">
+                {loading ? 'SYNCING' : (isAuthenticated ? 'DASHBOARD' : 'ADMIN_ACCESS')}
+              </span>
+            </motion.button>
+
             <motion.a
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(6,182,212,0.4)" }}
               whileTap={{ scale: 0.95 }}
               href="https://drive.google.com/file/d/1fa6ZZkbo0xYR-YHXy_jQIn0nYYraaVe3/view?usp=sharing"
               download
-              className={`text-sm font-medium px-4 py-2 rounded-md transition-colors duration-300 ${
-                darkMode
-                  ? "bg-blue-500 hover:bg-blue-600 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
+              className="text-[10px] font-black tracking-widest px-4 py-2.5 bg-transparent border-2 border-white/20 text-white/90 hover:text-white hover:border-white transition-all uppercase"
             >
-              Download Resume
+              RESUME.pdf
             </motion.a>
           </nav>
 
           {/* Mobile Navigation Toggle */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`p-2 rounded-md ${
-                darkMode
-                  ? "text-gray-200 hover:bg-gray-800"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className="p-2 text-cyan-400 hover:bg-cyan-400/10 transition-colors"
             >
               <svg
                 className="h-6 w-6"
@@ -125,35 +131,36 @@ const Header = ({ darkMode, scrollPosition }) => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className={`md:hidden py-4 ${
-              darkMode ? "bg-gray-900" : "bg-white"
-            }`}
+            className="lg:hidden py-8 bg-black/95 border-t border-cyan-500/20"
           >
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-6">
               {navItems.map((item) => (
                 <button
                   key={item.id}
-                  className={`px-4 py-2 text-sm font-medium ${
-                    darkMode
-                      ? "hover:bg-gray-800 rounded-md"
-                      : "hover:bg-gray-100 rounded-md"
-                  }`}
+                  className="px-4 py-2 text-xs font-bold tracking-[0.3em] text-cyan-100/70 hover:text-cyan-400 text-left transition-colors uppercase"
                   onClick={() => scrollToSection(item.id)}
                 >
                   {item.label}
                 </button>
               ))}
-              <a
-                href="https://drive.google.com/file/d/1fa6ZZkbo0xYR-YHXy_jQIn0nYYraaVe3/view?usp=sharing"
-                download
-                className={`mx-4 text-center text-sm font-medium px-4 py-2 rounded-md transition-colors duration-300 ${
-                  darkMode
-                    ? "bg-blue-500 hover:bg-blue-600 text-white"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                Download Resume
-              </a>
+
+              <div className="grid grid-cols-1 gap-4 px-4 pt-4 border-t border-white/5">
+                <button
+                  onClick={onButtonClick}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-3 py-4 bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 font-black tracking-widest text-xs uppercase neon-text-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                >
+                  {isAuthenticated ? <Terminal className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                  {isAuthenticated ? 'ACCESS_PROJECT_NODES' : 'INITIALIZE_ADMIN_AUTH'}
+                </button>
+                <a
+                  href="https://drive.google.com/file/d/1fa6ZZkbo0xYR-YHXy_jQIn0nYYraaVe3/view?usp=sharing"
+                  download
+                  className="text-center text-xs font-black tracking-widest py-4 border-2 border-white/20 text-white uppercase"
+                >
+                  DOWNLOAD_CV.pdf
+                </a>
+              </div>
             </div>
           </motion.div>
         )}

@@ -1,65 +1,64 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+
 const ProfessionalProjects = ({ darkMode }) => {
   const [hoveredId, setHoveredId] = useState(null);
 
   const projects = [
     {
       id: 1,
-      title: "State Bank Of India General Insurance",
+      title: "SBI GENERAL INSURANCE",
+      slug: "PROJ_001",
       description:
-        "An unambiguous and comprehensive online service to purchase any policy; that is exactly how important insurance policies have become in our lives",
+        "Comprehensive online portal for insurance policy management and procurement. High-availability architecture for critical financial operations.",
       image: "sbig.png",
       technologies: [
         "React",
-        "Next",
+        "Next.js",
         "TailwindCSS",
-        "JavaScript",
         "Node.js",
         "Express",
         "PostgreSQL",
         "Strapi",
       ],
       link: "https://www.sbigeneral.in/",
-      github: "#",
     },
     {
       id: 2,
-      title: "Alkem Marketplace",
-
+      title: "ALKEM MARKETPLACE",
+      slug: "PROJ_002",
       description:
-        "Alkem Market Place, owned by Alkem Labs, is an online platform simplifying the ordering of in-stock medicines. Designed for ease, it offers a seamless ordering experience for both healthcare providers and patients. With real-time stock updates and a user-friendly interface, it ensures timely and reliable delivery, reflecting Alkem's commitment to modernizing healthcare.",
+        "Centralized pharmaceutical supply chain platform. Real-time inventory tracking and automated order processing for healthcare nodes.",
       image: "alkem.png",
       technologies: [
         "React",
-        "formik",
+        "Formik",
         "Redux",
         "Node",
         "PostgreSQL",
         "Express",
       ],
       link: "https://alkemmarketplace.in/",
-      github: "#",
     },
     {
       id: 3,
-      title: "Connect2Clinic",
+      title: "CONNECT2CLINIC",
+      slug: "PROJ_003",
       description:
-        "Connect2Clinic, an exceptional digital initiative pioneered by Alkem Labs, is dedicated to transforming the management of healthcare practices. As a subsidiary of Alkem Labs, the project's unwavering goal is to carry forward the company’s rich tradition of excellence and unwavering dedication to healthcare. This cutting-edge platform stands as an AI-driven, comprehensive solution that not only streamlines and elevates the patient experience but also empowers healthcare providers with state-of-the-art tools and technologies.",
+        "AI-driven healthcare management ecosystem. Advanced patient-doctor telemetry and clinic workflow optimization protocols.",
       image: "c2c.png",
       technologies: ["React", "Next", "TailwindCSS", "JavaScript"],
       link: "https://www.connect2clinic.com",
-      github: "#",
     },
     {
       id: 4,
-      title: "Ageas Federal Insurance",
+      title: "AGEAS FEDERAL INSURANCE",
+      slug: "PROJ_004",
       description:
-        "Ageas Federal Life Insurance (AFLI) is one of India’s prominent life insurance companies that strives towards creating value for its stakeholders. We are a joint venture between Ageas, an international insurance giant based out of Europe and Federal Bank, one of India’s leading private sector banks.",
+        "Multinational joint-venture fintech platform. Scalable cloud-native architecture for high-volume insurance transactions.",
       image: "ageas.png",
-      technologies: ["PHP", "Laravel", "NextJS", "ReactJS", "AzureCloud", "CI/CD", "strapi"],
+      technologies: ["PHP", "Laravel", "NextJS", "ReactJS", "AzureCloud", "CI/CD", "Strapi"],
       link: "https://www.ageasfederal.com/",
-      github: "https://github.com/Swapnil1296/Meesho-",
     },
   ];
 
@@ -70,82 +69,94 @@ const ProfessionalProjects = ({ darkMode }) => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="text-center mb-16"
+        className="text-center mb-20"
       >
-        <h2
-          className={`inline-block text-3xl font-bold pb-2 border-b-4 ${darkMode ? "border-blue-400" : "border-blue-600"
-            }`}
-        >
-          Professional Projects
-        </h2>
+        <div className="inline-block relative">
+          <h2 className="text-3xl font-black tracking-widest text-white uppercase relative z-10">
+            &lt; DEPLOYED_ASSETS /&gt;
+          </h2>
+          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+        </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {projects.map((project) => (
           <motion.div
             key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className={`rounded-lg shadow-lg overflow-hidden ${darkMode ? "bg-gray-800" : "bg-white"
-              }`}
+            className="group relative"
             onMouseEnter={() => setHoveredId(project.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
-            <div
-              className="relative overflow-hidden"
-              style={{ height: "200px" }}
-            >
-              <img
-                src={project.image}
-                alt={project.title}
-                className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
-                style={{
-                  transform:
-                    hoveredId === project.id ? "scale(1.1)" : "scale(1)",
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="text-white text-xl font-bold">
-                  {project.title}
-                </h3>
+            {/* Holographic Border Effect */}
+            <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-sm blur opacity-20 group-hover:opacity-75 transition duration-1000 group-hover:duration-200`}></div>
+
+            <div className="relative bg-black/80 border border-white/10 overflow-hidden">
+              {/* Header Info */}
+              <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/5">
+                <span className="text-[9px] font-black tracking-widest text-cyan-400">{project.slug}</span>
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-cyan-500 opacity-50"></div>
+                  <div className="w-1.5 h-1.5 bg-purple-500 opacity-50"></div>
+                </div>
               </div>
-            </div>
 
-            <div className="p-6">
-              <p className="mb-4">{project.description}</p>
+              <div className="relative h-56 overflow-hidden">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 brightness-50 group-hover:brightness-100"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {project.technologies.map((tech, idx) => (
-                  <span
-                    key={idx}
-                    className={`px-2 py-1 rounded-full text-xs ${darkMode
-                      ? "bg-gray-700 text-blue-300"
-                      : "bg-blue-100 text-blue-800"
-                      }`}
+                {/* Visual Glitch Lines */}
+                <div className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-20 pointer-events-none">
+                  <div className="absolute top-1/4 left-0 w-full h-px bg-cyan-400"></div>
+                  <div className="absolute top-2/4 left-0 w-full h-px bg-purple-400"></div>
+                </div>
+
+                <div className="absolute bottom-4 left-4">
+                  <h3 className="text-xl font-black tracking-tighter text-white uppercase neon-text-cyan">
+                    {project.title}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <p className="text-xs text-cyan-100/60 leading-relaxed font-bold mb-6 h-12 overflow-hidden">
+                  &gt; {project.description}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {project.technologies.slice(0, 5).map((tech, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 bg-cyan-500/5 border border-cyan-500/20 text-[8px] font-black text-white tracking-widest"
+                    >
+                      {tech.toUpperCase()}
+                    </span>
+                  ))}
+                  {project.technologies.length > 5 && (
+                    <span className="text-[8px] font-black text-cyan-400/50">+{project.technologies.length - 5}</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                  <motion.a
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-black tracking-[0.3em] text-cyan-400 hover:text-white transition-colors"
                   >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex space-x-4">
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`px-4 py-2 rounded-md text-sm font-medium ${darkMode
-                    ? "bg-blue-500 hover:bg-blue-600 text-white"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                    }`}
-                >
-                  View Live
-                </motion.a>
-
+                    [ ACCESS_NODE ]
+                  </motion.a>
+                  <div className="text-[8px] font-black text-cyan-400/20 italic tracking-tighter">DATA_ENCRYPTED_v2.0</div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -156,4 +167,3 @@ const ProfessionalProjects = ({ darkMode }) => {
 };
 
 export default ProfessionalProjects;
-

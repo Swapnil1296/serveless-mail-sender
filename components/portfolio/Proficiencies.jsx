@@ -67,13 +67,12 @@ const Proficiencies = ({ darkMode }) => {
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2
-          className={`inline-block text-3xl font-bold pb-2 border-b-4 ${
-            darkMode ? "border-blue-400" : "border-blue-600"
-          }`}
-        >
-          My Skills & Expertise
-        </h2>
+        <div className="inline-block relative">
+          <h2 className="text-3xl font-black tracking-widest text-white uppercase relative z-10">
+            &lt; SKILLS_REPOSITORY /&gt;
+          </h2>
+          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+        </div>
       </motion.div>
 
       <motion.div
@@ -81,34 +80,31 @@ const Proficiencies = ({ darkMode }) => {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
       >
         {skills.map((skillGroup, index) => (
           <motion.div
             key={index}
             variants={item}
-            className={`p-6 rounded-lg shadow-lg ${
-              darkMode
-                ? "bg-gray-800 hover:bg-gray-700"
-                : "bg-white hover:bg-gray-50"
-            } transition-all duration-300`}
+            className="p-6 bg-black/40 border-2 border-cyan-500/20 hover:border-cyan-400/50 transition-all duration-300 relative group overflow-hidden"
           >
-            <div className="flex items-center mb-4">
-              <span className="text-3xl mr-4">{skillGroup.icon}</span>
-              <h3 className="text-xl font-semibold">{skillGroup.category}</h3>
+            {/* Background Accent */}
+            <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 -mr-8 -mt-8 rotate-45 group-hover:bg-cyan-500/10 transition-colors"></div>
+
+            <div className="flex items-center mb-6">
+              <span className="text-2xl mr-4 brightness-125">{skillGroup.icon}</span>
+              <h3 className="text-sm font-black tracking-[0.2em] text-cyan-400 uppercase">
+                {skillGroup.category}
+              </h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {skillGroup.items.map((skill, idx) => (
                 <motion.span
                   key={idx}
-                  whileHover={{ scale: 1.05 }}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    darkMode
-                      ? "bg-gray-700 text-blue-300"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(6,182,212,0.2)" }}
+                  className="px-3 py-1 bg-cyan-500/5 border border-cyan-500/30 text-cyan-100/90 text-[10px] font-bold tracking-tighter"
                 >
-                  {skill}
+                  {skill.toUpperCase()}
                 </motion.span>
               ))}
             </div>
@@ -123,101 +119,33 @@ const Proficiencies = ({ darkMode }) => {
         viewport={{ once: true }}
         className="mt-16"
       >
-        <div
-          className={`max-w-3xl mx-auto p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
-        >
-          <h3 className="text-xl font-semibold mb-4">Professional Overview</h3>
-          <p className="mb-4">
-            With over 3 years of experience in software development, I've
-            mastered both frontend and backend technologies to create seamless,
-            responsive, and user-friendly applications. My approach combines
-            technical expertise with creative problem-solving to deliver
-            solutions that exceed expectations.
+        <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-cyan-950/20 to-purple-950/20 border-2 border-purple-500/20 backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-2 text-[10px] font-black text-purple-500/30">OVERVIEW_VER_3.0.1</div>
+
+          <h3 className="text-xl font-black tracking-widest text-purple-400 mb-6 uppercase flex items-center gap-4">
+            <span className="w-12 h-px bg-purple-500/30"></span>
+            Professional_Manifesto
+          </h3>
+          <p className="text-sm text-cyan-100/80 leading-relaxed font-medium mb-8">
+            With over 3 years of experience in the digital frontier, I have
+            mastered frontend and backend constructs to create high-fidelity,
+            responsive, and user-centric applications. My methodology integrates
+            technical precision with creative problem-solving to deliver
+            optimal-grade solutions.
           </p>
-          <div className="flex flex-wrap gap-4 mt-6">
-            <div className="flex items-center">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  darkMode ? "bg-gray-700" : "bg-blue-100"
-                }`}
-              >
-                <svg
-                  className={`w-6 h-6 ${
-                    darkMode ? "text-blue-400" : "text-blue-600"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {[
+              { label: "FAST_LEARNER", desc: "Rapid tech adaptation", icon: "⚡" },
+              { label: "SOL_ORIENTED", desc: "Heuristic problem solver", icon: "🧠" },
+              { label: "TEAM_SYNC", desc: "Comm-protocol efficient", icon: "📡" }
+            ].map((feature, i) => (
+              <div key={i} className="flex flex-col gap-2 border-l-2 border-cyan-500/30 pl-4">
+                <span className="text-xl mb-1">{feature.icon}</span>
+                <h4 className="text-[10px] font-black tracking-[0.2em] text-cyan-400">{feature.label}</h4>
+                <p className="text-[10px] text-cyan-100/60 font-medium">{feature.desc}</p>
               </div>
-              <div className="ml-4">
-                <h4 className="font-medium">Fast Learner</h4>
-                <p className="text-sm">Quick to master new technologies</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  darkMode ? "bg-gray-700" : "bg-blue-100"
-                }`}
-              >
-                <svg
-                  className={`w-6 h-6 ${
-                    darkMode ? "text-blue-400" : "text-blue-600"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h4 className="font-medium">Solution-Oriented</h4>
-                <p className="text-sm">Creative approach to problem solving</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  darkMode ? "bg-gray-700" : "bg-blue-100"
-                }`}
-              >
-                <svg
-                  className={`w-6 h-6 ${
-                    darkMode ? "text-blue-400" : "text-blue-600"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h4 className="font-medium">Team Player</h4>
-                <p className="text-sm">Collaborative and communicative</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </motion.div>

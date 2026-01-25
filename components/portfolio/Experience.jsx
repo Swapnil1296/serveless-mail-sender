@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 
 const Experience = ({ darkMode }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [prevTab, setPrevTab] = useState(0);
   const tabsRef = useRef([]);
 
   const experiences = [
@@ -53,25 +52,13 @@ const Experience = ({ darkMode }) => {
       technologies: ["HTML5", "CSS3", "JavaScript", "React"],
     },
   ];
+
   const handleActiveTab = (index) => {
-    setPrevTab(activeTab);
     setActiveTab(index);
   };
-  useEffect(() => {
-    let index = 0;
-    const length = experiences.length;
-
-    const interval = setInterval(() => {
-      handleActiveTab(index);
-      index = (index + 1) % length;
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
 
   return (
-    <section id="experience" className="pt-20 pb-16 ">
+    <section id="experience" className="pt-20 pb-16">
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -79,112 +66,94 @@ const Experience = ({ darkMode }) => {
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2
-          className={`inline-block text-3xl font-bold pb-2 border-b-4 ${
-            darkMode ? "border-blue-400" : "border-blue-600"
-          }`}
-        >
-          Work Experience
-        </h2>
+        <div className="inline-block relative">
+          <h2 className="text-3xl font-black tracking-widest text-white uppercase relative z-10">
+            &lt; CAREER_CHRONOLOGY /&gt;
+          </h2>
+          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+        </div>
       </motion.div>
 
-      <div className="max-w-4xl mx-auto">
-        <div className="relative flex space-x-2 overflow-x-auto mb-8 pb-2">
-          {/* Tail effect */}
-          <motion.div
-            className="absolute h-full bg-blue-500 rounded-md z-0"
-            initial={false}
-            animate={{
-              left: tabsRef.current[activeTab]?.offsetLeft || 0,
-              width: tabsRef.current[activeTab]?.offsetWidth || 0,
-            }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          />
-
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+        {/* Tech-inspired Sidebar Tabs */}
+        <div className="flex md:flex-col overflow-x-auto md:overflow-visible border-l-2 border-purple-500/20 md:w-64 shrink-0">
           {experiences.map((experience, index) => (
             <button
               key={index}
-              ref={(el) => (tabsRef.current[index] = el)}
               onClick={() => handleActiveTab(index)}
-              className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${activeTab === index
-                ? "text-white"
-                : "text-gray-400 hover:text-white"
+              className={`px-6 py-4 text-left transition-all relative group ${activeTab === index
+                  ? "bg-purple-500/10 text-purple-400"
+                  : "text-cyan-100/40 hover:text-cyan-400 hover:bg-cyan-500/5"
                 }`}
             >
-              {experience.company}
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black tracking-tighter opacity-50">
+                  {index.toString().padStart(2, '0')}.EXEC
+                </span>
+                <span className="text-sm font-bold tracking-widest uppercase">
+                  {experience.company.split(' ')[0]}
+                </span>
+              </div>
+              {activeTab === index && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute left-[-2px] top-0 bottom-0 w-[2px] bg-purple-400 shadow-[0_0_10px_#8b5cf6]"
+                />
+              )}
             </button>
           ))}
         </div>
 
-
-
+        {/* Content Node */}
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className={`p-6 rounded-lg shadow-lg ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex-1 p-8 bg-black/40 border-2 border-purple-500/20 relative group"
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          {/* Decorative Corner */}
+          <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-purple-400 opacity-50"></div>
+
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8">
             <div>
-              <h3 className="text-xl font-bold">
+              <h3 className="text-2xl font-black tracking-tight text-white uppercase mb-1">
                 {experiences[activeTab].title}
               </h3>
-              <p
-                className={`text-lg ${
-                  darkMode ? "text-blue-400" : "text-blue-600"
-                }`}
-              >
-                {experiences[activeTab].company}
+              <p className="text-purple-400 font-bold tracking-[0.2em] text-xs">
+                @ {experiences[activeTab].company.toUpperCase()}
               </p>
             </div>
-            <p
-              className={`mt-2 md:mt-0 px-3 py-1 rounded-full text-sm inline-block ${
-                darkMode ? "bg-gray-700" : "bg-gray-200"
-              }`}
-            >
+            <div className="mt-4 md:mt-0 text-[10px] font-black bg-purple-500/10 border border-purple-500/30 px-3 py-1 text-purple-300 tracking-widest uppercase">
               {experiences[activeTab].period}
-            </p>
+            </div>
           </div>
 
-          <h4 className="font-semibold mb-2">Key Responsibilities:</h4>
-          <ul className="mb-6 space-y-2">
+          <div className="space-y-6 mb-8">
             {experiences[activeTab].responsibilities.map((item, idx) => (
-              <motion.li
+              <motion.div
                 key={idx}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: idx * 0.1 }}
-                className="flex items-start"
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-start gap-4"
               >
-                <div
-                  className={`mt-1.5 mr-2 h-1.5 w-1.5 rounded-full ${
-                    darkMode ? "bg-blue-400" : "bg-blue-600"
-                  }`}
-                ></div>
-                <span>{item}</span>
-              </motion.li>
+                <span className="mt-1 text-purple-500 text-xs font-black">❯</span>
+                <p className="text-sm text-cyan-100/70 leading-relaxed font-medium">
+                  {item}
+                </p>
+              </motion.div>
             ))}
-          </ul>
+          </div>
 
-          <h4 className="font-semibold mb-2">Technologies Used:</h4>
           <div className="flex flex-wrap gap-2">
             {experiences[activeTab].technologies.map((tech, idx) => (
-              <motion.span
+              <span
                 key={idx}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  darkMode
-                    ? "bg-gray-700 text-blue-300"
-                    : "bg-blue-100 text-blue-800"
-                }`}
+                className="px-2 py-1 bg-purple-500/5 border border-purple-500/20 text-[9px] font-black text-purple-300 tracking-tighter uppercase"
               >
-                {tech}
-              </motion.span>
+                #{tech.replace(/\s+/g, '_').toUpperCase()}
+              </span>
             ))}
           </div>
         </motion.div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Mail, FileText, Plus, NotebookPen } from 'lucide-react';
+import { X, Mail, NotebookPen, Plus } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 interface DashboardModalProps {
@@ -15,8 +15,7 @@ interface Project {
   description: string;
   icon: React.ReactNode;
   route: string;
-  color: string;
-  gradient: string;
+  slug: string;
 }
 
 export default function DashboardModal({ isOpen, onClose }: DashboardModalProps) {
@@ -28,22 +27,19 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
     {
       id: 'email-management',
       name: 'Email Management',
-      description: 'Bulk email sender and logs viewer',
+      slug: 'COMMS_v2',
+      description: 'Bulk email sender and protocol log viewer',
       icon: <Mail className="w-8 h-8" />,
       route: '/projects/email-sender',
-      color: 'cyan',
-      gradient: 'from-cyan-600 via-purple-600 to-pink-600',
     },
-      {
+    {
       id: 'interview-preparation-kit',
-      name: 'Interview Preparation Kit',
-      description: 'Interview Preparation Kit',
+      name: 'Interview Prep Kit',
+      slug: 'INT_CORE_v1',
+      description: 'Heuristic-based interview preparation modules',
       icon: <NotebookPen className="w-8 h-8" />,
       route: '/projects/interview-prep',
-      color: 'cyan',
-      gradient: 'from-cyan-600 via-purple-600 to-pink-600',
     },
-    // Add more projects here in the future
   ];
 
   const handleProjectClick = (route: string) => {
@@ -52,69 +48,74 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-cyan-950/40 via-purple-950/40 to-black/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border-2 border-cyan-500/50 p-6 sm:p-8 max-w-4xl w-full relative overflow-hidden max-h-[90vh] overflow-y-auto">
-        {/* Glowing background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-2xl -z-10"></div>
+    <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4 font-mono">
+      <div className="bg-black border-2 border-cyan-500/30 p-8 max-w-4xl w-full relative overflow-hidden max-h-[90vh] overflow-y-auto cyberpunk-scrollbar">
+        {/* Visual Scanline Effect */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px]"></div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 -mr-12 -mt-12 rotate-45"></div>
 
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-red-500/20 rounded-lg transition-colors z-10"
+          className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-500/10 transition-colors uppercase text-[10px] font-black flex items-center gap-2"
         >
-          <X className="w-5 h-5 text-red-400" />
+          [ TERMINATE_SESSION ] <X className="w-3 h-3" />
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 uppercase tracking-wider mb-2">
-            Project Dashboard
+        <div className="text-center mb-12 border-b border-cyan-500/20 pb-8">
+          <h2 className="text-3xl font-black text-white tracking-[0.2em] uppercase neon-text-cyan mb-2">
+            CONTROL_CENTER.SYS
           </h2>
-          <p className="text-cyan-300/70 text-sm">Select a project to access</p>
-          <div className="h-0.5 w-32 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 mx-auto mt-4"></div>
+          <p className="text-cyan-400/60 text-[10px] tracking-widest uppercase flex items-center justify-center gap-4">
+            <span className="w-8 h-px bg-cyan-500/30"></span>
+            ACTIVE_NODES_IDENTIFIED
+            <span className="w-8 h-px bg-cyan-500/30"></span>
+          </p>
         </div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {projects.map((project) => (
             <button
               key={project.id}
               onClick={() => handleProjectClick(project.route)}
-              className={`group relative p-6 bg-gradient-to-br ${project.gradient} bg-opacity-20 border-2 border-${project.color}-500/50 rounded-xl hover:border-${project.color}-400 transition-all hover:scale-105 text-left overflow-hidden`}
+              className="group relative p-8 bg-cyan-500/5 border-2 border-cyan-500/20 hover:border-cyan-400 transition-all hover:bg-cyan-500/10 text-left overflow-hidden"
             >
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              {/* Corner accent */}
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400 opacity-0 group-hover:opacity-100 transition-all"></div>
 
-              {/* Icon */}
-              <div className={`inline-flex items-center justify-center w-16 h-16 bg-${project.color}-500/20 rounded-xl mb-4 relative`}>
-                <div className={`absolute inset-0 bg-${project.color}-500 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity`}></div>
-                <div className="text-white relative z-10">{project.icon}</div>
+              {/* Icon Node */}
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-black border border-cyan-500/30 mb-6 relative group-hover:border-cyan-400 transition-all">
+                <div className="text-cyan-400 relative z-10 group-hover:scale-110 transition-transform">{project.icon}</div>
+                <div className="absolute inset-0 bg-cyan-400/10 blur-md opacity-0 group-hover:opacity-50 transition-all"></div>
               </div>
 
               {/* Content */}
-              <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-wider">
-                {project.name}
-              </h3>
-              <p className="text-cyan-300/70 text-sm">{project.description}</p>
+              <div className="mb-4">
+                <span className="text-[9px] font-black text-cyan-400/40 tracking-widest block mb-1">{project.slug}</span>
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter group-hover:text-cyan-400 transition-colors">
+                  {project.name}
+                </h3>
+              </div>
+              <p className="text-xs text-cyan-100/60 font-bold mb-6 leading-relaxed">
+                &gt; {project.description}
+              </p>
 
-              {/* Arrow indicator */}
-              <div className="absolute bottom-4 right-4 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
+              {/* Action Indicator */}
+              <div className="flex items-center gap-2 text-[10px] font-black text-cyan-400 tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                [ ACCESS_PROTOCOL ]
+                <div className="h-px flex-1 bg-cyan-500/30"></div>
               </div>
             </button>
           ))}
 
-          {/* Coming Soon Card */}
-          <div className="group relative p-6 bg-gradient-to-br from-gray-600 to-gray-800 bg-opacity-20 border-2 border-gray-500/30 rounded-xl text-left opacity-50">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-500/20 rounded-xl mb-4">
-              <Plus className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-400 mb-2 uppercase tracking-wider">
-              More Projects
-            </h3>
-            <p className="text-gray-500 text-sm">Coming soon...</p>
+          {/* Locked/Empty Node */}
+          <div className="relative p-8 bg-white/5 border-2 border-white/5 opacity-30 text-left flex flex-col items-center justify-center border-dashed">
+            <Plus className="w-12 h-12 text-white/40 mb-4" />
+            <span className="text-[10px] font-black tracking-[0.3em] uppercase">RESTRICTED_ACCESS</span>
           </div>
         </div>
       </div>
