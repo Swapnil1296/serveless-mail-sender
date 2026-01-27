@@ -50,7 +50,7 @@ const PersonalProjects = ({ darkMode }) => {
             {/* Holographic Border Effect */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-sm blur opacity-20 group-hover:opacity-75 transition duration-1000"></div>
 
-            <div className="relative bg-black/90 border border-white/10 overflow-hidden">
+            <div className="relative bg-slate-800/90 border border-white/10 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/5">
                 <span className="text-[9px] font-black tracking-widest text-purple-400">{project.slug}</span>
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>

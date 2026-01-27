@@ -39,7 +39,7 @@ const UpcomingProjects = ({ darkMode }) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className="mb-8 p-8 bg-black/40 border border-cyan-500/20 relative group overflow-hidden"
+            className="mb-8 p-8 bg-slate-800/40 border border-cyan-500/20 relative group overflow-hidden"
           >
             {/* Background Data Stream Effect */}
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">

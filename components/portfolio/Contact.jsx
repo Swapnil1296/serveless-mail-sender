@@ -51,7 +51,7 @@ const Contact = ({ darkMode }) => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="p-8 bg-black/60 border-2 border-cyan-500/20 relative group"
+        className="p-8 bg-slate-800/60 border-2 border-cyan-500/20 relative group"
       >
         {/* Terminal Header */}
         <div className="absolute top-0 left-0 right-0 h-6 bg-cyan-500/10 flex items-center px-4 gap-1.5">

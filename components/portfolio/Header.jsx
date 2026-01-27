@@ -29,7 +29,7 @@ const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonCl
   return (
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-cyan-500/20 backdrop-blur-md ${scrollPosition > 50
-        ? "bg-black/80 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+        ? "bg-slate-900/80 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
         : "bg-transparent"
         }`}
       initial={{ y: -100 }}
@@ -131,7 +131,7 @@ const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonCl
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden py-8 bg-black/95 border-t border-cyan-500/20"
+            className="lg:hidden py-8 bg-slate-900/95 border-t border-cyan-500/20"
           >
             <div className="flex flex-col space-y-6">
               {navItems.map((item) => (

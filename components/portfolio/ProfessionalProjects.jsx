@@ -94,7 +94,7 @@ const ProfessionalProjects = ({ darkMode }) => {
             {/* Holographic Border Effect */}
             <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-sm blur opacity-20 group-hover:opacity-75 transition duration-1000 group-hover:duration-200`}></div>
 
-            <div className="relative bg-black/80 border border-white/10 overflow-hidden">
+            <div className="relative bg-slate-800/80 border border-white/10 overflow-hidden">
               {/* Header Info */}
               <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/5">
                 <span className="text-[9px] font-black tracking-widest text-cyan-400">{project.slug}</span>
@@ -108,7 +108,7 @@ const ProfessionalProjects = ({ darkMode }) => {
                 <img
                   src={project.image}
                   alt={project.title}
-                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 brightness-50 group-hover:brightness-100"
+                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 brightness-75 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
 

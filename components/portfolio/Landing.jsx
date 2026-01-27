@@ -30,7 +30,7 @@ export default function Landing({ isAuthenticated, loading, onButtonClick }) {
 
   return (
     <div
-      className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-200"
+      className="min-h-screen bg-slate-900 text-white selection:bg-cyan-500/30 selection:text-cyan-200"
     >
       <Header
         darkMode={darkMode}
@@ -42,7 +42,7 @@ export default function Landing({ isAuthenticated, loading, onButtonClick }) {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
         {/* Dynamic Background Elements */}
-        <div className="fixed inset-0 pointer-events-none opacity-20">
+        <div className="fixed inset-0 pointer-events-none opacity-30">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,#3b82f6,transparent_50%)]"></div>
           <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_120%,#a855f7,transparent_50%)]"></div>
         </div>

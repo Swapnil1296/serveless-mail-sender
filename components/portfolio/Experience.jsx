@@ -82,8 +82,8 @@ const Experience = ({ darkMode }) => {
               key={index}
               onClick={() => handleActiveTab(index)}
               className={`px-6 py-4 text-left transition-all relative group ${activeTab === index
-                  ? "bg-purple-500/10 text-purple-400"
-                  : "text-cyan-100/40 hover:text-cyan-400 hover:bg-cyan-500/5"
+                ? "bg-purple-500/10 text-purple-400"
+                : "text-cyan-100/40 hover:text-cyan-400 hover:bg-cyan-500/5"
                 }`}
             >
               <div className="flex flex-col">
@@ -110,7 +110,7 @@ const Experience = ({ darkMode }) => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex-1 p-8 bg-black/40 border-2 border-purple-500/20 relative group"
+          className="flex-1 p-8 bg-slate-800/40 border-2 border-purple-500/20 relative group"
         >
           {/* Decorative Corner */}
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-purple-400 opacity-50"></div>
