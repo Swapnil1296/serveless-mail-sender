@@ -25,11 +25,11 @@ export default function PortfolioLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden font-mono">
+    <div className="min-h-screen bg-slate-900 relative overflow-hidden font-mono">
       {/* Dynamic Background Overlays (Complements Landing.jsx) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.05),transparent_70%)]"></div>
-        <div className="absolute inset-0 opacity-[0.03]"
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_70%)]"></div>
+        <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: 'linear-gradient(#06b6d4 1px, transparent 1px), linear-gradient(90deg, #06b6d4 1px, transparent 1px)', backgroundSize: '100px 100px' }}>
         </div>
       </div>

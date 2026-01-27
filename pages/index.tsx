@@ -8,7 +8,7 @@ export default function Home() {
         <title>Swapnil Landage - Full Stack Developer</title>
         <meta name="description" content="Full Stack Developer specializing in MERN stack" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/cyberpunk_circle_image.png" />
       </Head>
       <PortfolioLanding />
     </>

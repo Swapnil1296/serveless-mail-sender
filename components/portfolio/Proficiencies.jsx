@@ -86,7 +86,7 @@ const Proficiencies = ({ darkMode }) => {
           <motion.div
             key={index}
             variants={item}
-            className="p-6 bg-black/40 border-2 border-cyan-500/20 hover:border-cyan-400/50 transition-all duration-300 relative group overflow-hidden"
+            className="p-6 bg-slate-800/40 border-2 border-cyan-500/20 hover:border-cyan-400/50 transition-all duration-300 relative group overflow-hidden"
           >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 -mr-8 -mt-8 rotate-45 group-hover:bg-cyan-500/10 transition-colors"></div>

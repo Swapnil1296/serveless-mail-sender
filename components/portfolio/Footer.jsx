@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const Footer = ({ darkMode }) => {
   return (
-    <footer className="py-12 bg-black border-t-2 border-cyan-500/20 relative overflow-hidden">
+    <footer className="py-12 bg-slate-900 border-t-2 border-cyan-500/20 relative overflow-hidden">
       {/* Decorative BG element */}
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 

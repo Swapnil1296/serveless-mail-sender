@@ -83,7 +83,7 @@ const Introduction = ({ darkMode }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="relative hidden lg:block"
+          className="relative mt-20 lg:mt-0"
         >
           <div className="relative w-80 h-80 mx-auto group">
             <div className="absolute -inset-4 border border-cyan-500/30 animate-pulse transition-all group-hover:border-cyan-500/50"></div>
