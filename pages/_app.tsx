@@ -39,7 +39,7 @@ function Navigation() {
             <div className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-500/50 rounded-lg hover:border-cyan-400 transition-all">
               <span className="text-xl sm:text-2xl">🚀</span>
               <div>
-                <div className="text-sm sm:text-base md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
+                <div className="text-sm sm:text-base md:text-xl font-bold bg-clip-text text-blue-600 bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
                   PROJECT HUB
                 </div>
                 <div className="text-[8px] sm:text-xs text-cyan-300/70 uppercase tracking-widest -mt-1">
