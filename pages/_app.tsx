@@ -52,7 +52,7 @@ function Navigation() {
           {/* Navigation Links */}
           <div className="flex gap-2 sm:gap-3 md:gap-4">
             <Link
-              href="/projects/email-sender"
+              href={(router.pathname === '/projects/email-sender' || router.pathname === '/projects/email-logs') ? "/projects/interview-prep" : "/projects/email-sender"}
               className={`relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm md:text-base uppercase tracking-wider transition-all overflow-hidden group ${
                 router.pathname === '/projects/email-sender' || router.pathname === '/projects/email-logs'
                   ? 'bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 text-white border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/50'
@@ -61,8 +61,11 @@ function Navigation() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                <span className="hidden sm:inline">📧</span>
-                <span>Email Management</span>
+                {(router.pathname === '/projects/email-sender' || router.pathname === '/projects/email-logs') ?<><span className="hidden sm:inline">📧</span>
+                  <span>Interviw Kit</span></> : <><span className="hidden sm:inline">📧</span>
+                    <span>Email Management</span>
+                 </>}
+                
               </span>
               {(router.pathname === '/projects/email-sender' || router.pathname === '/projects/email-logs') && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 animate-pulse"></div>

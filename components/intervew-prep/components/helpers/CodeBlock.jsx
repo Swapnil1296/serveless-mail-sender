@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 import { Copy, Check } from 'lucide-react';
 
-const CodeBlock = ({ language, code }) => {
+const CodeBlock = memo(({ language, code }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -67,6 +67,9 @@ const CodeBlock = ({ language, code }) => {
             </Highlight>
         </div>
     );
-};
+}, (prevProps, nextProps) => {
+    // Only re-render if language or code changes
+    return prevProps.language === nextProps.language && prevProps.code === nextProps.code;
+});
 
 export default CodeBlock;
