@@ -10,7 +10,7 @@ const Header = () => {
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Main Title with Glitch/Neon Effect */}
-          <h1 className="text-3xl sm:text-5xl font-black mb-6 font-mono tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-pulse">
+          <h1 className="text-3xl sm:text-5xl font-black mb-6 font-mono tracking-tighter text-blue-600 bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-pulse">
             INTERVIEW_PREPARATION <span className="text-fuchsia-500">_GUIDE</span>
           </h1>
 
