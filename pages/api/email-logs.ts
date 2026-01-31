@@ -39,15 +39,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (followUpSent !== undefined) query.followUpSent = followUpSent === 'true';
     if (search) query.email = { $regex: search, $options: 'i' };
 
-    // Fetch logs with pagination
-    const [logs, total] = await Promise.all([
-      EmailLog.find(query)
-        .sort({ sentAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-      EmailLog.countDocuments(query),
-    ]);
+    // Fetch ALL logs matching the query first (for sorting)
+    const allLogs = await EmailLog.find(query).lean();
+    
+    // Sort by priority: phoneNumber > note > followUpSent > sentAt
+    const sortedLogs = allLogs.sort((a: any, b: any) => {
+      const scoreA = 
+        (a.phoneNumber ? 1000 : 0) + 
+        (a.note ? 100 : 0) + 
+        (a.followUpSent ? 10 : 0);
+      
+      const scoreB = 
+        (b.phoneNumber ? 1000 : 0) + 
+        (b.note ? 100 : 0) + 
+        (b.followUpSent ? 10 : 0);
+      
+      // If scores are equal, sort by sentAt (newest first)
+      if (scoreB === scoreA) {
+        return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime();
+      }
+      
+      return scoreB - scoreA;
+    });
+    
+    // Apply pagination AFTER sorting
+    const logs = sortedLogs.slice(skip, skip + limitNum);
+    const total = sortedLogs.length;
 
     // Get statistics
     const stats = await EmailLog.aggregate([

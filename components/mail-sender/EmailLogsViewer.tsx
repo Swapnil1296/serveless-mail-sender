@@ -70,6 +70,8 @@ export default function EmailLogsViewer() {
       });
 
       const data = await response.json();
+      
+      // Server already sorted the data, just use it directly
       setLogs(data.logs);
       setStats(data.stats);
       setTotalPages(data.pagination.pages);
