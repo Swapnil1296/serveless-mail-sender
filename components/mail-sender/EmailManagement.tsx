@@ -11,7 +11,7 @@ export default function EmailManagement() {
   return (
     <div className="min-h-screen bg-black">
       {/* Tab Navigation */}
-      <div className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-40">
+      <div className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-[72px] z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex gap-4">
             <button

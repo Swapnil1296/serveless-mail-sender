@@ -10,6 +10,8 @@ export interface IEmailLog extends Document {
   sentAt: Date;
   followUpSent: boolean;
   followUpSentAt?: Date;
+  phoneNumber?: string;
+  note?: string;
   metadata?: {
     ipAddress?: string;
     userAgent?: string;
@@ -62,6 +64,16 @@ const EmailLogSchema: Schema = new Schema(
     followUpSentAt: {
       type: Date,
     },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    note: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     metadata: {
       ipAddress: String,
       userAgent: String,
@@ -69,6 +81,7 @@ const EmailLogSchema: Schema = new Schema(
   },
   {
     timestamps: true,
+    strict: true,
   }
 );
 
@@ -77,7 +90,11 @@ EmailLogSchema.index({ email: 1, sentAt: -1 });
 EmailLogSchema.index({ status: 1, followUpSent: 1 });
 EmailLogSchema.index({ jobType: 1, sentAt: -1 });
 
-const EmailLog: Model<IEmailLog> =
-  mongoose.models.EmailLog || mongoose.model<IEmailLog>('EmailLog', EmailLogSchema);
+// Delete the model from cache if it exists to ensure schema updates are applied
+if (mongoose.models.EmailLog) {
+  delete mongoose.models.EmailLog;
+}
+
+const EmailLog: Model<IEmailLog> = mongoose.model<IEmailLog>('EmailLog', EmailLogSchema);
 
 export default EmailLog;
