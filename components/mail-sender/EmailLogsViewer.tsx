@@ -345,58 +345,61 @@ export default function EmailLogsViewer() {
       <div className="max-w-7xl mx-auto">
         <div className="bg-gradient-to-br from-cyan-950/40 via-purple-950/40 to-black/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border-2 border-cyan-500/30 p-4 sm:p-6 md:p-8">
           {/* Header */}
-          <div className="flex flex-col gap-4 mb-6 sm:mb-8 relative">
+          <div className="mb-6 sm:mb-8 relative">
             {/* Glowing background effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-2xl -z-10"></div>
 
-            {/* Title Section */}
-            <div className="flex items-center gap-2 sm:gap-4 relative">
-              {/* Animated icon with glow */}
-              <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
-                <div className="relative bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 p-2 sm:p-3 rounded-xl">
-                  <Mail className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
+            {/* Title and Buttons Container */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* Title Section */}
+              <div className="flex items-center gap-2 sm:gap-4 relative">
+                {/* Animated icon with glow */}
+                <div className="relative flex-shrink-0">
+                  <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
+                  <div className="relative bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 p-2 sm:p-3 rounded-xl">
+                    <Mail className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
+                  </div>
+                </div>
+
+                {/* Title with glitch effect */}
+                <div className="relative flex-1 min-w-0">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white relative z-10 tracking-wider uppercase whitespace-nowrap">
+                    Email <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Logs</span>
+                  </h1>
+                  {/* Glitch layers - hidden on mobile */}
+                  <h1 className="hidden lg:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-400 opacity-50 animate-glitch-1 uppercase whitespace-nowrap" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)' }}>
+                    Email Logs
+                  </h1>
+                  <h1 className="hidden lg:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-400 opacity-50 animate-glitch-2 uppercase whitespace-nowrap" style={{ clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)' }}>
+                    Email Logs
+                  </h1>
+
+                  {/* Decorative line under title */}
+                  <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 mt-1"></div>
                 </div>
               </div>
 
-              {/* Title with glitch effect */}
-              <div className="relative flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white relative z-10 tracking-wider uppercase">
-                  Email <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Logs</span>
-                </h1>
-                {/* Glitch layers - hidden on mobile */}
-                <h1 className="hidden sm:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-400 opacity-50 animate-glitch-1 uppercase" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)' }}>
-                  Email Logs
-                </h1>
-                <h1 className="hidden sm:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-400 opacity-50 animate-glitch-2 uppercase" style={{ clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)' }}>
-                  Email Logs
-                </h1>
-
-                {/* Decorative line under title */}
-                <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 mt-1"></div>
+              {/* Buttons Section */}
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <button
+                  onClick={checkPendingFollowups}
+                  disabled={loading}
+                  className="flex-1 sm:flex-none px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-500 hover:to-yellow-500 disabled:from-gray-700 disabled:to-gray-800 text-white rounded-lg sm:rounded-xl flex items-center justify-center gap-2 font-bold text-xs sm:text-sm md:text-base transition-all hover:scale-105 border-2 border-orange-400/50 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-yellow-400/30 to-orange-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
+                  <span className="relative z-10">Pending</span>
+                </button>
+                <button
+                  onClick={fetchLogs}
+                  disabled={loading}
+                  className="flex-1 sm:flex-none px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-800 text-white rounded-lg sm:rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base transition-all hover:scale-105 border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-blue-400/30 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline relative z-10">Refresh</span>
+                </button>
               </div>
-            </div>
-
-            {/* Buttons Section */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <button
-                onClick={checkPendingFollowups}
-                disabled={loading}
-                className="flex-1 sm:flex-none px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-500 hover:to-yellow-500 disabled:from-gray-700 disabled:to-gray-800 text-white rounded-lg sm:rounded-xl flex items-center justify-center gap-2 font-bold text-xs sm:text-sm md:text-base transition-all hover:scale-105 border-2 border-orange-400/50 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-yellow-400/30 to-orange-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
-                <span className="relative z-10">Pending</span>
-              </button>
-              <button
-                onClick={fetchLogs}
-                disabled={loading}
-                className="flex-1 sm:flex-none px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-800 text-white rounded-lg sm:rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base transition-all hover:scale-105 border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-blue-400/30 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline relative z-10">Refresh</span>
-              </button>
             </div>
           </div>
 

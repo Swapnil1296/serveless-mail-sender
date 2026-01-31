@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import EmailManagement from '@/components/EmailManagement';
+import EmailManagement from '@/components/mail-sender/EmailManagement';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function EmailManagementPage() {

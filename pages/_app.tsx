@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { LogOut } from 'lucide-react';
+import RouteLoader from '@/components/RouteLoader';
 
 function Navigation() {
   const router = useRouter();
@@ -18,7 +19,7 @@ function Navigation() {
   }
 
   return (
-    <nav className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-50 relative overflow-hidden">
+    <nav className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-50 overflow-hidden">
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0" style={{
@@ -31,14 +32,14 @@ function Navigation() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 relative">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           {/* Logo with glow effect */}
           <Link href="/" className="group relative">
             <div className="absolute inset-0 bg-cyan-500/20 blur-xl group-hover:bg-cyan-500/30 transition-all rounded-lg"></div>
             <div className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-500/50 rounded-lg hover:border-cyan-400 transition-all">
               <span className="text-xl sm:text-2xl">🚀</span>
               <div>
-                <div className="text-base sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
+                <div className="text-sm sm:text-base md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
                   PROJECT HUB
                 </div>
                 <div className="text-[8px] sm:text-xs text-cyan-300/70 uppercase tracking-widest -mt-1">
@@ -93,7 +94,7 @@ function AppContent({ Component, pageProps }: AppProps) {
     // Log startup info on client side
     if (typeof window !== 'undefined') {
       console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #06b6d4');
-      console.log('%c🚀 Project Hub - Portfolio & Apps', 'color: #06b6d4; font-size: 16px; font-weight: bold');
+      
       console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #06b6d4');
       console.log('%cApp Status: Running', 'color: #10b981');
       console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #06b6d4');
@@ -102,6 +103,7 @@ function AppContent({ Component, pageProps }: AppProps) {
 
   return (
     <>
+      <RouteLoader />
       <Navigation />
       <Component {...pageProps} />
     </>
