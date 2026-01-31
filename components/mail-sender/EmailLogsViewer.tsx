@@ -16,6 +16,8 @@ interface EmailLog {
   sentAt: string;
   followUpSent: boolean;
   followUpSentAt?: string;
+  phoneNumber?: string;
+  note?: string;
 }
 
 interface Stats {
@@ -42,6 +44,9 @@ export default function EmailLogsViewer() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [pendingFollowups, setPendingFollowups] = useState<EmailLog[]>([]);
   const [selectedPendingEmails, setSelectedPendingEmails] = useState<Set<string>>(new Set());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editNote, setEditNote] = useState('');
+  const [editPhone, setEditPhone] = useState('');
 
   useEffect(() => {
     fetchLogs();
@@ -226,6 +231,62 @@ export default function EmailLogsViewer() {
     setSelectedPendingEmails(newSelected);
   };
 
+  const startEditing = (log: EmailLog) => {
+    setEditingId(log._id);
+    setEditNote(log.note || '');
+    setEditPhone(log.phoneNumber || '');
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditNote('');
+    setEditPhone('');
+  };
+
+  const saveNoteAndPhone = async (logId: string) => {
+    try {
+      const response = await fetch('/api/update-email-log', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
+        },
+        body: JSON.stringify({
+          logId,
+          note: editNote,
+          phoneNumber: editPhone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert.success('Note and phone number updated!', 'Updated');
+        
+        // Update local state immediately
+        setLogs(prevLogs => 
+          prevLogs.map(log => 
+            log._id === logId 
+              ? { ...log, note: editNote, phoneNumber: editPhone }
+              : log
+          )
+        );
+        
+        setEditingId(null);
+        setEditNote('');
+        setEditPhone('');
+        
+        // Refresh from server to ensure sync
+        fetchLogs();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('Failed to update log:', error);
+      showAlert.error(error instanceof Error ? error.message : 'Failed to update', 'Error');
+    }
+  };
+
   const sendPendingFollowups = async () => {
     if (selectedPendingEmails.size === 0) {
       showAlert.warning('Please select at least one email to send follow-up', 'No Selection');
@@ -280,33 +341,34 @@ export default function EmailLogsViewer() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-black p-2 sm:p-4 md:p-8 overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="bg-gradient-to-br from-cyan-950/40 via-purple-950/40 to-black/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border-2 border-cyan-500/30 p-4 sm:p-6 md:p-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 relative">
+          <div className="flex flex-col gap-4 mb-6 sm:mb-8 relative">
             {/* Glowing background effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-2xl -z-10"></div>
 
-            <div className="flex items-center gap-3 sm:gap-4 relative">
+            {/* Title Section */}
+            <div className="flex items-center gap-2 sm:gap-4 relative">
               {/* Animated icon with glow */}
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
                 <div className="relative bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 p-2 sm:p-3 rounded-xl">
-                  <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  <Mail className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
                 </div>
               </div>
 
               {/* Title with glitch effect */}
-              <div className="relative">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white relative z-10 tracking-wider uppercase">
+              <div className="relative flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white relative z-10 tracking-wider uppercase">
                   Email <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Logs</span>
                 </h1>
-                {/* Glitch layers */}
-                <h1 className="absolute top-0 left-0 text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400 opacity-50 animate-glitch-1 uppercase" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)' }}>
+                {/* Glitch layers - hidden on mobile */}
+                <h1 className="hidden sm:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-400 opacity-50 animate-glitch-1 uppercase" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)' }}>
                   Email Logs
                 </h1>
-                <h1 className="absolute top-0 left-0 text-2xl sm:text-3xl md:text-4xl font-bold text-pink-400 opacity-50 animate-glitch-2 uppercase" style={{ clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)' }}>
+                <h1 className="hidden sm:block absolute top-0 left-0 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-400 opacity-50 animate-glitch-2 uppercase" style={{ clipPath: 'polygon(0 60%, 100% 60%, 100% 100%, 0 100%)' }}>
                   Email Logs
                 </h1>
 
@@ -315,7 +377,8 @@ export default function EmailLogsViewer() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {/* Buttons Section */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button
                 onClick={checkPendingFollowups}
                 disabled={loading}
@@ -323,8 +386,7 @@ export default function EmailLogsViewer() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-yellow-400/30 to-orange-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
-                <span className="hidden sm:inline relative z-10">Check Pending</span>
-                <span className="sm:hidden relative z-10">Pending</span>
+                <span className="relative z-10">Pending</span>
               </button>
               <button
                 onClick={fetchLogs}
@@ -440,9 +502,9 @@ export default function EmailLogsViewer() {
           </div>
 
           {/* Logs Table - Desktop */}
-          <div className="hidden md:block bg-black/40 rounded-xl overflow-hidden border-2 border-cyan-500/30">
+          <div className="hidden lg:block bg-black/40 rounded-xl overflow-hidden border-2 border-cyan-500/30">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-max">
                 <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
                   <tr>
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">
@@ -456,8 +518,11 @@ export default function EmailLogsViewer() {
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Email</th>
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Job Type</th>
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Status</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Phone</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Note</th>
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Sent At</th>
                     <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Follow-up</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -493,6 +558,32 @@ export default function EmailLogsViewer() {
                           </span>
                         )}
                       </td>
+                      <td className="px-4 py-3">
+                        {editingId === log._id ? (
+                          <input
+                            type="tel"
+                            value={editPhone}
+                            onChange={e => setEditPhone(e.target.value)}
+                            placeholder="Phone"
+                            className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm"
+                          />
+                        ) : (
+                          <span className="text-gray-300 text-sm">{log.phoneNumber || '-'}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingId === log._id ? (
+                          <input
+                            type="text"
+                            value={editNote}
+                            onChange={e => setEditNote(e.target.value)}
+                            placeholder="Add note..."
+                            className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm"
+                          />
+                        ) : (
+                          <span className="text-gray-300 text-sm max-w-xs truncate">{log.note || '-'}</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-gray-300 text-sm">
                         {format(new Date(log.sentAt), 'MMM dd, yyyy HH:mm')}
                       </td>
@@ -505,6 +596,31 @@ export default function EmailLogsViewer() {
                           <span className="text-gray-500 text-sm">Not sent</span>
                         )}
                       </td>
+                      <td className="px-4 py-3">
+                        {editingId === log._id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => saveNoteAndPhone(log._id)}
+                              className="px-2 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-xs font-bold"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-bold"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => startEditing(log)}
+                            className="px-2 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -513,7 +629,7 @@ export default function EmailLogsViewer() {
           </div>
 
           {/* Logs Cards - Mobile */}
-          <div className="md:hidden space-y-3">
+          <div className="lg:hidden space-y-3">
             {logs && logs?.map(log => (
               <div
                 key={log._id}
@@ -544,10 +660,45 @@ export default function EmailLogsViewer() {
                         </span>
                       )}
                     </div>
+
+                    {/* Phone Number */}
+                    <div className="mb-2">
+                      {editingId === log._id ? (
+                        <input
+                          type="tel"
+                          value={editPhone}
+                          onChange={e => setEditPhone(e.target.value)}
+                          placeholder="Phone"
+                          className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-xs"
+                        />
+                      ) : (
+                        <div className="text-xs text-gray-400">
+                          <span className="text-cyan-300 font-bold">Phone:</span> {log.phoneNumber || '-'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Note */}
+                    <div className="mb-2">
+                      {editingId === log._id ? (
+                        <input
+                          type="text"
+                          value={editNote}
+                          onChange={e => setEditNote(e.target.value)}
+                          placeholder="Add note..."
+                          className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-xs"
+                        />
+                      ) : (
+                        <div className="text-xs text-gray-400">
+                          <span className="text-cyan-300 font-bold">Note:</span> {log.note || '-'}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="text-gray-400 text-xs mb-1">
                       {format(new Date(log.sentAt), 'MMM dd, yyyy HH:mm')}
                     </div>
-                    <div className="text-xs">
+                    <div className="text-xs mb-3">
                       {log.followUpSent ? (
                         <span className="text-green-400">
                           ✓ Follow-up sent {log.followUpSentAt && `on ${format(new Date(log.followUpSentAt), 'MMM dd')}`}
@@ -556,6 +707,31 @@ export default function EmailLogsViewer() {
                         <span className="text-gray-500">No follow-up sent</span>
                       )}
                     </div>
+
+                    {/* Action Buttons */}
+                    {editingId === log._id ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveNoteAndPhone(log._id)}
+                          className="flex-1 px-2 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-xs font-bold"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="flex-1 px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-bold"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => startEditing(log)}
+                        className="w-full px-2 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
