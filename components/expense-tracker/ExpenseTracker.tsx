@@ -228,97 +228,183 @@ export default function ExpenseTracker() {
         </div>
       </form>
 
-      {/* Expenses Table */}
+      {/* Expenses Table/Cards */}
       {!showGrouped ? (
-        <div className="bg-black/40 border-2 border-cyan-500/30 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
-                <tr>
-                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Date</th>
-                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Amount</th>
-                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Expended On</th>
-                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map(expense => (
-                  <tr key={expense._id} className="border-b border-cyan-500/10 hover:bg-cyan-900/10">
-                    <td className="px-4 py-3 text-gray-300 text-sm">
-                      {editingId === expense._id ? (
-                        <input
-                          type="date"
-                          value={editData.date}
-                          onChange={e => setEditData({ ...editData, date: e.target.value })}
-                          className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm"
-                        />
-                      ) : (
-                        format(new Date(expense.date), 'dd MMM yyyy')
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-white font-bold">
-                      {editingId === expense._id ? (
-                        <input
-                          type="number"
-                          value={editData.amount}
-                          onChange={e => setEditData({ ...editData, amount: e.target.value })}
-                          className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm w-24"
-                        />
-                      ) : (
-                        `₹${expense.amount.toLocaleString('en-IN')}`
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-gray-300">
-                      {editingId === expense._id ? (
-                        <input
-                          type="text"
-                          value={editData.expendedOn}
-                          onChange={e => setEditData({ ...editData, expendedOn: e.target.value })}
-                          className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm w-full"
-                        />
-                      ) : (
-                        expense.expendedOn
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {editingId === expense._id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => saveExpense(expense._id)}
-                            className="p-2 bg-green-600 hover:bg-green-500 text-white rounded"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="p-2 bg-red-600 hover:bg-red-500 text-white rounded"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => startEditing(expense)}
-                            className="p-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => deleteExpense(expense._id)}
-                            className="p-2 bg-red-600 hover:bg-red-500 text-white rounded"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-black/40 border-2 border-cyan-500/30 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Date</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Amount</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Expended On</th>
+                    <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {expenses.map(expense => (
+                    <tr key={expense._id} className="border-b border-cyan-500/10 hover:bg-cyan-900/10">
+                      <td className="px-4 py-3 text-gray-300 text-sm">
+                        {editingId === expense._id ? (
+                          <input
+                            type="date"
+                            value={editData.date}
+                            onChange={e => setEditData({ ...editData, date: e.target.value })}
+                            className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm w-full"
+                          />
+                        ) : (
+                          format(new Date(expense.date), 'dd MMM yyyy')
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-white font-bold text-sm">
+                        {editingId === expense._id ? (
+                          <input
+                            type="number"
+                            value={editData.amount}
+                            onChange={e => setEditData({ ...editData, amount: e.target.value })}
+                            className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm w-24"
+                          />
+                        ) : (
+                          `₹${expense.amount.toLocaleString('en-IN')}`
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300 text-sm">
+                        {editingId === expense._id ? (
+                          <input
+                            type="text"
+                            value={editData.expendedOn}
+                            onChange={e => setEditData({ ...editData, expendedOn: e.target.value })}
+                            className="px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm w-full"
+                          />
+                        ) : (
+                          expense.expendedOn
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingId === expense._id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => saveExpense(expense._id)}
+                              className="p-2 bg-green-600 hover:bg-green-500 text-white rounded"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="p-2 bg-red-600 hover:bg-red-500 text-white rounded"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditing(expense)}
+                              className="p-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteExpense(expense._id)}
+                              className="p-2 bg-red-600 hover:bg-red-500 text-white rounded"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {expenses.map(expense => (
+              <div key={expense._id} className="bg-black/40 border-2 border-cyan-500/30 rounded-xl p-4">
+                {editingId === expense._id ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-cyan-300 text-xs font-bold mb-1 block">Date</label>
+                      <input
+                        type="date"
+                        value={editData.date}
+                        onChange={e => setEditData({ ...editData, date: e.target.value })}
+                        className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-cyan-300 text-xs font-bold mb-1 block">Amount</label>
+                      <input
+                        type="number"
+                        value={editData.amount}
+                        onChange={e => setEditData({ ...editData, amount: e.target.value })}
+                        className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-cyan-300 text-xs font-bold mb-1 block">Expended On</label>
+                      <input
+                        type="text"
+                        value={editData.expendedOn}
+                        onChange={e => setEditData({ ...editData, expendedOn: e.target.value })}
+                        className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={() => saveExpense(expense._id)}
+                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-sm"
+                      >
+                        <Check className="w-4 h-4" />
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-sm"
+                      >
+                        <X className="w-4 h-4" />
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="text-white font-bold text-lg mb-1">₹{expense.amount.toLocaleString('en-IN')}</div>
+                        <div className="text-gray-300 text-sm">{expense.expendedOn}</div>
+                      </div>
+                      <div className="text-cyan-300 text-xs font-bold">
+                        {format(new Date(expense.date), 'dd MMM yyyy')}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-3 border-t border-cyan-500/20">
+                      <button
+                        onClick={() => startEditing(expense)}
+                        className="flex-1 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-xs"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteExpense(expense._id)}
+                        className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-xs"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
         <div className="space-y-4">
           {groupedData.map((group: any) => (

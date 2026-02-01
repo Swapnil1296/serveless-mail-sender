@@ -215,19 +215,21 @@ export default function Owings() {
         </div>
       </form>
 
-      {/* Owings Table */}
-      <div className="bg-black/40 border-2 border-cyan-500/30 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
-              <tr>
-                <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Name</th>
-                <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Amount</th>
-                <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Due Date</th>
-                <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Status</th>
-                <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Actions</th>
-              </tr>
-            </thead>
+      {/* Owings Table/Cards */}
+      <>
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-black/40 border-2 border-cyan-500/30 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
+                <tr>
+                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Name</th>
+                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Amount</th>
+                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Due Date</th>
+                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Status</th>
+                  <th className="px-4 py-3 text-left text-cyan-300 font-bold text-sm">Actions</th>
+                </tr>
+              </thead>
             <tbody>
               {owings.map(owing => (
                 <tr key={owing._id} className={`border-b border-cyan-500/10 hover:bg-cyan-900/10 ${owing.paid ? 'opacity-50' : ''}`}>
@@ -326,6 +328,111 @@ export default function Owings() {
           </table>
         </div>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {owings.map(owing => (
+          <div key={owing._id} className={`bg-black/40 border-2 border-cyan-500/30 rounded-xl p-4 ${owing.paid ? 'opacity-60' : ''}`}>
+            {editingId === owing._id ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-cyan-300 text-xs font-bold mb-1 block">Name</label>
+                  <input
+                    type="text"
+                    value={editData.name}
+                    onChange={e => setEditData({ ...editData, name: e.target.value })}
+                    className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-cyan-300 text-xs font-bold mb-1 block">Amount</label>
+                  <input
+                    type="number"
+                    value={editData.amount}
+                    onChange={e => setEditData({ ...editData, amount: e.target.value })}
+                    className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-cyan-300 text-xs font-bold mb-1 block">Due Date</label>
+                  <input
+                    type="date"
+                    value={editData.dueDate}
+                    onChange={e => setEditData({ ...editData, dueDate: e.target.value })}
+                    className="w-full px-3 py-2 bg-black/40 border border-cyan-500/50 rounded-lg text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.paid}
+                      onChange={e => setEditData({ ...editData, paid: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-gray-300">Mark as Paid</span>
+                  </label>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => saveOwing(owing._id)}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <Check className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEditing}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <div className="text-white font-bold text-lg mb-1">{owing.name}</div>
+                    <div className="text-white text-xl font-bold">₹{owing.amount.toLocaleString('en-IN')}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-cyan-300 text-xs font-bold mb-1">
+                      {format(new Date(owing.dueDate), 'dd MMM yyyy')}
+                    </div>
+                    {owing.paid ? (
+                      <span className="inline-flex items-center gap-1 text-green-400 text-xs">
+                        <CheckCircle className="w-3 h-3" />
+                        Paid
+                      </span>
+                    ) : (
+                      <span className="text-red-400 text-xs font-bold">Pending</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-3 border-t border-cyan-500/20">
+                  <button
+                    onClick={() => startEditing(owing)}
+                    className="flex-1 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-xs"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteOwing(owing._id)}
+                    className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 font-bold text-xs"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
     </div>
   );
 }
