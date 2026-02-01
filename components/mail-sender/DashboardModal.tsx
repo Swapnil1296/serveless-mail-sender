@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Mail, NotebookPen, Plus } from 'lucide-react';
+import { X, Mail, NotebookPen, Plus, Wallet } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 interface DashboardModalProps {
@@ -39,6 +39,14 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       description: 'Heuristic-based interview preparation modules',
       icon: <NotebookPen className="w-8 h-8" />,
       route: '/projects/interview-prep',
+    },
+    {
+      id: 'expense-tracker',
+      name: 'Expense Tracker',
+      slug: 'FIN_TRK_v1',
+      description: 'Track expenses, lendings, and owings',
+      icon: <Wallet className="w-8 h-8" />,
+      route: '/projects/expense-tracker',
     },
   ];
 
