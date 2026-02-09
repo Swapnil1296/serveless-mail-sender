@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Mail, NotebookPen, Plus, Wallet } from 'lucide-react';
+import { X, Mail, NotebookPen, Plus, Wallet, FileText } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 interface DashboardModalProps {
@@ -47,6 +47,14 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       description: 'Track expenses, lendings, and owings',
       icon: <Wallet className="w-8 h-8" />,
       route: '/projects/expense-tracker',
+    },
+    {
+      id: 'resume-creator',
+      name: 'ATS Resume Creator',
+      slug: 'RESUME_AI_v1',
+      description: 'Generate ATS-friendly resume from 5 job descriptions using AI',
+      icon: <FileText className="w-8 h-8" />,
+      route: '/projects/resume-creator',
     },
   ];
 
@@ -120,8 +128,8 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
             </button>
           ))}
 
-          {/* Locked/Empty Node */}
-          <div className="relative p-8 bg-white/5 border-2 border-white/5 opacity-30 text-left flex flex-col items-center justify-center border-dashed">
+          {/* Locked/Empty Node - placeholder for future projects */}
+          <div className="relative p-8 bg-white/5 border-2 border-white/5 opacity-30 text-left flex flex-col items-center justify-center border-dashed sm:col-span-2 lg:col-span-1">
             <Plus className="w-12 h-12 text-white/40 mb-4" />
             <span className="text-[10px] font-black tracking-[0.3em] uppercase">RESTRICTED_ACCESS</span>
           </div>

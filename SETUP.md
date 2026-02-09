@@ -130,6 +130,27 @@ You should see:
 3. **Try follow-ups** - Send a follow-up email
 4. **Deploy** - Deploy to Vercel when ready
 
+## 📄 ATS Resume Creator
+
+The Resume Creator uses AI to generate ATS-friendly resumes from job descriptions. Configure at least one AI provider (tried in order: DeepSeek → OpenAI → Gemini):
+
+**DeepSeek (recommended – free, generous limits)**
+- Get key: https://platform.deepseek.com/
+- Add to `.env.local`: `DEEPSEEK_API_KEY=sk-...`
+- Optional: `DEEPSEEK_MODEL=deepseek-chat` (default)
+
+**OpenAI**
+- Get key: https://platform.openai.com/api-keys
+- Add to `.env.local`: `OPENAI_API_KEY=sk-...`
+- Optional: `OPENAI_MODEL=gpt-3.5-turbo` (default)
+
+**Google Gemini (free tier, rate limits apply)**
+- Get key: https://aistudio.google.com/apikey
+- Add to `.env.local`: `GEMINI_API_KEY=...`
+- Optional: `GEMINI_MODEL=gemini-2.0-flash` (default)
+
+If one provider fails (quota, token limit, etc.), the next configured provider is used automatically.
+
 ## 🚀 Deployment to Vercel
 
 1. Push code to GitHub
@@ -142,6 +163,7 @@ You should see:
    - `API_KEY`
    - `NEXT_PUBLIC_API_KEY`
    - `MAX_EMAILS_PER_REQUEST`
+   - `OPENAI_API_KEY` or `GEMINI_API_KEY` (for Resume Creator)
 4. Deploy!
 
 ## 📧 Need Help?
