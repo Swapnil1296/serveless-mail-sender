@@ -106,7 +106,6 @@
   }
 }
 
-/* Controls & inputs */
 .controls {
   display: grid;
   grid-template-columns: 1fr;
@@ -172,7 +171,6 @@
   accent-color: #00ffff;
 }
 
-/* Buttons */
 .buttonGroup {
   display: flex;
   flex-direction: column;
@@ -255,7 +253,6 @@
   cursor: not-allowed;
 }
 
-/* Stats */
 .statusSection {
   margin-top: 30px;
 }
@@ -329,7 +326,6 @@
   }
 }
 
-/* Logs */
 .logContainer {
   background: rgba(0, 0, 0, 0.8);
   border: 2px solid #00ffff;
@@ -407,7 +403,6 @@
   justify-content: center;
 }
 
-/* Section headings */
 .sectionTitle {
   margin-bottom: 20px;
 }
@@ -416,7 +411,6 @@
   margin-bottom: 10px;
 }
 
-/* Session status box */
 .sessionBox {
   margin-top: 15px;
   padding: 10px;
@@ -445,7 +439,6 @@
   opacity: 0.7;
 }
 
-/* Job History */
 .jobHistoryHeader {
   display: flex;
   justify-content: space-between;
