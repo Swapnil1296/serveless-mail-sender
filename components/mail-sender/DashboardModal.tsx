@@ -56,6 +56,14 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       icon: <FileText className="w-8 h-8" />,
       route: '/projects/resume-creator',
     },
+    {
+      id: 'naukari-scraper',
+      name: 'Naukari Scraper',
+      slug: 'NAUK_SCR_V1',
+      description: 'Scrap jobs from naukari',
+      icon: <Wallet className="w-8 h-8" />,
+      route: '/projects/naukari-scraper',
+    },
   ];
 
   const handleProjectClick = (route: string) => {
