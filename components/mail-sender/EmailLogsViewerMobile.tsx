@@ -31,7 +31,7 @@ interface EmailLogsViewerMobileProps {
 function LogCardMobile({
   log,
   isSelected,
-  onSelect,
+  onSelectLog,
   onClick,
 }: {
   log: EmailLogForView;
