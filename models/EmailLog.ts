@@ -12,6 +12,7 @@ export interface IEmailLog extends Document {
   followUpSentAt?: Date;
   phoneNumber?: string;
   note?: string;
+  interviewScheduledStatus?: 'scheduled' | 'not_scheduled' | 'rejected' | 'waiting_for_response';
   metadata?: {
     ipAddress?: string;
     userAgent?: string;
@@ -73,6 +74,12 @@ const EmailLogSchema: Schema = new Schema(
       type: String,
       trim: true,
       default: '',
+    },
+    interviewScheduledStatus: {
+      type: String,
+      enum: ['scheduled', 'not_scheduled', 'rejected', 'waiting_for_response'],
+      default: 'not_scheduled',
+      index: true,
     },
     metadata: {
       ipAddress: String,

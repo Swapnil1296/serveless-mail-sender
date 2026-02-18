@@ -5,6 +5,8 @@ import { Mail, Send, CheckCircle, XCircle, RefreshCw, Trash2, Clock, X } from 'l
 import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 import { showAlert } from '@/lib/alerts';
+import { EmailLogDetailModal } from './EmailLogDetailModal';
+import EmailLogsViewerMobile from './EmailLogsViewerMobile';
 
 interface EmailLog {
   _id: string;
@@ -18,6 +20,7 @@ interface EmailLog {
   followUpSentAt?: string;
   phoneNumber?: string;
   note?: string;
+  interviewScheduledStatus?: 'scheduled' | 'not_scheduled' | 'rejected' | 'waiting_for_response';
 }
 
 interface Stats {
@@ -26,6 +29,58 @@ interface Stats {
   followUpsSent: number;
   frontendEmails: number;
   mernEmails: number;
+}
+
+function LogCard({
+  log,
+  isSelected,
+  onSelect,
+  onClick,
+}: {
+  log: EmailLog;
+  isSelected: boolean;
+  onSelect: () => void;
+  onClick: () => void;
+}) {
+  const status = log.interviewScheduledStatus || 'not_scheduled';
+  const statusLabel =
+    status === 'scheduled' ? 'Scheduled' : status === 'rejected' ? 'Rejected' : status === 'waiting_for_response' ? 'Waiting' : 'Not scheduled';
+  return (
+    <div
+      onClick={onClick}
+      className="flex flex-col gap-2 p-4 rounded-xl border-2 border-cyan-500/30 bg-black/40 hover:bg-cyan-900/20 cursor-pointer transition-colors text-left"
+    >
+      <div className="flex items-start gap-2">
+        <div onClick={e => e.stopPropagation()} className="flex-shrink-0">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onSelect}
+            onClick={e => e.stopPropagation()}
+            className="w-4 h-4 rounded mt-0.5 cursor-pointer"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-white font-mono text-sm break-all">{log.email}</div>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <span className="px-2 py-0.5 bg-purple-500/30 text-purple-300 rounded-full text-xs font-bold uppercase">
+              {log.jobType}
+            </span>
+            <span className="text-xs text-cyan-300">{statusLabel}</span>
+          </div>
+          {log.phoneNumber && <div className="text-xs text-gray-400 mt-1">📱 {log.phoneNumber}</div>}
+          {log.note && <p className="text-xs text-gray-300 mt-1 line-clamp-2">{log.note}</p>}
+          <div className="text-xs mt-1">
+            {log.followUpSent ? (
+              <span className="text-green-400">✓ Follow-up sent</span>
+            ) : (
+              <span className="text-gray-500">No follow-up</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function EmailLogsViewer() {
@@ -44,13 +99,20 @@ export default function EmailLogsViewer() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [pendingFollowups, setPendingFollowups] = useState<EmailLog[]>([]);
   const [selectedPendingEmails, setSelectedPendingEmails] = useState<Set<string>>(new Set());
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editNote, setEditNote] = useState('');
-  const [editPhone, setEditPhone] = useState('');
+  const [detailLog, setDetailLog] = useState<EmailLog | null>(null);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
     fetchLogs();
   }, [page, filters]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const set = () => setIsMobileView(mq.matches);
+    set();
+    mq.addEventListener('change', set);
+    return () => mq.removeEventListener('change', set);
+  }, []);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -233,60 +295,15 @@ export default function EmailLogsViewer() {
     setSelectedPendingEmails(newSelected);
   };
 
-  const startEditing = (log: EmailLog) => {
-    setEditingId(log._id);
-    setEditNote(log.note || '');
-    setEditPhone(log.phoneNumber || '');
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
-    setEditNote('');
-    setEditPhone('');
-  };
-
-  const saveNoteAndPhone = async (logId: string) => {
-    try {
-      const response = await fetch('/api/update-email-log', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
-        },
-        body: JSON.stringify({
-          logId,
-          note: editNote,
-          phoneNumber: editPhone,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showAlert.success('Note and phone number updated!', 'Updated');
-        
-        // Update local state immediately
-        setLogs(prevLogs => 
-          prevLogs.map(log => 
-            log._id === logId 
-              ? { ...log, note: editNote, phoneNumber: editPhone }
-              : log
-          )
-        );
-        
-        setEditingId(null);
-        setEditNote('');
-        setEditPhone('');
-        
-        // Refresh from server to ensure sync
-        fetchLogs();
-      } else {
-        throw new Error(data.error);
-      }
-    } catch (error) {
-      console.error('Failed to update log:', error);
-      showAlert.error(error instanceof Error ? error.message : 'Failed to update', 'Error');
-    }
+  const handleDetailSaved = (updated: Partial<Pick<EmailLog, 'note' | 'phoneNumber' | 'interviewScheduledStatus'>>) => {
+    if (!detailLog) return;
+    setLogs(prev =>
+      prev.map(log =>
+        log._id === detailLog._id ? { ...log, ...updated } : log
+      )
+    );
+    setDetailLog(null);
+    fetchLogs();
   };
 
   const sendPendingFollowups = async () => {
@@ -506,191 +523,83 @@ export default function EmailLogsViewer() {
             </div>
           </div>
 
-          {/* Logs Table - Responsive for all screens */}
-          <div className="bg-black/40 rounded-xl overflow-hidden border-2 border-cyan-500/30">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-max">
-                <thead className="bg-cyan-900/30 border-b-2 border-cyan-500/30">
-                  <tr>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm">
-                      <input
-                        type="checkbox"
-                        checked={selectedLogs?.size === logs?.length && logs?.length > 0}
-                        onChange={handleSelectAll}
-                        className="w-4 h-4"
-                      />
-                    </th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm">Email</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm hidden sm:table-cell">Job</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm">Status</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm hidden lg:table-cell">Phone</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm hidden lg:table-cell">Note</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm hidden md:table-cell">Sent</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm hidden lg:table-cell">Follow-up</th>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-cyan-300 font-bold text-xs sm:text-sm">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs && logs.length > 0 ? logs.map(log => (
-                    <tr
+          {/* Follow-up list (desktop only): logs where interview status is not "scheduled" */}
+          {!isMobileView && (() => {
+            const followUpList = logs.filter(
+              log => (log.interviewScheduledStatus || 'not_scheduled') !== 'scheduled'
+            );
+            if (followUpList.length === 0) return null;
+            return (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="w-5 h-5 text-orange-400" />
+                  <h2 className="text-lg font-bold text-white uppercase">Follow-up list ({followUpList.length})</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                  {followUpList.map(log => (
+                    <LogCard
                       key={log._id}
-                      className="border-b border-cyan-500/10 hover:bg-cyan-900/10 transition-colors"
-                    >
-                      <td className="px-2 sm:px-4 py-2 sm:py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedLogs.has(log._id)}
-                          onChange={() => handleSelectLog(log._id)}
-                          className="w-4 h-4 cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3">
-                        <div className="text-white font-mono text-xs sm:text-sm break-all">{log.email}</div>
-                        <div className="text-gray-400 text-xs mt-1 sm:hidden">
-                          {log.jobType} • {format(new Date(log.sentAt), 'MMM dd')}
-                        </div>
-                        {/* Mobile view - show phone, note & follow-up when NOT editing */}
-                        {editingId !== log._id && (
-                          <div className="mt-2 space-y-1 lg:hidden">
-                            {log.phoneNumber && (
-                              <div className="text-xs text-gray-300">
-                                <span className="text-cyan-300 font-bold">📱</span> {log.phoneNumber}
-                              </div>
-                            )}
-                            {log.note && (
-                              <div className="text-xs text-gray-300">
-                                <span className="text-cyan-300 font-bold">📝</span> {log.note}
-                              </div>
-                            )}
-                            <div className="text-xs">
-                              {log.followUpSent ? (
-                                <span className="text-green-400">
-                                  ✓ Follow-up sent {log.followUpSentAt ? `on ${format(new Date(log.followUpSentAt), 'MMM dd')}` : ''}
-                                </span>
-                              ) : (
-                                <span className="text-gray-500">No follow-up sent</span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        {/* Mobile expanded details - show inputs when editing */}
-                        {editingId === log._id && (
-                          <div className="mt-2 space-y-2 lg:hidden">
-                            <div>
-                              <label className="text-cyan-300 text-xs font-bold">Phone:</label>
-                              <input
-                                type="tel"
-                                value={editPhone}
-                                onChange={e => setEditPhone(e.target.value)}
-                                placeholder="Enter phone number"
-                                className="w-full mt-1 px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-xs"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-cyan-300 text-xs font-bold">Note:</label>
-                              <input
-                                type="text"
-                                value={editNote}
-                                onChange={e => setEditNote(e.target.value)}
-                                placeholder="Add note..."
-                                className="w-full mt-1 px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-xs"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
-                        <span className="px-2 py-1 bg-purple-500/30 text-purple-300 rounded-full text-xs font-bold uppercase">
-                          {log?.jobType}
-                        </span>
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3">
-                        {log.status === 'success' ? (
-                          <span className="flex items-center gap-1 text-green-400 text-xs sm:text-sm">
-                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Success</span>
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-red-400 text-xs sm:text-sm">
-                            <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Failed</span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
-                        {editingId === log._id ? (
-                          <input
-                            type="tel"
-                            value={editPhone}
-                            onChange={e => setEditPhone(e.target.value)}
-                            placeholder="Phone"
-                            className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm"
-                          />
-                        ) : (
-                          <span className="text-gray-300 text-sm">{log.phoneNumber || '-'}</span>
-                        )}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
-                        {editingId === log._id ? (
-                          <input
-                            type="text"
-                            value={editNote}
-                            onChange={e => setEditNote(e.target.value)}
-                            placeholder="Note"
-                            className="w-full px-2 py-1 bg-black/40 border border-cyan-500/50 rounded text-white text-sm"
-                          />
-                        ) : (
-                          <span className="text-gray-300 text-sm max-w-xs truncate">{log.note || '-'}</span>
-                        )}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-300 text-xs sm:text-sm hidden md:table-cell">
-                        {format(new Date(log.sentAt), 'MMM dd, yyyy')}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
-                        {log.followUpSent ? (
-                          <span className="text-green-400 text-sm">✓</span>
-                        ) : (
-                          <span className="text-gray-500 text-sm">-</span>
-                        )}
-                      </td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3">
-                        {editingId === log._id ? (
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => saveNoteAndPhone(log._id)}
-                              className="px-2 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-xs font-bold"
-                            >
-                              ✓
-                            </button>
-                            <button
-                              onClick={cancelEditing}
-                              className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-bold"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => startEditing(log)}
-                            className="px-2 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan={9} className="px-4 py-12 text-center">
-                        <Mail className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-400 text-lg font-bold">No emails found</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      log={log}
+                      isSelected={selectedLogs.has(log._id)}
+                      onSelect={() => handleSelectLog(log._id)}
+                      onClick={() => setDetailLog(log)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Logs: Cards (desktop) or Mobile component */}
+          {isMobileView ? (
+            <EmailLogsViewerMobile
+              logs={logs}
+              followUpList={logs.filter(log => (log.interviewScheduledStatus || 'not_scheduled') !== 'scheduled')}
+              selectedLogs={selectedLogs}
+              onSelectLog={handleSelectLog}
+              onCardClick={setDetailLog}
+              emptyMessage="No emails found"
+            />
+          ) : (
+            <div className="bg-black/40 rounded-xl border-2 border-cyan-500/30 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="checkbox"
+                  checked={selectedLogs.size === logs.length && logs.length > 0}
+                  onChange={handleSelectAll}
+                  className="w-4 h-4 rounded"
+                />
+                <span className="text-cyan-300 text-sm font-bold uppercase">Select all / All logs</span>
+              </div>
+              {logs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Mail className="w-12 h-12 text-gray-600 mb-4" />
+                  <p className="text-gray-400 text-lg font-bold">No emails found</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {logs.map(log => (
+                    <LogCard
+                      key={log._id}
+                      log={log}
+                      isSelected={selectedLogs.has(log._id)}
+                      onSelect={() => handleSelectLog(log._id)}
+                      onClick={() => setDetailLog(log)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Detail modal (shared) */}
+          <EmailLogDetailModal
+            log={detailLog}
+            isOpen={!!detailLog}
+            onClose={() => setDetailLog(null)}
+            onSaved={handleDetailSaved}
+            isMobile={isMobileView}
+          />
 
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 sm:mt-6">

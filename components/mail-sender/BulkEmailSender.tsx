@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Send, Briefcase, Code, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { showAlert } from '@/lib/alerts';
 
@@ -68,6 +69,13 @@ export default function BulkEmailSender() {
     }
   };
 
+  // Client-side email validation (matches API rules: basic format + length)
+  const isValidEmail = (email: string): boolean => {
+    if (!email || typeof email !== 'string' || email.length > 254) return false;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email.trim());
+  };
+
   const validateInputs = (emailList: string[]): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -83,6 +91,17 @@ export default function BulkEmailSender() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const showInvalidEmailsAlert = (invalidList: string[]) => {
+    const listHtml =
+      invalidList.length > 0
+        ? `<p class="text-left font-medium text-red-300 mb-2">Invalid addresses:</p><ul class="text-left list-disc list-inside text-cyan-200 space-y-1">${invalidList.map(e => `<li><code class="bg-black/40 px-1 rounded">${e}</code></li>`).join('')}</ul>`
+        : '';
+    showAlert.error(
+      listHtml || 'Invalid email addresses detected.',
+      'Invalid email addresses'
+    );
+  };
+
   const sendEmails = async (jobType: 'frontend' | 'mern') => {
     const emailList = emails
       .split(',')
@@ -92,6 +111,13 @@ export default function BulkEmailSender() {
     const uniqueEmails = [...new Set(emailList)];
 
     if (!validateInputs(uniqueEmails)) {
+      return;
+    }
+
+    // Validate emails before calling API
+    const invalidEmails = uniqueEmails.filter(e => !isValidEmail(e));
+    if (invalidEmails.length > 0) {
+      showInvalidEmailsAlert(invalidEmails);
       return;
     }
 
@@ -124,7 +150,12 @@ export default function BulkEmailSender() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send emails');
+        if (data.invalidEmails && Array.isArray(data.invalidEmails) && data.invalidEmails.length > 0) {
+          showInvalidEmailsAlert(data.invalidEmails);
+        } else {
+          showAlert.error(data.error || 'Failed to send emails', 'Error');
+        }
+        return;
       }
 
       setResults(data.results);
@@ -139,7 +170,10 @@ export default function BulkEmailSender() {
       }
     } catch (error) {
       console.error('Error:', error);
-      showAlert.error(error instanceof Error ? error.message : 'Failed to send emails', 'Error');
+      showAlert.error(
+        error instanceof Error ? error.message : 'Failed to send emails',
+        'Error'
+      );
     } finally {
       setLoading(false);
     }
@@ -378,18 +412,21 @@ export default function BulkEmailSender() {
               </button>
             </div>
 
-            {loading && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="text-center py-8 bg-black/60 rounded-2xl border-2 border-purple-500/50 px-12">
-                  <div className="inline-block relative">
-                    <div className="w-20 h-20 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
+            {loading &&
+              typeof document !== 'undefined' &&
+              createPortal(
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
+                  <div className="text-center py-6 px-6 bg-black/70 rounded-2xl border-2 border-purple-500/50 shadow-2xl shrink-0 w-[260px] sm:w-[300px] box-border">
+                    <div className="inline-block relative">
+                      <div className="w-14 h-14 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto" />
+                    </div>
+                    <p className="text-white font-bold text-base sm:text-lg mt-4 uppercase tracking-wide">
+                      TRANSMITTING DATA
+                    </p>
                   </div>
-                  <p className="text-white font-bold text-2xl mt-6 uppercase">
-                    TRANSMITTING DATA
-                  </p>
-                </div>
-              </div>
-            )}
+                </div>,
+                document.body
+              )}
 
             {results.length > 0 && (
               <div className="bg-black/60 rounded-2xl p-6 border-2 border-green-500/50">

@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { logId, note, phoneNumber } = req.body;
+    const { logId, note, phoneNumber, interviewScheduledStatus } = req.body;
 
     if (!logId) {
       return res.status(400).json({ error: 'Log ID is required' });
@@ -16,30 +16,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await dbConnect();
 
-    console.log('Updating log:', logId, 'with note:', note, 'and phone:', phoneNumber);
-
-    // Update the email log with note and phone number
     const updateData: any = {
       updatedAt: new Date(),
     };
 
-    if (note !== undefined) {
-      updateData.note = note;
+    if (note !== undefined) updateData.note = note;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (interviewScheduledStatus !== undefined) {
+      const valid = ['scheduled', 'not_scheduled', 'rejected', 'waiting_for_response'];
+      if (valid.includes(interviewScheduledStatus)) {
+        updateData.interviewScheduledStatus = interviewScheduledStatus;
+      }
     }
-
-    if (phoneNumber !== undefined) {
-      updateData.phoneNumber = phoneNumber;
-    }
-
-    console.log('Update data:', updateData);
 
     const result = await EmailLog.findByIdAndUpdate(
       logId,
       { $set: updateData },
       { new: true, runValidators: true }
     );
-
-    console.log('Update result:', result);
 
     if (!result) {
       return res.status(404).json({ error: 'Email log not found' });
