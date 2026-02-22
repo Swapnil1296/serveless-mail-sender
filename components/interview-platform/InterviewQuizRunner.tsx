@@ -139,7 +139,7 @@ export default function InterviewQuizRunner() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-red-400">{error || 'Invalid session'}</div>
         <button
-          onClick={() => router.push('/projects/interview-hub')}
+          onClick={() => router.push('/projects/quiz-hub')}
           className="ml-4 px-4 py-2 rounded bg-cyan-600 text-white"
         >
           Back
@@ -163,7 +163,7 @@ export default function InterviewQuizRunner() {
             <div className="text-green-400 mb-6">+{result.xpEarned} XP</div>
           )}
           <button
-            onClick={() => router.push('/projects/interview-hub')}
+            onClick={() => router.push('/projects/quiz-hub')}
             className="w-full py-3 rounded-lg font-bold bg-cyan-600 hover:bg-cyan-500 text-black"
           >
             Back to Dashboard
