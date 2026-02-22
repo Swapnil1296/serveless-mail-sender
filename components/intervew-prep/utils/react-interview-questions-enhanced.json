@@ -1,0 +1,263 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "description": "Enhanced React Interview Questions - Theoretical depth for 3.5+ years experience",
+    "totalQuestions": 25,
+    "categories": ["enhanced_explanations", "new_questions"],
+    "usage": "Merge with reacQuestiondata.js or import directly"
+  },
+  "enhancedQuestions": [
+    {
+      "id": "E001",
+      "topic": "reactJs",
+      "question": "Explain the Virtual DOM in React - Complete Theoretical Deep Dive",
+      "answer": "The Virtual DOM (VDOM) is a fundamental concept that underpins React's performance model. Understanding it demonstrates architectural thinking that impresses senior interviewers.\n\n<b>📚 Theoretical Foundation:</b>\n\n<b>1. What is the Virtual DOM?</b>\nThe Virtual DOM is a <mark>programmatic, in-memory representation of the actual DOM</mark>. It's a lightweight JavaScript object tree that mirrors the structure of real DOM nodes. Crucially, it's not a specification or API—it's an implementation pattern that React adopted.\n\n<b>2. Why Does React Need It? (The Problem Statement)</b>\nDirect DOM manipulation is one of the slowest operations in web development because:\n- DOM operations trigger browser reflows and repaints (expensive layout recalculations)\n- Browsers optimize DOM access—reading and writing in bursts causes \"layout thrashing\"\n- The DOM is a live, stateful tree; changes propagate across the entire document\n\n<b>3. The Reconciliation Algorithm (The Heart of Virtual DOM)</b>\nReact's diffing algorithm follows these principles:\n- <b>Tree Diffing:</b> React compares trees level by level (O(n) complexity) rather than comparing every possible permutation (O(n³))\n- <b>Component Assumptions:</b> If element types differ, React destroys the entire subtree and rebuilds—hence the importance of stable component types\n- <b>Key Optimization:</b> Keys enable React to track element identity across reorders, avoiding unnecessary unmount/remount cycles\n\n<b>4. The Commit Phase</b>\nAfter diffing, React produces a \"effect list\"—a minimal set of DOM mutations. These are batched and applied in a single commit, minimizing browser reflows. This is why React 18's automatic batching improves performance.\n\n<b>5. Conceptual Model for Interviewers</b>\nThink of it as: Virtual DOM = Blueprint | Real DOM = Construction Site. React never \"touches\" the blueprint directly for updates; it creates a new blueprint, compares it with the old one, and only instructs the construction crew (browser) on the minimal changes needed.\n\n<b>📝 Key Takeaway for Interview:</b> The Virtual DOM isn't inherently \"faster\" than direct manipulation—it's faster because it enables <b>batched, minimal updates</b> and provides a <b>declarative abstraction</b> that allows React to optimize the \"how\" of updates.",
+      "tags": ["dom", "fundamental", "theoretical"],
+      "keyFeatures": ["reconciliation", "diffing", "batching", "commit phase"],
+      "actionWords": ["in-memory representation", "O(n) diffing", "effect list", "minimal mutations"],
+      "codeExample": "// Virtual DOM is created from JSX:\nconst vdomElement = {\n  type: 'div',\n  props: { className: 'container' },\n  children: [{ type: 'TEXT_ELEMENT', props: { nodeValue: 'Hello' } }]\n};"
+    },
+    {
+      "id": "E002",
+      "topic": "reactJs",
+      "question": "Explain React Fiber Architecture - What problem does it solve?",
+      "answer": "React Fiber is React's <mark>reconciliation engine rewritten from scratch</mark> (introduced in React 16). It's essential to understand for senior-level React interviews.\n\n<b>📚 Theoretical Foundation:</b>\n\n<b>1. The Pre-Fiber Problem</b>\nReact's old reconciler used a <b>synchronous, recursive</b> approach. When it started rendering, it couldn't be interrupted. For large component trees, this caused:\n- Main thread blockage → janky UI, unresponsive scroll/input\n- No prioritization—all updates treated equally\n- Animation frames dropped during heavy renders\n\n<b>2. What is a Fiber?</b>\nA Fiber is a <mark>unit of work</mark>—a JavaScript object representing a component instance or DOM node. The Fiber tree is a linked list structure (each fiber has child, sibling, return pointers), enabling:\n- <b>Incremental rendering:</b> Work can be split into chunks\n- <b>Pause & resume:</b> React can pause work, run higher-priority tasks, then resume\n- <b>Reuse:</b> Completed work can be abandoned and reused\n\n<b>3. Two Phases of Fiber</b>\n- <b>Render Phase:</b> Async, interruptible. Fiber traverses the tree, computes effects, builds the \"work-in-progress\" tree. Can be paused for user input.\n- <b>Commit Phase:</b> Sync, uninterruptible. Applies all side effects (DOM updates) in one pass. Must be fast.\n\n<b>4. Priorities in Fiber</b>\nReact assigns priorities to updates: Immediate (input), User-blocking (clicks), Normal (data fetch), Low (offscreen content). High-priority work preempts low-priority work.\n\n<b>5. Why This Matters for Concurrency</b>\nFiber enables React 18's concurrent features—useTransition, useDeferredValue, Suspense—because the scheduler can interrupt low-priority renders to keep the UI responsive.\n\n<b>📝 Interview Key Point:</b> Fiber isn't about making React \"faster\" in raw terms—it's about making React <b>schedulable and interruptible</b>, which enables concurrent rendering and a responsive user experience under load.",
+      "tags": ["fiber", "architecture", "concurrent", "theoretical"],
+      "keyFeatures": ["incremental rendering", "priority scheduling", "work units"],
+      "actionWords": ["unit of work", "interruptible", "render phase vs commit phase", "linked list"],
+      "codeExample": "// Fiber structure (simplified):\n{\n  type: ComponentType,\n  stateNode: DOMNode | ComponentInstance,\n  child: Fiber | null,\n  sibling: Fiber | null,\n  return: Fiber | null,\n  effectTag: 'UPDATE' | 'PLACEMENT' | 'DELETION',\n  alternate: Fiber | null  // work-in-progress or current\n}"
+    },
+    {
+      "id": "E003",
+      "topic": "reactJs",
+      "question": "Why do React Hooks have Rules? Explain the technical reasoning",
+      "answer": "The Rules of Hooks (only call at top level, only in React functions) aren't arbitrary—they're <mark>enforced by React's internal implementation</mark>. Explaining this shows deep understanding.\n\n<b>📚 Theoretical Foundation:</b>\n\n<b>1. How Hooks Are Stored Internally</b>\nReact doesn't store hook state in the component. It maintains a <b>linked list of hook state</b> per component instance. Each time you call useState or useEffect, React appends to this list. The <b>order of hook calls</b> determines which state slot gets read/updated.\n\n<b>2. Why Order Matters (The Critical Insight)</b>\nConsider:\n\n// First render: [useState(0), useState('')]  →  Hooks list: [0, '']\n// Second render (conditional): [useState(0)]  →  Hooks list expects 2 slots, gets 1\n// React would associate the wrong state with the wrong hook!\n\nIf hooks were called conditionally or in loops, the order could change between renders. React would map the wrong state to the wrong hook—causing subtle, hard-to-debug bugs. The \"top level only\" rule guarantees a <b>stable call order</b>.\n\n<b>3. The Fiber-Hook Connection</b>\nEach Fiber node has a memoizedState property pointing to the first hook. Each hook has a next pointer to the next hook. When useState runs, React walks this list. Conditional hooks would break the linked list invariant.\n\n<b>4. Why \"Only in React Functions\"</b>\nCustom hooks and components run in a React execution context. Regular functions don't—they lack the Fiber tree context, so React wouldn't know where to attach hook state.\n\n<b>5. ESLint Plugin - exhaustive-deps</b>\nThe dependency array rule exists because stale closures capture old values. Missing dependencies = bugs. Over-specifying can cause infinite loops. The rule enforces consistency.\n\n<b>📝 Interview Takeaway:</b> Hooks rely on <b>call order stability</b>. React uses a linked list for hook storage—violating the rules breaks the invariant and causes state to be misassociated.",
+      "tags": ["hooks", "theoretical", "fundamental"],
+      "keyFeatures": ["linked list storage", "call order", "fiber memoizedState"],
+      "actionWords": ["call order stability", "linked list invariant", "memoizedState"],
+      "codeExample": "// React's internal hook structure (simplified):\n// fiber.memoizedState -> Hook1 -> Hook2 -> Hook3 -> null\n// Each render: React walks this list in order; index = call order"
+    },
+    {
+      "id": "E004",
+      "topic": "reactJs",
+      "question": "What is the difference between useEffect and useLayoutEffect? When would you choose one over the other?",
+      "answer": "This question tests understanding of React's <mark>render and paint lifecycle</mark>—a subtle but critical distinction for avoiding visual bugs.\n\n<b>📚 Theoretical Foundation:</b>\n\n<b>1. The Browser Rendering Pipeline</b>\nWhen React updates:\n1. React runs render (computes new UI)\n2. React commits (applies DOM mutations)\n3. Browser runs <b>layout</b> (calculates geometry)\n4. Browser <b>paints</b> (draws pixels to screen)\n5. Browser runs <b>composite</b> (GPU layers)\n\n<b>2. useEffect Timing</b>\nuseEffect callbacks run <b>asynchronously after paint</b>. The browser has already drawn the screen. Your effect runs in a microtask/macrotask—the user sees the updated DOM before your effect executes.\n\n<b>3. useLayoutEffect Timing</b>\nuseLayoutEffect callbacks run <b>synchronously after DOM mutations but before paint</b>. React schedules them to run in the same tick as the commit. The browser hasn't painted yet—your effect can read layout (e.g., scroll position, dimensions) and make changes before the user sees anything.\n\n<b>4. When to Use useLayoutEffect</b>\n- Measuring DOM (getBoundingClientRect, offsetHeight) and updating state that affects layout\n- Preventing visual \"flash\" or flicker (e.g., applying a transform before paint)\n- DOM mutations that must be synchronous with React's commit\n\n<b>5. When to Use useEffect</b>\n- Data fetching, subscriptions, logging—anything that doesn't need to block paint\n- 99% of side effects. useEffect doesn't block the browser from painting, so it keeps the UI responsive\n\n<b>6. SSR Consideration</b>\nuseLayoutEffect logs a warning in SSR because it can't run on the server. Use useEffect for SSR-safe code, or guard useLayoutEffect with typeof window !== 'undefined'.\n\n<b>📝 Interview Key:</b> useLayoutEffect = \"before paint\" (synchronous, blocks). useEffect = \"after paint\" (async, non-blocking). Use useLayoutEffect when you need to measure or mutate DOM before the user sees it.",
+      "tags": ["hooks", "useEffect", "useLayoutEffect", "rendering"],
+      "keyFeatures": ["paint timing", "synchronous vs async", "DOM measurement"],
+      "actionWords": ["before paint", "after paint", "layout phase", "blocking"],
+      "codeExample": "// useLayoutEffect - prevents flash of wrong content\nuseLayoutEffect(() => {\n  const { height } = ref.current.getBoundingClientRect();\n  setTooltipPosition(height);\n}, [dependency]);"
+    },
+    {
+      "id": "E005",
+      "topic": "reactJs",
+      "question": "Explain the concept of 'Lifting State Up' - When and why would you use it?",
+      "answer": "Lifting state up is a fundamental React pattern that reflects <mark>unidirectional data flow</mark> and the principle of a single source of truth.\n\n<b>📚 Theoretical Foundation:</b>\n\n<b>1. Definition</b>\nLifting state up means moving shared state from child components to the nearest common ancestor that needs to read or control that state. The state \"lives\" higher in the tree, and children receive it via props.\n\n<b>2. Why React Enforces This</b>\nReact's philosophy: data flows down. When two siblings need to share state:\n- Option A: Each has its own state → they're out of sync (anti-pattern)\n- Option B: State in parent, passed as props → single source of truth (correct)\n\nThis makes the data flow <b>predictable and debuggable</b>. You can trace any piece of state to one owner.\n\n<b>3. Trade-off: Prop Drilling</b>Lifting state can lead to \"prop drilling\"—passing props through many layers of components that don't use them. Solutions: Context API, state management (Redux/Zustand), or composition patterns (render props, component composition).\n\n<b>4. When to Lift</b>\n- Two or more components need to reflect the same changing data\n- A child needs to notify a sibling of changes (lift to common parent)\n- Form inputs that affect multiple parts of the UI\n\n<b>5. Controlled vs Uncontrolled</b>\nLifting state often creates <b>controlled components</b>—the parent owns the value and passes it down; the child notifies changes via callbacks. This gives the parent full control over the UI state.\n\n<b>📝 Interview Takeaway:</b> Lifting state up = move state to the lowest common ancestor. It ensures single source of truth and predictable data flow, at the cost of potential prop drilling (mitigated by Context or other patterns).",
+      "tags": ["state", "state-lifting", "architecture"],
+      "keyFeatures": ["single source of truth", "unidirectional flow", "controlled components"],
+      "actionWords": ["common ancestor", "prop drilling", "controlled component"],
+      "codeExample": "// Lifted state - both inputs share same source of truth\nfunction Parent() {\n  const [value, setValue] = useState('');\n  return (\n    <>\n      <InputA value={value} onChange={setValue} />\n      <InputB value={value} onChange={setValue} />\n    </>\n  );\n}"
+    }
+  ],
+  "newQuestions": [
+    {
+      "id": "N001",
+      "topic": "reactJs",
+      "question": "What is React's Concurrent Rendering and how does it improve user experience?",
+      "answer": "Concurrent rendering is a React 18+ feature that allows React to <mark>prepare multiple versions of the UI simultaneously</mark> and prioritize which updates to show first.\n\n<b>Key Concepts:</b>\n- <b>Interruptible Rendering:</b> React can pause a low-priority render, handle a high-priority update (e.g., user typing), then resume or discard the paused work\n- <b>useTransition:</b> Marks state updates as non-urgent; keeps current UI responsive while the transition updates in the background\n- <b>useDeferredValue:</b> Defers updating a value, allowing urgent UI to render first (e.g., keep input responsive while deferring expensive list filtering)\n- <b>Suspense:</b> Lets components \"wait\" for something before rendering; enables streaming SSR and declarative loading states\n\n<b>Benefits:</b> Smoother interactions (typing doesn't lag), better perceived performance, and the ability to show loading states without blocking the entire UI.",
+      "tags": ["concurrent", "React 18", "performance"],
+      "keyFeatures": ["interruptible", "prioritization", "Suspense"],
+      "actionWords": ["useTransition", "useDeferredValue", "streaming"],
+      "codeExample": "const [isPending, startTransition] = useTransition();\nstartTransition(() => setSearchQuery(input));"
+    },
+    {
+      "id": "N002",
+      "topic": "reactJs",
+      "question": "What is a hydration mismatch in React SSR? How do you debug and fix it?",
+      "answer": "A hydration mismatch occurs when the <mark>HTML rendered on the server doesn't match what React expects to render on the client</mark> during hydration. React then throws a warning and must do a full client-side re-render, losing SSR benefits.\n\n<b>Common Causes:</b>\n1. Using browser-only APIs (window, document, localStorage) during initial render without guards\n2. Invalid HTML nesting (e.g., <p> inside <p>)\n3. Date/time rendering (server and client timezones differ)\n4. Random values (Math.random(), Date.now()) during render\n5. Third-party scripts that mutate the DOM before React hydrates\n\n<b>Debugging:</b> React's error message includes a diff showing server vs client output. Use suppressHydrationWarning sparingly only when intentional (e.g., timestamps).\n\n<b>Fixes:</b> Use useEffect for client-only logic, ensure consistent date formatting, use useId for stable IDs, and avoid conditional rendering based on window in initial render.",
+      "tags": ["SSR", "hydration", "debugging"],
+      "keyFeatures": ["server-client consistency", "suppressHydrationWarning"],
+      "actionWords": ["mismatch", "client-only", "useEffect"],
+      "codeExample": "// Fix: Move client-only logic to useEffect\nconst [mounted, setMounted] = useState(false);\nuseEffect(() => setMounted(true), []);\nif (!mounted) return <Fallback />;"
+    },
+    {
+      "id": "N003",
+      "topic": "reactJs",
+      "question": "How would you prevent memory leaks in React components?",
+      "answer": "Memory leaks in React typically occur when <mark>subscriptions, timers, or event listeners outlive the component</mark> that created them.\n\n<b>Common Sources:</b>\n1. Subscriptions (WebSocket, event listeners) not cleaned up in useEffect return\n2. Intervals/timeouts not cleared\n3. AbortController for fetch not called on unmount\n4. Stale closures holding references to unmounted component state\n\n<b>Best Practices:</b>\n- Always return a cleanup function from useEffect for subscriptions and timers\n- Use AbortController with fetch and call abort() in cleanup\n- Cancel in-flight requests when dependencies change or component unmounts\n- For class components: clear in componentWillUnmount\n\n<b>Detection:</b> Chrome DevTools Memory profiler, React DevTools Profiler, and watching for \"Can't perform state update on unmounted component\" warnings.",
+      "tags": ["memory", "useEffect", "cleanup"],
+      "keyFeatures": ["cleanup function", "AbortController", "subscriptions"],
+      "actionWords": ["return cleanup", "abort", "unmount"],
+      "codeExample": "useEffect(() => {\n  const controller = new AbortController();\n  fetch(url, { signal: controller.signal }).then(...);\n  return () => controller.abort();\n}, [url]);"
+    },
+    {
+      "id": "N004",
+      "topic": "reactJs",
+      "question": "Explain the difference between React Server Components (RSC) and Client Components",
+      "answer": "React Server Components run <mark>only on the server</mark> and never ship JavaScript to the client. Client Components are the traditional React components that run in the browser.\n\n<b>Server Components:</b>\n- Execute on the server for each request\n- Can directly access databases, file system, internal APIs\n- Zero JavaScript sent to the client for their code\n- Cannot use hooks, browser APIs, or event handlers\n- Can fetch data without exposing secrets (API keys, DB credentials)\n\n<b>Client Components:</b>\n- Run in the browser, support interactivity\n- Use useState, useEffect, event handlers\n- Must mark with 'use client' in Next.js App Router\n\n<b>Composition:</b> Server Components can import and render Client Components, passing serializable props. Client Components cannot import Server Components—they receive them as props (children).\n\n<b>Interview Key:</b> RSC reduces bundle size and enables secure server-side data access. Use Client Components only where interactivity is needed.",
+      "tags": ["RSC", "Next.js", "architecture"],
+      "keyFeatures": ["zero JS", "server-only", "composition"],
+      "actionWords": ["use client", "serializable", "server-first"],
+      "codeExample": "// Server Component (default in App Router)\nasync function ProductList() {\n  const products = await db.query('SELECT * FROM products');\n  return <ul>{products.map(p => <li key={p.id}>{p.name}</li>)}</ul>;\n}"
+    },
+    {
+      "id": "N005",
+      "topic": "reactJs",
+      "question": "What are React's design principles? How do they influence the API?",
+      "answer": "React's design is guided by principles that shape its API and ecosystem:\n\n<b>1. Composition Over Inheritance:</b> React uses composition (components containing components) rather than class inheritance. The 'children' prop and slots pattern enable flexible reuse.\n\n<b>2. Declarative:</b> You describe what the UI should look like for a given state; React handles the imperative DOM updates. This makes code predictable and easier to debug.\n\n<b>3. Unidirectional Data Flow:</b> Data flows parent → child via props. Events flow child → parent via callbacks. This creates a clear, traceable data flow.\n\n<b>4. Learn Once, Write Anywhere:</b> React doesn't assume the output target. The same concepts apply to web (React DOM), mobile (React Native), and 3D (React Three Fiber).\n\n<b>5. Gradual Adoption:</b> You can add React to an existing project incrementally, or use just parts of it (e.g., only for a specific section).\n\n<b>6. Stability and Compatibility:</b> React values backward compatibility. Deprecations are gradual with clear migration paths.\n\nThese principles explain why React favors functions and composition over classes and inheritance, and why the Context API and hooks were designed the way they are.",
+      "tags": ["fundamental", "design", "philosophy"],
+      "keyFeatures": ["composition", "declarative", "unidirectional"],
+      "actionWords": ["composition over inheritance", "declarative", "gradual adoption"],
+      "codeExample": ""
+    },
+    {
+      "id": "N006",
+      "topic": "reactJs",
+      "question": "How does React's batching of state updates work? What changed in React 18?",
+      "answer": "Batching is when React <mark>groups multiple state updates into a single re-render</mark> for better performance.\n\n<b>React 17 and Earlier:</b> Only updates inside React event handlers (onClick, onChange) were batched. Updates in setTimeout, fetch callbacks, or native event listeners triggered separate re-renders.\n\n<b>React 18 - Automatic Batching:</b> All updates are batched by default, regardless of where they occur—inside event handlers, setTimeout, Promises, native events. React batches them and does one re-render.\n\n<b>Opt-out:</b> If you need to flush updates immediately (e.g., for measuring DOM after a state change), use flushSync from react-dom. Use sparingly as it can hurt performance.\n\n<b>Why It Matters:</b> Fewer re-renders = better performance. In complex UIs with multiple state updates from async code, automatic batching significantly reduces unnecessary renders.",
+      "tags": ["batching", "React 18", "performance"],
+      "keyFeatures": ["automatic batching", "flushSync"],
+      "actionWords": ["grouped updates", "single re-render", "flushSync"],
+      "codeExample": "// React 18: Both updates batched, one re-render\nsetTimeout(() => {\n  setCount(c => c + 1);\n  setFlag(f => !f);\n}, 1000);"
+    },
+    {
+      "id": "N007",
+      "topic": "reactJs",
+      "question": "What is the React Compiler and how does it change optimization practices?",
+      "answer": "The React Compiler (React Forget) is an experimental tool that <mark>automatically memoizes components and values</mark> during build time, reducing the need for manual useMemo, useCallback, and React.memo.\n\n<b>How It Works:</b> The compiler analyzes your code and inserts optimizations where it detects that memoization would prevent unnecessary re-renders or recalculations. It understands the rules of React (when components re-render, when effects run) and applies safe optimizations.\n\n<b>Impact on Practices:</b>\n- Less manual optimization code—the compiler handles it\n- Fewer bugs from incorrect dependency arrays or forgotten memoization\n- Code stays readable without performance annotations\n\n<b>Current Status:</b> As of React 19, the compiler is available but optional. You opt in via Babel/SWC plugin. It's intended to become the default in future versions.\n\n<b>Interview Takeaway:</b> The compiler represents React's direction—move optimization complexity to the tooling so developers can focus on logic. Manual memoization will still be valid for edge cases, but the compiler will handle the common cases.",
+      "tags": ["React 19", "compiler", "optimization"],
+      "keyFeatures": ["auto-memoization", "build-time", "React Forget"],
+      "actionWords": ["automatic", "useMemo", "useCallback"],
+      "codeExample": "// With React Compiler: no need for useMemo/useCallback\n// Compiler auto-optimizes\nfunction MyComponent({ items }) {\n  const filtered = items.filter(i => i.active);\n  return <List items={filtered} />;\n}"
+    },
+    {
+      "id": "N008",
+      "topic": "reactJs",
+      "question": "Explain the render prop pattern vs custom hooks - When would you use each?",
+      "answer": "Both patterns share logic between components but differ in how they expose it.\n\n<b>Render Props:</b> A component receives a function as a prop (usually 'render' or 'children') and calls it with state/data. The parent decides what to render.\n- Pros: Flexible, explicit data flow, works with class components\n- Cons: Callback hell with nesting, slightly verbose\n\n<b>Custom Hooks:</b> Extract stateful logic into a function that uses other hooks. Returns state and handlers for the component to use.\n- Pros: Composable, no wrapper components, clean JSX, follows hooks rules\n- Cons: Only for functional components\n\n<b>When to Use:</b> Prefer custom hooks for most shared logic today. Use render props when you need to customize rendering structure (e.g., a table component that renders rows) or when integrating with libraries that use this pattern. Render props are still valid but hooks have largely superseded them for logic reuse.",
+      "tags": ["patterns", "hooks", "render props"],
+      "keyFeatures": ["logic reuse", "composition"],
+      "actionWords": ["render prop", "custom hook", "children as function"],
+      "codeExample": "// Custom hook - preferred\nfunction useWindowSize() {\n  const [size, setSize] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));\n  useEffect(() => { /* resize listener */; return cleanup; }, []);\n  return size;\n}"
+    },
+    {
+      "id": "N009",
+      "topic": "reactJs",
+      "question": "What security considerations should you keep in mind when building React apps?",
+      "answer": "React applications face several security concerns:\n\n<b>1. XSS (Cross-Site Scripting):</b> React escapes content by default. Danger: dangerouslySetInnerHTML—only use with sanitized input (e.g., DOMPurify). Never inject user input directly.\n\n<b>2. Injection in Attributes:</b> React escapes attribute values, but avoid constructing URLs or script sources from user input without validation.\n\n<b>3. Dependencies:</b> Use npm audit, dependabot; keep dependencies updated. Supply chain attacks via malicious packages are real.\n\n<b>4. Sensitive Data:</b> Never store secrets in client-side code. API keys in frontend are exposed. Use environment variables for build-time config only (still visible in bundle). Sensitive operations must happen server-side.\n\n<b>5. Authentication:</b> JWT in localStorage is vulnerable to XSS. Prefer httpOnly cookies for tokens. Implement proper CSRF protection for state-changing requests.\n\n<b>6. Serialization:</b> When passing data from Server Components or SSR, ensure no sensitive or non-serializable data leaks to the client.",
+      "tags": ["security", "XSS", "best-practices"],
+      "keyFeatures": ["XSS prevention", "sanitization", "secrets"],
+      "actionWords": ["dangerouslySetInnerHTML", "DOMPurify", "httpOnly cookie"],
+      "codeExample": "// Safe: use DOMPurify with dangerouslySetInnerHTML\nimport DOMPurify from 'dompurify';\n<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userContent) }} />"
+    },
+    {
+      "id": "N010",
+      "topic": "reactJs",
+      "question": "How would you implement accessibility (a11y) in a React application?",
+      "answer": "Accessibility in React follows the same principles as standard web accessibility, with React-specific patterns.\n\n<b>1. Semantic HTML:</b> Use correct elements—<button> for buttons, <nav>, <main>, <article>, <label> for form inputs. Avoid div/span for interactive elements.\n\n<b>2. Keyboard Navigation:</b> Ensure all interactive elements are focusable and respond to Enter/Space. Use tabIndex carefully (prefer 0 for logical order, avoid positive values). Implement roving tabindex for custom components like menus.\n\n<b>3. ARIA Attributes:</b> Use when semantic HTML isn't enough—aria-label, aria-labelledby, aria-describedby, aria-expanded, aria-hidden, role. Don't override semantics (e.g., role='button' on a div without keyboard handler).\n\n<b>4. Focus Management:</b> For modals, trap focus and return it on close. Use useRef and useEffect for programmatic focus. React's useId helps generate stable IDs for aria-labelledby.\n\n<b>5. Forms:</b> Associate labels with inputs (htmlFor + id). Provide error messages linked via aria-describedby. Announce validation errors to screen readers.\n\n<b>6. Testing:</b> Use jest-axe, @axe-core/react for automated checks. Manual testing with keyboard-only and screen reader (NVDA, VoiceOver) is essential.\n\n<b>7. Libraries:</b> Radix UI, Reach UI, and similar libraries provide accessible primitives. Consider using them for complex components.",
+      "tags": ["accessibility", "a11y", "best-practices"],
+      "keyFeatures": ["semantic HTML", "ARIA", "keyboard"],
+      "actionWords": ["aria-label", "focus trap", "useId", "semantic"],
+      "codeExample": "// Accessible button with tooltip\n<button aria-label=\"Close dialog\" onClick={onClose}>\n  <XIcon aria-hidden />\n</button>"
+    },
+    {
+      "id": "N011",
+      "topic": "reactJs",
+      "question": "What is the difference between createRoot and ReactDOM.render?",
+      "answer": "createRoot is the React 18+ API for rendering; ReactDOM.render is the legacy API.\n\n<b>createRoot (React 18+):</b>\n- Enables concurrent features (Suspense, useTransition, automatic batching)\n- Returns a root object with render and unmount methods\n- Required for React 18 concurrency\n\n<b>ReactDOM.render (Legacy):</b>\n- Synchronous, no concurrent features\n- Still supported but deprecated; will be removed in a future major version\n- Wraps the app in createRoot under the hood in React 18 for compatibility\n\n<b>Migration:</b> Replace ReactDOM.render(<App />, el) with createRoot(el).render(<App />). Use hydrateRoot for SSR hydration instead of ReactDOM.hydrate.",
+      "tags": ["React 18", "rendering", "migration"],
+      "keyFeatures": ["createRoot", "concurrent", "hydrateRoot"],
+      "actionWords": ["createRoot", "hydrateRoot", "legacy"],
+      "codeExample": "// React 18\nimport { createRoot } from 'react-dom/client';\ncreateRoot(document.getElementById('root')).render(<App />);"
+    },
+    {
+      "id": "N012",
+      "topic": "reactJs",
+      "question": "Explain the compound component pattern in React",
+      "answer": "The compound component pattern creates <mark>components that work together and share implicit state</mark> through context, while allowing flexible composition.\n\n<b>Example:</b> A Tabs component with TabList, Tab, TabPanels, TabPanel. Users compose:\n\n<Tabs>\n  <TabList>\n    <Tab>One</Tab>\n    <Tab>Two</Tab>\n  </TabList>\n  <TabPanels>\n    <TabPanel>Content 1</TabPanel>\n    <TabPanel>Content 2</TabPanel>\n  </TabPanels>\n</Tabs>\n\n<b>Implementation:</b> The parent (Tabs) holds state (active index) and provides it via React.createContext. Child components (Tab, TabPanel) consume the context to coordinate behavior. Users get full control over structure and styling while the logic is encapsulated.\n\n<b>Benefits:</b> Flexible API, logical grouping, single import. Used by Radix UI, Headless UI, and similar libraries.\n\n<b>Vs Alternatives:</b> Simpler than render props for complex UIs; more flexible than a single component with many props.",
+      "tags": ["patterns", "composition", "Context"],
+      "keyFeatures": ["implicit state", "flexible composition"],
+      "actionWords": ["compound", "Context", "implicit state"],
+      "codeExample": "const TabsContext = createContext();\nfunction Tabs({ children }) {\n  const [activeIndex, setActiveIndex] = useState(0);\n  return (\n    <TabsContext.Provider value={{ activeIndex, setActiveIndex }}>\n      {children}\n    </TabsContext.Provider>\n  );\n}"
+    },
+    {
+      "id": "N013",
+      "topic": "reactJs",
+      "question": "How do you test React components? What tools and strategies do you use?",
+      "answer": "Testing React components involves unit, integration, and E2E approaches.\n\n<b>1. Unit/Integration - React Testing Library (RTL):</b>\n- Test behavior from the user's perspective (queries by role, label, text)\n- Avoid testing implementation details (state, internal functions)\n- Use userEvent for interactions (closer to real user)\n- render, screen, fireEvent/userEvent, waitFor\n\n<b>2. Jest:</b> Test runner, mocking (jest.fn, jest.mock), snapshots (use sparingly).\n\n<b>3. Mocking:</b> Mock fetch/API with MSW (Mock Service Worker) for realistic integration tests. Mock modules with jest.mock when necessary.\n\n<b>4. Hooks Testing:</b> Use @testing-library/react-hooks or test hooks via a wrapper component.\n\n<b>5. E2E:</b> Playwright or Cypress for full user flows, critical paths.\n\n<b>Best Practices:</b> Prefer integration over unit; avoid snapshot testing for UI; test accessibility (jest-axe); keep tests maintainable and meaningful.",
+      "tags": ["testing", "RTL", "Jest"],
+      "keyFeatures": ["React Testing Library", "user-centric", "MSW"],
+      "actionWords": ["screen", "userEvent", "waitFor", "queryByRole"],
+      "codeExample": "render(<LoginForm />);\nawait userEvent.type(screen.getByLabelText('Email'), 'test@test.com');\nawait userEvent.click(screen.getByRole('button', { name: 'Submit' }));\nawait waitFor(() => expect(screen.getByText('Success')).toBeInTheDocument());"
+    },
+    {
+      "id": "N014",
+      "topic": "reactJs",
+      "question": "What is the difference between createElement and cloneElement?",
+      "answer": "<b>createElement:</b> Creates a new React element (the object representation of a component or DOM node). Used by JSX under the hood. Signature: createElement(type, props, ...children).\n\n<b>cloneElement:</b> Clones an existing React element and allows you to <mark>merge new props with the original</mark>. Useful for adding or overriding props on a child element. Signature: cloneElement(element, props, ...children).\n\n<b>Use Cases for cloneElement:</b>\n- Passing additional props to children (e.g., a parent adding onClick or data-* to each child)\n- Wrapping children with extra behavior\n- Commonly used in compound components or layout components\n\n<b>Caveat:</b> cloneElement creates a new element reference. Prefer composition (render props, children as function) when possible, as they're more flexible. cloneElement is useful when you need to augment pre-existing children you don't control.",
+      "tags": ["API", "elements", "composition"],
+      "keyFeatures": ["element creation", "prop merging"],
+      "actionWords": ["createElement", "cloneElement", "merge props"],
+      "codeExample": "React.Children.map(children, child =>\n  React.cloneElement(child, { className: 'enhanced' })\n);"
+    },
+    {
+      "id": "N015",
+      "topic": "reactJs",
+      "question": "How would you implement infinite scroll in React efficiently?",
+      "answer": "Efficient infinite scroll requires <mark>intersection detection, paginated fetching, and optional virtualization</mark>.\n\n<b>1. Intersection Observer:</b> Use a sentinel element at the bottom of the list. When it enters the viewport, trigger loading more data. More performant than scroll listeners.\n\n<b>2. Data Fetching:</b> Use React Query or SWR for caching, deduplication, and pagination. Pass page/cursor to the API; append new items to the list.\n\n<b>3. Virtualization (for long lists):</b> If the DOM grows too large (1000+ items), use react-window or react-virtualized to render only visible items. Combine with infinite scroll: load more as user scrolls, virtualize the rendered portion.\n\n<b>4. Edge Cases:</b> Prevent duplicate fetches (loading flag, disable observer while loading). Handle errors and retry. Consider \"load more\" button as fallback for accessibility.\n\n<b>5. Accessibility:</b> Provide a way to load more via keyboard (e.g., focusable \"Load more\" button). Announce loading state to screen readers.",
+      "tags": ["patterns", "performance", "data-fetching"],
+      "keyFeatures": ["Intersection Observer", "pagination", "virtualization"],
+      "actionWords": ["sentinel", "react-window", "React Query"],
+      "codeExample": "const { ref, inView } = useInView();\nuseEffect(() => {\n  if (inView && hasNextPage && !isFetching) fetchNextPage();\n}, [inView, hasNextPage, isFetching]);\nreturn <>{items}{hasNextPage && <div ref={ref}>Loading...</div>}</>;"
+    },
+    {
+      "id": "N016",
+      "topic": "reactJs",
+      "question": "What is the difference between Redux and React Context? When would you choose each?",
+      "answer": "<b>Context API:</b> Built-in, simple, good for theme/locale/auth. Limitations: no built-in devtools, no middleware, re-renders all consumers when value changes (unless you split contexts), no time-travel debugging.\n\n<b>Redux:</b> Predictable state container, single store, middleware (thunk, saga), devtools with time-travel, normalized state patterns. Better for large apps with complex state logic, undo/redo, or when you need to persist/replay actions.\n\n<b>When to Use Context:</b> Simple global state (theme, user, language), small-to-medium apps, avoiding extra dependencies.\n\n<b>When to Use Redux:</b> Complex state with many reducers, need for middleware (logging, analytics, async), large team needing predictable patterns, offline support or state persistence.",
+      "tags": ["state-management", "Redux", "Context"],
+      "keyFeatures": ["single store", "middleware", "devtools"],
+      "actionWords": ["Context", "Redux", "middleware"],
+      "codeExample": ""
+    },
+    {
+      "id": "N017",
+      "topic": "reactJs",
+      "question": "Explain the purpose of React.Children utilities",
+      "answer": "React.Children provides utilities for <mark>opaque data structures</mark>—you don't need to know if children is an array, single element, or null.\n\n<b>Methods:</b>\n- React.Children.map(children, fn): Iterate over children; handles single child, array, null/undefined\n- React.Children.forEach: Same as map but no return value\n- React.Children.count: Count of children\n- React.Children.only: Assert exactly one child, return it (throws otherwise)\n- React.Children.toArray: Flatten and normalize to array; adds keys for stability\n\n<b>Use Cases:</b> Layout components that need to wrap/clone each child, compound components, enforcing single-child (e.g., FocusScope). Less common with hooks; prefer composition patterns when possible.",
+      "tags": ["API", "children", "composition"],
+      "keyFeatures": ["map", "toArray", "only"],
+      "actionWords": ["opaque", "normalize", "cloneElement"],
+      "codeExample": "React.Children.map(children, (child, index) =>\n  React.isValidElement(child) ? React.cloneElement(child, { key: index }) : child\n);"
+    },
+    {
+      "id": "N018",
+      "topic": "reactJs",
+      "question": "What is React's recommended approach for forms? Controlled vs uncontrolled",
+      "answer": "React supports both; the choice depends on needs.\n\n<b>Controlled:</b> Input value is driven by React state. onChange updates state; value comes from state. Single source of truth. Enables validation, formatting, conditional disabling. Preferred for most forms.\n\n<b>Uncontrolled:</b> Input maintains its own state in the DOM. Use ref to read value when needed (e.g., on submit). Simpler for one-off inputs, file inputs, or integrating with non-React libraries.\n\n<b>Libraries:</b> Formik, React Hook Form, or built-in controlled components. React Hook Form minimizes re-renders by using refs internally (uncontrolled) while exposing controlled-like API.\n\n<b>Recommendation:</b> Use controlled for forms with validation, dynamic fields, or conditional logic. Use uncontrolled for simple cases or when integrating with legacy code.",
+      "tags": ["forms", "controlled", "uncontrolled"],
+      "keyFeatures": ["single source of truth", "validation"],
+      "actionWords": ["controlled", "uncontrolled", "ref"],
+      "codeExample": "// Controlled\nconst [value, setValue] = useState('');\n<input value={value} onChange={e => setValue(e.target.value)} />"
+    },
+    {
+      "id": "N019",
+      "topic": "reactJs",
+      "question": "How does React's key prop affect reconciliation? What happens if you use index as key?",
+      "answer": "Keys help React identify which items changed, were added, or removed in lists. Without keys, React uses position (index) by default.\n\n<b>Using index as key:</b> Problematic when the list can reorder, filter, or have items inserted/removed. If you insert an item at the start, every index shifts. React reuses DOM nodes by position—component state gets associated with the wrong item (e.g., input value from item A appears on item B after reorder).\n\n<b>Using stable unique ID:</b> React tracks identity. Reordering doesn't confuse state; only the DOM nodes move. Correct behavior.\n\n<b>When index is acceptable:</b> Static lists that never reorder or change length. Still, prefer stable IDs when available.\n\n<b>Key Rules:</b> Keys must be unique among siblings (not globally). Don't use random values (new key every render = remount every time).",
+      "tags": ["key", "reconciliation", "lists"],
+      "keyFeatures": ["identity", "reorder", "state preservation"],
+      "actionWords": ["index", "stable ID", "reconciliation"],
+      "codeExample": "// Prefer\n{items.map(item => <Item key={item.id} {...item} />)}\n// Avoid for dynamic lists\n{items.map((item, i) => <Item key={i} {...item} />)}"
+    },
+    {
+      "id": "N020",
+      "topic": "reactJs",
+      "question": "What is the purpose of React.lazy and Suspense? How do they work together?",
+      "answer": "React.lazy enables <mark>code-splitting</mark>—loading component code only when needed. Suspense provides a declarative way to handle the loading state.\n\n<b>React.lazy:</b> Wraps a dynamic import. Returns a component that suspends (throws a promise) while the chunk loads. When the promise resolves, React retries rendering.\n\n<b>Suspense:</b> Catches the thrown promise from lazy (or a data-fetching library). Renders fallback until the promise resolves, then renders children. Can nest Suspense boundaries for granular loading.\n\n<b>Together:</b> Lazy components suspend; Suspense boundary catches and shows fallback. Enables route-based or component-based code splitting without manual loading state.\n\n<b>Limitation:</b> lazy only supports default exports. For named exports, create an intermediate module that re-exports as default.",
+      "tags": ["lazy", "Suspense", "code-splitting"],
+      "keyFeatures": ["dynamic import", "fallback", "chunk"],
+      "actionWords": ["suspend", "fallback", "code-split"],
+      "codeExample": "const LazyPage = React.lazy(() => import('./Page'));\n<Suspense fallback={<Spinner />}>\n  <LazyPage />\n</Suspense>"
+    }
+  ]
+}

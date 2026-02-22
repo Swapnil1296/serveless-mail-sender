@@ -3,7 +3,7 @@ import InterviewPrepApp from './components/InterviewPrepApp';
 import ExcelToJsonConverter from './components/ExcelToJsonConverter';
 import AddQuestionForm from "./components/AddQuestionForm";
 import { javascriptQuestionData } from './utils/javascriptQuestionData';
-import { reactQuesionData } from './utils/reacQuestiondata';
+import { reactQuestionsMerged as reactQuesionData } from './utils/reactQuestionsMerged';
 import { Menu, X } from 'lucide-react';
 import { htmlAndCSS } from './utils/htmlCss';
 import { reduxRtk } from './utils/reduxRtk';

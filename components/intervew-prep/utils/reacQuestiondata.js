@@ -1845,6 +1845,90 @@ export const reactQuesionData = [
     "keyFeatures": [],
     "actionWords": [],
     "codeExample": ""
+  },
+  {
+    "id": ":r0:0adssdsd",
+    "topic": "reactJs",
+    "question": "What is React & its core internal architecture?",
+    "answer": "React is an open-source JavaScript library for building UI, but at its core, it is a **state management system that facilitates efficient DOM manipulation through an abstraction layer.** \n\nKey to its 3.5+ year level understanding is the **Fiber Architecture** (introduced in v16). Unlike the old Stack Reconciler, Fiber allows React to split rendering work into small chunks and spread it over multiple frames. This enables **Concurrent Rendering**, meaning React can pause, resume, or abort work to prioritize user interactions (like typing) over heavy background re-renders.",
+    "tags": ["architecture", "fiber"],
+    "actionWords": [
+      "Fiber Reconciler",
+      "Scheduling",
+      "Concurrent Mode",
+      "Asynchronous Rendering"
+    ],
+    "codeExample": ""
+  },
+  {
+    "id":":r0:0adssdsd18",
+    "topic": "reactJs",
+    "question": "How does the Virtual DOM and the Diffing Algorithm work under the hood?",
+    "answer": "The Virtual DOM is a lightweight JS object representing the UI. When state changes, React creates a new VDOM tree. The **Reconciliation** process then compares the new tree with the old one using a **Heuristic Diffing Algorithm**.\n\nWhile a general tree-to-tree transformation has a complexity of $O(n^3)$, React optimizes this to $O(n)$ based on two assumptions:\n1. Two elements of different types will produce different trees.\n2. Developers can hint at stable child elements across renders using the `key` prop.\n\nIt operates in two phases: \n- **Render Phase:** Determines changes (Pure, no side effects).\n- **Commit Phase:** Applies changes to the Real DOM.",
+    "tags": ["dom", "internals"],
+    "actionWords": [
+      "Heuristic Algorithm",
+      "Reconciliation",
+      "O(n) Complexity",
+      "Phase Separation"
+    ],
+    "codeExample": ""
+  },
+  {
+    "id":":r0:0adssdsd132",
+    "topic": "reactJs",
+    "question": "Deep Dive: How do Hooks work internally? (The Linked List model)",
+    "answer": "Hooks are not magic; they are stored in a **linked list on the Fiber node** associated with the component. Each time a Hook is called (e.g., `useState`), React moves a pointer to the next node in that list.\n\nThis is precisely why you **cannot call Hooks inside loops or conditions**. If the order of Hook calls changes between renders, the pointer will point to the wrong state data, leading to memory leaks or logic crashes. At 3.5 years exp, you should know that hooks rely on a persistent 'memoizedState' property on the Fiber.",
+    "tags": ["hooks", "advanced"],
+    "actionWords": [
+      "Fiber Node",
+      "MemoizedState",
+      "Call Order",
+      "Linked List"
+    ],
+    "codeExample": ""
+  },
+  {
+    "id":":r0:0adssdsd145",
+    "topic": "reactJs",
+    "question": "Explain React 18 Concurrent Features: useTransition vs useDeferredValue",
+    "answer": "React 18 introduced the ability to mark updates as 'non-urgent'. \n\n- `useTransition`: Returns a stateful value for the pending state and a function to start the transition. It is used when you want to wrap the code that *triggers* the state update.\n- `useDeferredValue`: Used when you receive a value from a parent (like a prop) and want to 'defer' the re-rendering of a heavy UI part until the main thread is free.\n\nBoth prevent the UI from 'locking up' during heavy computations by allowing React to interrupt the render to handle higher-priority events.",
+    "tags": ["React 18", "performance"],
+    "actionWords": [
+      "Interruptible Rendering",
+      "Prioritization",
+      "Transitions",
+      "Responsiveness"
+    ],
+    "codeExample": "const [isPending, startTransition] = useTransition();\nstartTransition(() => { setSearchQuery(val); });"
+  },
+  {
+    "id":":r0:0adssdsd146",
+    "topic": "reactJs",
+    "question": "What is the React 19 Compiler (React Forget)?",
+    "answer": "React 19 moves toward a 'compiled' future. Traditionally, we use `useMemo`, `useCallback`, and `React.memo` to prevent re-renders (Manual Memoization). The **React Compiler** is a build-time tool that automatically memoizes components and hooks by analyzing the dependency graph.\n\nThis shifts the burden from the developer to the tool, ensuring that the UI only re-renders when the data actually changes, without the overhead of manual dependency arrays.",
+    "tags": ["React 19", "compiler"],
+    "actionWords": [
+      "Auto-memoization",
+      "Build-time optimization",
+      "React Forget",
+      "Zero-overhead"
+    ],
+    "codeExample": ""
+  },
+  {
+  "id":":r0:0adssdsd147",
+    "topic": "reactJs",
+    "question": "Compare Server Components (RSC) vs Client Components in a Next.js context.",
+    "answer": "Server Components (RSC) never ship JS to the client; they render on the server and stream a serialized JSON structure to the browser. This is ideal for data-heavy parts of the app to reduce bundle size.\n\nClient Components (marked with 'use client') are the standard React components we use for interactivity (state, effects, event listeners). A key architectural pattern is **interleaving**, where you pass Client Components as children to Server Components to maintain performance while allowing interactivity.",
+    "tags": ["Next.js", "SSR", "RSC"],
+    "actionWords": [
+      "Zero-bundle size",
+      "Serialization",
+      "Interleaving",
+      "Hydration"
+    ],
+    "codeExample": ""
   }
 
 
