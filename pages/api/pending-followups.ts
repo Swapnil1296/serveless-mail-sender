@@ -27,10 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 1. Were sent successfully
     // 2. Were sent 5 or more days ago
     // 3. Haven't received a follow-up yet
+    // 4. Interview not already scheduled (no need to follow up if scheduled)
     const pendingFollowups = await EmailLog.find({
       status: 'success',
       followUpSent: false,
       sentAt: { $lte: fiveDaysAgo },
+      $nor: [{ interviewScheduledStatus: 'scheduled' }],
     })
       .sort({ sentAt: 1 }) // Oldest first
       .lean();

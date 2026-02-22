@@ -58,6 +58,16 @@ export function EmailLogDetailModal({
     }
   }, [log]);
 
+  useEffect(() => {
+    if (isOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isOpen]);
+
   if (!log || !isOpen) return null;
 
   const handleSave = async () => {
