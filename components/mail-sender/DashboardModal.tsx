@@ -67,7 +67,7 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
     },
     {
       id: 'quiz-hub',
-      name: 'Quizzz Hub',
+      name: 'Quiz Hub',
       slug: 'QUIZ_HUB_v1',
       description: 'Quiz Hub with dashboard, quizzes, analytics',
       icon: <NotebookPen className="w-8 h-8" />,
