@@ -6,6 +6,10 @@ const LIMITS = {
   note: 2000,
   phoneNumber: 30,
   senderName: 100,
+  mcqQuestion: 2000,
+  mcqOption: 500,
+  mcqTopic: 100,
+  mcqExplanation: 2000,
 } as const;
 
 /**
@@ -50,4 +54,39 @@ export function isValidObjectId(id: unknown): id is string {
  */
 export function filterValidObjectIds(ids: unknown[]): string[] {
   return ids.filter((id): id is string => isValidObjectId(id));
+}
+
+/** Sanitize MCQ question text */
+export function sanitizeMcqQuestion(input: unknown): string {
+  return sanitizeText(input, LIMITS.mcqQuestion);
+}
+
+/** Sanitize MCQ option text */
+export function sanitizeMcqOption(input: unknown): string {
+  return sanitizeText(input, LIMITS.mcqOption);
+}
+
+/** Sanitize MCQ topic */
+export function sanitizeMcqTopic(input: unknown): string {
+  return sanitizeText(input, LIMITS.mcqTopic);
+}
+
+/** Sanitize MCQ explanation (shown when answer is wrong) */
+export function sanitizeMcqExplanation(input: unknown): string {
+  return sanitizeText(input, LIMITS.mcqExplanation);
+}
+
+/**
+ * Decode HTML entities for display (e.g. validator.escape produces &#x2F; for /).
+ * Use when rendering sanitized text as plain text in React.
+ */
+export function decodeHtmlEntities(str: string): string {
+  if (!str || typeof str !== 'string') return str;
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/');
 }

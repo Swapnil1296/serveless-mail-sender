@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Mail, NotebookPen, Plus, Wallet, FileText } from 'lucide-react';
+import { X, Mail, NotebookPen, Plus, Wallet, FileText, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 interface DashboardModalProps {
@@ -63,6 +63,22 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       description: 'Scrap jobs from naukari',
       icon: <Wallet className="w-8 h-8" />,
       route: '/projects/naukari-scraper',
+    },
+    {
+      id: 'mcq-quiz',
+      name: 'MCQ Quiz',
+      slug: 'MCQ_QUIZ_v1',
+      description: 'Practice MCQs with topic filter and explanations',
+      icon: <HelpCircle className="w-8 h-8" />,
+      route: '/projects/mcq',
+    },
+    {
+      id: 'interview-platform',
+      name: 'Interview Prep Platform',
+      slug: 'INTERVIEW_V1',
+      description: 'Adaptive MERN interview prep with dashboard, quizzes, analytics',
+      icon: <NotebookPen className="w-8 h-8" />,
+      route: '/projects/interview-hub',
     },
   ];
 

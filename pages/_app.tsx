@@ -90,6 +90,20 @@ function Navigation() {
                 <span>Resume</span>
               </span>
             </Link>
+          
+            <Link
+              href="/projects/interview-hub"
+              className={`relative px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all overflow-hidden group ${
+                router.pathname === '/projects/interview-hub'
+                  ? 'bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 text-white border-2 border-cyan-400/50'
+                  : 'text-cyan-300 border-2 border-cyan-500/30 hover:border-cyan-400/50'
+              }`}
+            >
+              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                <span className="hidden sm:inline">📋</span>
+                <span>Quizs</span>
+              </span>
+            </Link>
 
             <button
               onClick={logout}

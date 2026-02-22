@@ -1,0 +1,33 @@
+{
+  "description": "Request body to add MCQ question(s). POST /api/mcq-questions with Authorization: Bearer <token>",
+  "single": {
+    "question": "What is the output of typeof null in JavaScript?",
+    "options": ["object", "null", "undefined", "string"],
+    "correctAnswer": 0,
+    "topic": "JavaScript",
+    "explanation": "typeof null returns 'object' due to a historical bug in JavaScript. It should ideally return 'null', but this behavior is kept for backwards compatibility."
+  },
+  "multiple": [
+    {
+      "question": "Which method adds an element to the end of an array?",
+      "options": ["push()", "pop()", "shift()", "unshift()"],
+      "correctAnswer": 0,
+      "topic": "JavaScript",
+      "explanation": "push() adds one or more elements to the end of an array and returns the new length."
+    },
+    {
+      "question": "What does React use for state management in function components?",
+      "options": ["useState", "setState", "getState", "this.state"],
+      "correctAnswer": 0,
+      "topic": "React",
+      "explanation": "useState is the Hook that lets you add React state to function components."
+    }
+  ],
+  "fields": {
+    "question": "string (required)",
+    "options": "array of 4 strings (required)",
+    "correctAnswer": "0 | 1 | 2 | 3 (required, index of correct option)",
+    "topic": "string (optional, default: 'general')",
+    "explanation": "string (optional, shown when user selects wrong answer)"
+  }
+}
