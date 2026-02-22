@@ -1,19 +1,11 @@
-export const nextJs = [
+[
   {
     "id": 1,
     "topic": "next",
     "question": "Explain the fundamental architecture of Next.js and why it matters for production applications",
     "answer": "Next.js is a React framework that extends React with a batteries-included approach for building full-stack, production-ready applications. Unlike a vanilla React app (e.g., Create React App), Next.js provides server-side capabilities out of the box.\n\nInternally, Next.js compiles your React components into optimized bundles and orchestrates when to run them: at build time (SSG), at request time (SSR), or purely on the client (CSR). The framework uses a hybrid rendering model, meaning each page can choose its own rendering strategy.\n\nWhy this matters: In production, you need fast Time to First Byte (TTFB), SEO-crawlable HTML, and minimal client JavaScript. Next.js achieves this by pre-rendering HTML when possible and streaming it to the client. The bundler (Webpack or Turbopack) performs automatic code splitting per route, so users only download JavaScript for the current page.\n\nEdge cases: Pages using getServerSideProps cannot be statically optimized and will always hit the server. Heavy dependencies in a page increase its bundle size; use dynamic imports for large libraries. Performance implications: Static pages are CDN-cacheable and scale infinitely; SSR pages require server capacity for each request.\n\nProduction use cases: E-commerce product pages (SSG with ISR), dashboards (SSR for personalized data), marketing sites (full SSG), and admin panels (CSR for non-SEO-critical apps).",
-    "tags": [
-      "architecture",
-      "overview"
-    ],
-    "actionWords": [
-      "hybrid rendering",
-      "code splitting",
-      "pre-render",
-      "TTFB"
-    ],
+    "tags": ["architecture", "overview"],
+    "actionWords": ["hybrid rendering", "code splitting", "pre-render", "TTFB"],
     "codeExample": "export default function Home() {\n  return <h1>Welcome to Next.js</h1>;\n}"
   },
   {
@@ -21,17 +13,8 @@ export const nextJs = [
     "topic": "next",
     "question": "App Router vs Pages Router: When should you use each?",
     "answer": "The App Router (app/ directory) and Pages Router (pages/ directory) are two routing paradigms in Next.js. The App Router was introduced in Next.js 13 and is the recommended approach for new applications.\n\nApp Router uses a file-system based routing with layout.tsx, page.tsx, loading.tsx, and error.tsx. It supports React Server Components by default, which means components are server components unless marked with 'use client'. Layouts are nested and persist across navigations without re-mounting. The Pages Router uses _app.js as the root and defines routes via files in pages/.\n\nWhy App Router: Server Components reduce client JavaScript by running components on the server. Data fetching can happen directly in async components without getServerSideProps. Streaming allows the shell to render first while slow data loads in. Route Handlers replace API routes with a Web API-compliant approach. Nested layouts enable shared UI (sidebar, header) that does not re-render on navigation.\n\nWhy Pages Router: Mature, stable, and well-documented. Easier migration from existing React apps. getServerSideProps and getStaticProps are explicit and familiar. No Server/Client component mental model.\n\nWhen to use App Router: New projects, when you want Server Components, streaming, or improved performance. When to use Pages Router: Legacy projects, when you need predictable behavior and do not need RSC. You can use both in the same project (incremental adoption).",
-    "tags": [
-      "app-router",
-      "pages-router",
-      "routing"
-    ],
-    "actionWords": [
-      "App Router",
-      "Pages Router",
-      "Server Components",
-      "layouts"
-    ],
+    "tags": ["app-router", "pages-router", "routing"],
+    "actionWords": ["App Router", "Pages Router", "Server Components", "layouts"],
     "codeExample": "// app/layout.tsx\nexport default function RootLayout({ children }) {\n  return (\n    <html>\n      <body>{children}</body>\n    </html>\n  );\n}\n\n// app/page.tsx\nexport default function Page() {\n  return <h1>Home</h1>;\n}"
   },
   {
@@ -39,19 +22,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Explain SSR, SSG, ISR, and CSR with production trade-offs",
     "answer": "Next.js supports four rendering strategies, each with distinct characteristics.\n\nSSR (Server-Side Rendering): The page is rendered on the server for every request. HTML is generated fresh each time, so content is always up-to-date. Internally, getServerSideProps (Pages Router) or an async Server Component (App Router) fetches data on each request. Trade-off: Every request hits the server, increasing latency and server load. Use for: Personalized dashboards, auth-gated content, real-time data.\n\nSSG (Static Site Generation): Pages are pre-rendered at build time. The output is static HTML stored on a CDN. No server computation at request time. Use getStaticProps (Pages Router) or fetch with cache at build (App Router). Trade-off: Content is stale until rebuild. Use for: Blogs, docs, marketing pages.\n\nISR (Incremental Static Regeneration): Combines SSG speed with on-demand updates. Pages are static but can be revalidated after a time interval (revalidate) or on-demand via revalidatePath/revalidateTag. Internally, the first request after revalidate triggers a background regeneration; users get the cached version immediately. Trade-off: Slight delay before fresh content appears. Use for: Product listings, news, frequently updated content.\n\nCSR (Client-Side Rendering): A shell loads first; data is fetched in the browser via useEffect or a client data library (SWR, React Query). No pre-rendered content. Trade-off: Poor SEO, slower perceived load. Use for: Admin panels, non-public dashboards.",
-    "tags": [
-      "SSR",
-      "SSG",
-      "ISR",
-      "CSR"
-    ],
-    "actionWords": [
-      "SSR",
-      "SSG",
-      "ISR",
-      "CSR",
-      "revalidate"
-    ],
+    "tags": ["SSR", "SSG", "ISR", "CSR"],
+    "actionWords": ["SSR", "SSG", "ISR", "CSR", "revalidate"],
     "codeExample": "// SSR - Pages Router\nexport async function getServerSideProps() {\n  const res = await fetch('https://api.example.com/data');\n  const data = await res.json();\n  return { props: { data } };\n}\n\n// SSG - Pages Router\nexport async function getStaticProps() {\n  const res = await fetch('https://api.example.com/data');\n  const data = await res.json();\n  return { props: { data } };\n}\n\n// ISR\nexport async function getStaticProps() {\n  const res = await fetch('https://api.example.com/data');\n  const data = await res.json();\n  return { props: { data }, revalidate: 60 };\n}"
   },
   {
@@ -59,16 +31,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What are React Server Components and how do they work in Next.js?",
     "answer": "React Server Components (RSC) are components that run exclusively on the server. They never ship JavaScript to the client and cannot use hooks, browser APIs, or event handlers. Next.js uses them by default in the App Router.\n\nHow they work internally: During a request, the server renders RSC to a special format (RSC payload) that describes the component tree. This payload is streamed to the client. The client React runtime reconstructs the tree and attaches Client Components (marked with 'use client') where interactivity is needed. RSC output is not HTML; it is a serialized representation that tells the client what to render. This allows components to fetch data directly (async components) and pass serializable props to Client Components.\n\nWhy they matter: They dramatically reduce bundle size because server-only code (data fetching, DB access) never reaches the client. Sensitive logic (API keys, DB queries) stays on the server. You can fetch data in components without a separate data layer, reducing waterfalls.\n\nEdge cases: RSC cannot use useState, useEffect, or event handlers; use Client Components for those. Props passed from Server to Client Components must be serializable (no functions, class instances). Patterns like passing children from Server to Client work because React serializes the rendered output. Performance: RSC reduce client JS and improve FCP; the trade-off is server compute per request.",
-    "tags": [
-      "server-components",
-      "app-router"
-    ],
-    "actionWords": [
-      "Server Components",
-      "use client",
-      "serializable",
-      "streaming"
-    ],
+    "tags": ["server-components", "app-router"],
+    "actionWords": ["Server Components", "use client", "serializable", "streaming"],
     "codeExample": "// Server Component - fetches data directly\nasync function ProductList() {\n  const res = await fetch('https://api.example.com/products');\n  const products = await res.json();\n  return (\n    <ul>\n      {products.map(p => <li key={p.id}>{p.name}</li>)}\n    </ul>\n  );\n}\n\nexport default function Page() {\n  return <ProductList />;\n}"
   },
   {
@@ -76,16 +40,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What is hydration and what causes hydration mismatches?",
     "answer": "Hydration is the process where React attaches to server-rendered HTML and makes it interactive. The server sends HTML; when the client loads, React walks the DOM, attaches event listeners, and restores component state. Without hydration, server-rendered pages would be static.\n\nHow it works: The server renders components to HTML. The client receives this HTML and the corresponding React tree. React compares the client-rendered output to the server HTML. If they match, React attaches handlers. If they differ, you get a hydration mismatch error.\n\nCommon causes of mismatches: Using browser-only values (window, localStorage, Date) during initial render. The server and client will produce different output. Rendering different content based on a check that behaves differently on server vs client (e.g., typeof window === 'undefined'). Third-party scripts that mutate the DOM before React hydrates. Incorrect nesting (e.g., <p> inside <p>). Using suppressHydrationWarning for text that intentionally differs (e.g., timestamps) can mask issues but should be used sparingly.\n\nBest practices: Use useEffect for client-only logic. For timestamps, render a placeholder on the server and update in useEffect. Ensure component trees are identical on server and client. Avoid conditional rendering based on client-only state during first render.",
-    "tags": [
-      "hydration",
-      "SSR",
-      "debugging"
-    ],
-    "actionWords": [
-      "hydration",
-      "hydration mismatch",
-      "suppressHydrationWarning"
-    ],
+    "tags": ["hydration", "SSR", "debugging"],
+    "actionWords": ["hydration", "hydration mismatch", "suppressHydrationWarning"],
     "codeExample": "// Bad - causes hydration mismatch\nexport default function Page() {\n  return <p>Time: {new Date().toISOString()}</p>;\n}\n\n// Good - client-only update\n'use client';\nimport { useEffect, useState } from 'react';\nexport default function Page() {\n  const [time, setTime] = useState('');\n  useEffect(() => setTime(new Date().toISOString()), []);\n  return <p>Time: {time || 'Loading...'}</p>;\n}"
   },
   {
@@ -93,17 +49,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Explain streaming and Suspense in Next.js",
     "answer": "Streaming allows the server to send HTML in chunks instead of waiting for the entire page to be ready. The browser can start rendering the shell (layout, static content) immediately while slow data fetches complete in the background.\n\nHow it works: With React Suspense, you wrap async components in <Suspense fallback={...}>. When a component suspends (e.g., during a fetch), React sends the fallback to the client first. Once the data is ready, the server streams the resolved content and React replaces the fallback. This improves TTFB because the initial response is fast; the user sees something immediately.\n\nIn Next.js App Router: Async Server Components can await fetch; if wrapped in Suspense, they stream. The loading.tsx file is a route-level Suspense boundary. Streaming works with both Node and Edge runtimes.\n\nEdge cases: Fallbacks must be static or fast to render; avoid heavy fallbacks. Streaming does not work with getServerSideProps (Pages Router). For client-side streaming, use React.lazy with Suspense. Performance: Streaming improves perceived performance and TTFB; the trade-off is more complex mental model and potential layout shift if fallbacks have different dimensions than final content.",
-    "tags": [
-      "streaming",
-      "suspense",
-      "performance"
-    ],
-    "actionWords": [
-      "streaming",
-      "Suspense",
-      "loading.tsx",
-      "TTFB"
-    ],
+    "tags": ["streaming", "suspense", "performance"],
+    "actionWords": ["streaming", "Suspense", "loading.tsx", "TTFB"],
     "codeExample": "import { Suspense } from 'react';\n\nasync function SlowComponent() {\n  const data = await fetch('https://api.example.com/slow').then(r => r.json());\n  return <div>{data.content}</div>;\n}\n\nexport default function Page() {\n  return (\n    <div>\n      <h1>Fast content</h1>\n      <Suspense fallback={<p>Loading...</p>}>\n        <SlowComponent />\n      </Suspense>\n    </div>\n  );\n}"
   },
   {
@@ -111,17 +58,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What are Server Actions and how do they differ from API routes?",
     "answer": "Server Actions are async functions that run on the server and can be invoked from Client Components. They were introduced in Next.js 14 as the preferred way to handle mutations (form submissions, data updates) without creating separate API routes.\n\nHow they work: You define an async function with 'use server' at the top of the file or at the function level. When called from the client, Next.js serializes the arguments, sends a POST request to the server, runs the function, and returns the result. The client receives the serialized response. Server Actions work with forms natively: a form's action can be a Server Action, and Next.js handles the submission and progressive enhancement.\n\nWhy use Server Actions: No need to create API routes for every mutation. Type-safe end-to-end (same types for server and client). Works with forms for progressive enhancement (no JS required). Automatic revalidation of cached data via revalidatePath/revalidateTag.\n\nServer Actions vs API routes: API routes are explicit HTTP endpoints (GET, POST, etc.) and are better for external consumers, webhooks, or when you need precise HTTP semantics. Server Actions are for internal app mutations and integrate tightly with the Next.js data model.\n\nEdge cases: Arguments must be serializable. Cannot pass functions or class instances. For large payloads, consider FormData. Server Actions run in the Node runtime by default; you can use the Edge runtime with configuration.",
-    "tags": [
-      "server-actions",
-      "forms",
-      "mutations"
-    ],
-    "actionWords": [
-      "Server Actions",
-      "use server",
-      "revalidatePath",
-      "progressive enhancement"
-    ],
+    "tags": ["server-actions", "forms", "mutations"],
+    "actionWords": ["Server Actions", "use server", "revalidatePath", "progressive enhancement"],
     "codeExample": "'use server';\nimport { revalidatePath } from 'next/cache';\n\nexport async function createPost(formData: FormData) {\n  const title = formData.get('title');\n  await db.posts.create({ title });\n  revalidatePath('/posts');\n}"
   },
   {
@@ -129,17 +67,8 @@ export const nextJs = [
     "topic": "next",
     "question": "How does Next.js handle data fetching and caching?",
     "answer": "Next.js extends the native fetch API with caching and revalidation. By default, fetch requests are cached indefinitely. You opt out with cache: 'no-store' or set revalidate for time-based freshness.\n\nCaching layers: (1) Data Cache: Persistent cache for fetch requests. Stored on disk (or in memory for serverless). (2) Full Route Cache: Caches the rendered output of static routes. (3) Router Cache: Client-side cache of RSC payloads for previously visited routes. (4) Request Memoization: Deduplicates identical fetch calls within a single render pass.\n\nHow fetch caching works: fetch(url, { cache: 'force-cache' }) uses the Data Cache. cache: 'no-store' skips cache. next: { revalidate: 60 } revalidates every 60 seconds. For dynamic data, use no-store or revalidate. For static or semi-static data, use force-cache with revalidate.\n\nProduction patterns: Use unstable_cache for wrapping non-fetch data sources (DB, APIs without fetch). Use revalidateTag for on-demand revalidation when content changes. Segment your cache by route and tag for granular control.\n\nEdge cases: cache: 'no-store' in a static route can force dynamic rendering. Cookies or headers in the request can affect caching (dynamic by default). ISR-style behavior is achieved with revalidate.",
-    "tags": [
-      "data-fetching",
-      "caching",
-      "fetch"
-    ],
-    "actionWords": [
-      "Data Cache",
-      "revalidate",
-      "revalidateTag",
-      "unstable_cache"
-    ],
+    "tags": ["data-fetching", "caching", "fetch"],
+    "actionWords": ["Data Cache", "revalidate", "revalidateTag", "unstable_cache"],
     "codeExample": "// Cached fetch with revalidation\nconst res = await fetch('https://api.example.com/data', {\n  next: { revalidate: 60 }\n});\n\n// No cache - always fresh\nconst res = await fetch('https://api.example.com/data', {\n  cache: 'no-store'\n});"
   },
   {
@@ -147,17 +76,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What is Next.js Middleware and what are its limitations?",
     "answer": "Middleware runs before a request is completed. It executes at the Edge, close to the user, and can modify the request or response, redirect, or rewrite URLs.\n\nHow it works: Create middleware.js (or .ts) at the project root. The function receives the request and returns NextResponse.next(), NextResponse.redirect(), or a custom Response. Middleware runs before the route handler; it has access to request headers, cookies, and the URL. You configure which paths run middleware via the config.matcher export.\n\nCommon use cases: Authentication (redirect unauthenticated users), A/B testing (rewrite to different pages), i18n (locale detection and redirect), bot protection, logging, adding security headers.\n\nLimitations: Runs on the Edge runtime, which has a subset of Node APIs (no fs, child_process, etc.). Cannot access the full request body for large payloads. Must be lightweight; long-running logic delays the response. Cannot directly call getServerSideProps or access database in middleware; use for redirects and headers, not data fetching.\n\nPerformance: Edge execution means low latency. Keep middleware small; offload heavy work to route handlers or Server Components.",
-    "tags": [
-      "middleware",
-      "edge",
-      "auth"
-    ],
-    "actionWords": [
-      "middleware",
-      "Edge runtime",
-      "NextResponse",
-      "matcher"
-    ],
+    "tags": ["middleware", "edge", "auth"],
+    "actionWords": ["middleware", "Edge runtime", "NextResponse", "matcher"],
     "codeExample": "import { NextResponse } from 'next/server';\n\nexport function middleware(request) {\n  const token = request.cookies.get('auth');\n  if (!token && request.nextUrl.pathname.startsWith('/dashboard')) {\n    return NextResponse.redirect(new URL('/login', request.url));\n  }\n  return NextResponse.next();\n}\n\nexport const config = { matcher: ['/dashboard/:path*'] };"
   },
   {
@@ -165,17 +85,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Edge runtime vs Node runtime: when to use each?",
     "answer": "Next.js supports two server runtimes: Node.js (default) and Edge.\n\nNode runtime: Full Node.js API (fs, crypto, child_process, etc.). Supports all npm packages. Suitable for heavy server logic, database connections, file system access. Cold starts can be slower. Runs in a traditional server or serverless environment.\n\nEdge runtime: Subset of Web APIs (Fetch, Web Crypto, etc.). No Node-specific APIs. Smaller footprint, faster cold starts, runs at the edge (globally distributed). Ideal for low-latency, simple logic: auth checks, redirects, geo-based routing, lightweight API handlers.\n\nHow to choose: Use Edge for middleware, simple API routes, or route handlers that need global low latency and do not require Node APIs. Use Node for database access, file system, or npm packages that depend on Node. In App Router, you set runtime = 'edge' in a route handler or page.\n\nEdge cases: Some npm packages are not compatible with Edge (they use Node APIs). Database connections from Edge may need HTTP-based or edge-compatible clients (e.g., Vercel KV, PlanetScale with HTTP). Execution time limits are stricter on Edge in some platforms.",
-    "tags": [
-      "edge",
-      "node",
-      "runtime"
-    ],
-    "actionWords": [
-      "Edge runtime",
-      "Node runtime",
-      "cold start",
-      "Web APIs"
-    ],
+    "tags": ["edge", "node", "runtime"],
+    "actionWords": ["Edge runtime", "Node runtime", "cold start", "Web APIs"],
     "codeExample": "// app/api/edge/route.ts\nexport const runtime = 'edge';\n\nexport async function GET() {\n  return Response.json({ message: 'Hello from Edge' });\n}"
   },
   {
@@ -183,17 +94,8 @@ export const nextJs = [
     "topic": "next",
     "question": "How does the Next.js Image component optimize performance?",
     "answer": "The next/image component provides automatic image optimization: resizing, format conversion (WebP/AVIF), lazy loading, and prevention of layout shift (CLS).\n\nHow it works: Next.js serves images through its Image Optimization API (or a custom loader). On first request, the image is resized and converted; the result is cached. The component uses srcset and sizes for responsive images. Lazy loading is enabled by default (images load when they enter the viewport). A blur placeholder can be shown while the image loads.\n\nKey props: width/height or fill for dimensions. sizes for responsive breakpoints. priority for above-the-fold images (disables lazy load). quality (1-100). placeholder='blur' with blurDataURL for a low-res preview.\n\nExternal images: Configure remotePatterns or domains in next.config.js. Without this, external images are rejected for security. For high traffic, consider a custom loader (e.g., Cloudinary) to offload optimization.\n\nEdge cases: fill requires the parent to have position: relative. Using unoptimized bypasses optimization (for special cases). Layout shift: always specify width/height or use fill with proper aspect ratio container.",
-    "tags": [
-      "image",
-      "performance",
-      "optimization"
-    ],
-    "actionWords": [
-      "next/image",
-      "lazy loading",
-      "WebP",
-      "remotePatterns"
-    ],
+    "tags": ["image", "performance", "optimization"],
+    "actionWords": ["next/image", "lazy loading", "WebP", "remotePatterns"],
     "codeExample": "import Image from 'next/image';\n\n<Image\n  src=\"/hero.jpg\"\n  alt=\"Hero\"\n  width={800}\n  height={600}\n  priority\n/>\n\n<Image src=\"https://example.com/photo.jpg\" alt=\"Photo\" width={400} height={300} />"
   },
   {
@@ -201,16 +103,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Explain code splitting and dynamic imports in Next.js",
     "answer": "Code splitting reduces initial bundle size by loading JavaScript only when needed. Next.js automatically splits by route: each page gets its own chunk. You can further split with dynamic imports.\n\nHow it works: next/dynamic wraps a component import. The component is loaded only when it renders. You can disable SSR for client-only components (e.g., charts, maps) with ssr: false to avoid hydration issues and reduce server load. A loading fallback improves UX during the load.\n\nUse cases: Heavy components (rich text editors, map libraries). Below-the-fold or conditionally rendered UI (modals, tabs). Third-party scripts that are not needed for initial render.\n\nEdge cases: ssr: false means the component does not render on the server; ensure no layout shift. Dynamic imports of the same module in different places can still be deduplicated by the bundler. For route-based splitting, Next.js handles it automatically; use dynamic for component-level splitting.",
-    "tags": [
-      "code-splitting",
-      "dynamic-import",
-      "performance"
-    ],
-    "actionWords": [
-      "next/dynamic",
-      "code splitting",
-      "ssr: false"
-    ],
+    "tags": ["code-splitting", "dynamic-import", "performance"],
+    "actionWords": ["next/dynamic", "code splitting", "ssr: false"],
     "codeExample": "import dynamic from 'next/dynamic';\n\nconst HeavyChart = dynamic(() => import('./HeavyChart'), {\n  loading: () => <p>Loading chart...</p>,\n  ssr: false\n});"
   },
   {
@@ -218,17 +112,8 @@ export const nextJs = [
     "topic": "next",
     "question": "How do you optimize SEO and metadata in Next.js?",
     "answer": "Next.js provides the Metadata API (App Router) and next/head (Pages Router) for SEO. The Metadata API supports static and dynamic metadata.\n\nApp Router: Export a metadata object or generateMetadata async function from layout.tsx or page.tsx. You can set title, description, openGraph, twitter, robots, alternates, etc. generateMetadata receives params and searchParams for dynamic pages. Metadata is merged from root layout down to the page; child metadata overrides parent.\n\nPages Router: Use next/head to add meta tags inside each page. For dynamic values, use getServerSideProps or getStaticProps to pass data, then render Head with that data.\n\nBest practices: Always set title and description. Use Open Graph and Twitter Card tags for social sharing. Implement canonical URLs for duplicate content. Use structured data (JSON-LD) where appropriate. Ensure meta tags are server-rendered so crawlers see them.\n\nEdge cases: Client-only metadata updates (e.g., in useEffect) are not seen by crawlers. For truly dynamic metadata, use generateMetadata or getServerSideProps. Sitemaps and robots.txt can be generated via app/sitemap.ts and app/robots.ts.",
-    "tags": [
-      "SEO",
-      "metadata",
-      "open-graph"
-    ],
-    "actionWords": [
-      "generateMetadata",
-      "Metadata API",
-      "openGraph",
-      "canonical"
-    ],
+    "tags": ["SEO", "metadata", "open-graph"],
+    "actionWords": ["generateMetadata", "Metadata API", "openGraph", "canonical"],
     "codeExample": "export async function generateMetadata({ params }) {\n  const product = await fetchProduct(params.id);\n  return {\n    title: product.name,\n    description: product.description,\n    openGraph: { images: [product.image] }\n  };\n}\n\nexport default async function ProductPage({ params }) {\n  const product = await fetchProduct(params.id);\n  return <div>{product.name}</div>;\n}"
   },
   {
@@ -236,17 +121,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What are the best practices for authentication in Next.js?",
     "answer": "Authentication in Next.js should protect routes and fetch user-specific data securely. Common patterns:\n\nServer-side protection: Use middleware to check auth before requests reach the page. Read cookies (e.g., session token) and redirect to /login if missing. For pages that need user data, fetch in Server Components or getServerSideProps, passing the session cookie to your auth/API layer. Never trust client-only checks for sensitive routes; always verify on the server.\n\nSession management: Store session in HTTP-only cookies (not localStorage) to prevent XSS. Use secure, SameSite cookies in production. Libraries like NextAuth.js handle OAuth, credentials, and session encoding.\n\nAPI routes / Route Handlers: Validate the session on each protected API call. Pass the cookie from the incoming request to your auth logic.\n\nEdge cases: Middleware runs on Edge; ensure your auth library supports it or use a lightweight JWT check. For getServerSideProps, the request object gives access to cookies. In App Router, cookies() from next/headers provides cookies in Server Components and Route Handlers. Avoid storing sensitive data in JWT payloads; keep JWTs small.",
-    "tags": [
-      "authentication",
-      "middleware",
-      "session"
-    ],
-    "actionWords": [
-      "NextAuth",
-      "HTTP-only cookies",
-      "middleware",
-      "session"
-    ],
+    "tags": ["authentication", "middleware", "session"],
+    "actionWords": ["NextAuth", "HTTP-only cookies", "middleware", "session"],
     "codeExample": "// middleware.js\nimport { NextResponse } from 'next/server';\n\nexport function middleware(req) {\n  const token = req.cookies.get('session');\n  if (!token && req.nextUrl.pathname.startsWith('/dashboard')) {\n    return NextResponse.redirect(new URL('/login', req.url));\n  }\n  return NextResponse.next();\n}"
   },
   {
@@ -254,16 +130,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What is the purpose of next.config.js and what can you customize?",
     "answer": "next.config.js is the central configuration file for Next.js. It controls build behavior, runtime settings, and integrations.\n\nKey options: images (remotePatterns, deviceSizes, formats). rewrites and redirects for URL manipulation. headers for security and cache headers. env to expose env vars at build time. webpack for custom loaders and plugins. experimental features (e.g., serverActions, turbo). output: 'standalone' for Docker deployments. output: 'export' for static export (no server).\n\nWhy it matters: You need next.config.js to allow external image domains, add security headers (CSP, HSTS), configure i18n, or integrate with a CDN. Build-time optimizations (e.g., bundle analyzer) are added here.\n\nEdge cases: Changes require a restart in dev. Some options (e.g., trailingSlash) affect routing. output: 'export' disables SSR and API routes. Always validate config shape; invalid options can cause build failures.",
-    "tags": [
-      "next-config",
-      "configuration"
-    ],
-    "actionWords": [
-      "next.config.js",
-      "redirects",
-      "rewrites",
-      "images"
-    ],
+    "tags": ["next-config", "configuration"],
+    "actionWords": ["next.config.js", "redirects", "rewrites", "images"],
     "codeExample": "module.exports = {\n  images: { remotePatterns: [{ hostname: 'example.com' }] },\n  async redirects() {\n    return [{ source: '/old', destination: '/new', permanent: true }];\n  }\n};"
   },
   {
@@ -271,15 +139,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Explain getStaticProps, getStaticPaths, and getServerSideProps",
     "answer": "These are Pages Router data fetching methods. getStaticProps runs at build time (or revalidation) and fetches data for static pages. Return { props } to pass data to the page. Add revalidate for ISR. getStaticPaths defines which dynamic routes (e.g., [id]) to pre-render at build time. Return { paths, fallback }. fallback: false means 404 for unknown paths; fallback: true allows on-demand generation; fallback: 'blocking' waits for generation before responding.\n\ngetServerSideProps runs on every request. Use for personalized or always-fresh data. Return { props }, { redirect }, or { notFound }. Access req, res, params, and query. It disables static optimization for that page.\n\nWhen to use: getStaticProps for public, cacheable pages (blogs, docs). getStaticPaths for dynamic static routes. getServerSideProps for dashboards, user-specific content, or when you need request context (cookies, headers). In App Router, these are replaced by async Server Components and Route Handlers.",
-    "tags": [
-      "pages-router",
-      "data-fetching"
-    ],
-    "actionWords": [
-      "getStaticProps",
-      "getStaticPaths",
-      "getServerSideProps"
-    ],
+    "tags": ["pages-router", "data-fetching"],
+    "actionWords": ["getStaticProps", "getStaticPaths", "getServerSideProps"],
     "codeExample": "export async function getStaticPaths() {\n  const posts = await getPosts();\n  return { paths: posts.map(p => ({ params: { id: p.id } })), fallback: false };\n}\n\nexport async function getStaticProps({ params }) {\n  const post = await getPost(params.id);\n  return { props: { post }, revalidate: 60 };\n}"
   },
   {
@@ -287,16 +148,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What is the purpose of _app.js and _document.js?",
     "answer": "_app.js wraps every page. It receives Component and pageProps. Use it for global layout, providers (theme, auth), and global CSS. It runs on both server and client. pageProps come from getStaticProps or getServerSideProps.\n\n_document.js customizes the HTML document structure. It runs only on the server. Use it to add lang, custom body classes, or scripts in head/body. Extend Document from next/document and override getInitialProps if needed. Do not add application logic here; use _app for that.\n\nIn App Router, layout.tsx replaces _app (nested layouts), and the root layout defines the HTML structure. There is no direct _document equivalent; you modify the root layout.",
-    "tags": [
-      "pages-router",
-      "_app",
-      "_document"
-    ],
-    "actionWords": [
-      "_app.js",
-      "_document.js",
-      "layout"
-    ],
+    "tags": ["pages-router", "_app", "_document"],
+    "actionWords": ["_app.js", "_document.js", "layout"],
     "codeExample": "function MyApp({ Component, pageProps }) {\n  return (\n    <Provider>\n      <Layout>\n        <Component {...pageProps} />\n      </Layout>\n    </Provider>\n  );\n}\nexport default MyApp;"
   },
   {
@@ -304,16 +157,8 @@ export const nextJs = [
     "topic": "next",
     "question": "How do you handle 404 and 500 error pages?",
     "answer": "Pages Router: Add 404.js and 500.js in the pages directory. Next.js automatically uses them for not-found and server errors. 404 can be a static component; 500 receives error, reset, and tryAgain props when using getInitialProps for custom error handling.\n\nApp Router: Add not-found.js for 404. Call notFound() from a Server Component or Route Handler to trigger it. For 500 and other errors, add error.js (Client Component) which receives error and reset. Add global-error.js to catch errors in the root layout (replaces the entire layout when triggered).\n\nBest practices: 404 should be helpful (search, navigation links). 500 should offer a retry and avoid exposing internal errors. Use error boundaries (error.js) to isolate failures and keep the rest of the app usable.",
-    "tags": [
-      "errors",
-      "404",
-      "500"
-    ],
-    "actionWords": [
-      "not-found",
-      "error.js",
-      "notFound()"
-    ],
+    "tags": ["errors", "404", "500"],
+    "actionWords": ["not-found", "error.js", "notFound()"],
     "codeExample": "// app/not-found.js\nexport default function NotFound() {\n  return <h1>404 - Page Not Found</h1>;\n}\n\n// app/error.js\n'use client';\nexport default function Error({ error, reset }) {\n  return (\n    <div>\n      <p>Something went wrong</p>\n      <button onClick={reset}>Try again</button>\n    </div>\n  );\n}"
   },
   {
@@ -321,17 +166,8 @@ export const nextJs = [
     "topic": "next",
     "question": "What is the Link component and how does prefetching work?",
     "answer": "The Link component from next/link enables client-side navigation between routes without a full page reload. It wraps an anchor tag and intercepts clicks to use Next.js client-side routing.\n\nHow it works: When you use Link, Next.js prefetches the target page's JavaScript and data when the link enters the viewport (in production). On click, the client already has the code, so navigation is instant. Prefetching uses the same logic as the router: for static pages, it fetches the RSC payload and chunks; for dynamic pages, it may prefetch less or nothing depending on the route.\n\nPrefetch behavior: prefetch=true (default in production) prefetches when the link is in the viewport. prefetch=false disables prefetching. In development, prefetching is more aggressive for faster navigation. The prefetched data is stored in the Router Cache on the client.\n\nWhy it matters: Full page reloads are slow and lose client state. Link preserves the app shell and enables instant transitions. Prefetching reduces the perceived latency of navigation. Always use Link for internal routes; use a regular a tag for external links.\n\nEdge cases: Dynamic routes with many variants can cause excessive prefetching; use prefetch=false for rarely visited links. Stale prefetched data: use revalidatePath or router.refresh() after mutations.",
-    "tags": [
-      "routing",
-      "Link",
-      "performance"
-    ],
-    "actionWords": [
-      "Link",
-      "prefetch",
-      "client-side navigation",
-      "Router Cache"
-    ],
+    "tags": ["routing", "Link", "performance"],
+    "actionWords": ["Link", "prefetch", "client-side navigation", "Router Cache"],
     "codeExample": "import Link from 'next/link';\n\n<Link href=\"/about\" prefetch={true}>About</Link>\n<Link href=\"/blog/[slug]\" prefetch={false}>Blog</Link>"
   },
   {
@@ -339,17 +175,8 @@ export const nextJs = [
     "topic": "next",
     "question": "How does Next.js handle environment variables and the NEXT_PUBLIC_ prefix?",
     "answer": "Next.js loads environment variables from .env, .env.local, .env.development, .env.production, and .env*.local files. Variables are available at build time and runtime depending on usage.\n\nNEXT_PUBLIC_ prefix: Variables prefixed with NEXT_PUBLIC_ are inlined into the client bundle at build time. They become available in browser JavaScript via process.env.NEXT_PUBLIC_*. Never use this prefix for secrets; they would be exposed to users.\n\nServer-only variables: Variables without the prefix are only available on the server (API routes, getServerSideProps, Server Components, Route Handlers). Use these for database URLs, secret keys, and internal API tokens.\n\nLoad order: .env is loaded first, then .env.local (overrides), then .env.development or .env.production. .env*.local is gitignored by default.\n\nEdge cases: Env vars are resolved at build time for static pages; changing them requires a rebuild. Always validate required env vars at startup to fail fast.",
-    "tags": [
-      "environment",
-      "configuration",
-      "security"
-    ],
-    "actionWords": [
-      "NEXT_PUBLIC_",
-      "process.env",
-      ".env",
-      "server-only"
-    ],
+    "tags": ["environment", "configuration", "security"],
+    "actionWords": ["NEXT_PUBLIC_", "process.env", ".env", "server-only"],
     "codeExample": "// .env.local\nNEXT_PUBLIC_API_URL=https://api.example.com\nDATABASE_URL=postgresql://...\n\nconst apiUrl = process.env.NEXT_PUBLIC_API_URL;"
   },
   {
@@ -357,17 +184,8 @@ export const nextJs = [
     "topic": "next",
     "question": "Explain deployment: npm run dev vs build vs start, and static export",
     "answer": "npm run dev starts the development server with HMR, source maps, and verbose errors. No optimizations; rebuilds on change.\n\nnpm run build compiles the app for production. It pre-renders static pages, generates RSC payloads, and produces optimized chunks. Output goes to .next. Static pages are identified in build output; dynamic pages are marked with Lambda.\n\nnpm run start runs the production server using the .next output. It serves pre-built assets and handles SSR for dynamic routes. Use after build for local production testing or self-hosting.\n\nStatic export (output: 'export' in next.config.js): next build produces static HTML/CSS/JS in the out directory. No Node server required; deploy to any static host. Limitations: No SSR, no API routes, no ISR, no middleware. getServerSideProps and dynamic routes with fallback: true are not supported.\n\nProduction: Vercel runs build and start automatically. For Docker or self-hosting, use output: 'standalone' for a minimal Node server in a container.",
-    "tags": [
-      "deployment",
-      "build",
-      "production"
-    ],
-    "actionWords": [
-      "npm run dev",
-      "npm run build",
-      "npm run start",
-      "static export"
-    ],
+    "tags": ["deployment", "build", "production"],
+    "actionWords": ["npm run dev", "npm run build", "npm run start", "static export"],
     "codeExample": "module.exports = { output: 'export' };"
   }
-];
+]
