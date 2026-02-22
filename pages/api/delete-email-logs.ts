@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '@/lib/mongodb';
 import EmailLog from '@/models/EmailLog';
+import { filterValidObjectIds } from '@/lib/sanitize';
 
 const authenticateApiKey = (req: NextApiRequest): boolean => {
   const apiKey = req.headers['x-api-key'];
@@ -19,10 +20,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await dbConnect();
 
-    const { emailIds } = req.body;
-
-    if (!emailIds || !Array.isArray(emailIds) || emailIds.length === 0) {
+    const rawIds = req.body?.emailIds;
+    if (!rawIds || !Array.isArray(rawIds) || rawIds.length === 0) {
       return res.status(400).json({ error: 'Email IDs are required' });
+    }
+
+    const emailIds = filterValidObjectIds(rawIds);
+    if (emailIds.length === 0) {
+      return res.status(400).json({ error: 'No valid email IDs provided' });
     }
 
     // Delete the email logs

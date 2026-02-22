@@ -37,7 +37,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (status) query.status = status;
     if (jobType) query.jobType = jobType;
     if (followUpSent !== undefined) query.followUpSent = followUpSent === 'true';
-    if (search) query.email = { $regex: search, $options: 'i' };
+    const searchStr = Array.isArray(search) ? search[0] : search;
+    if (searchStr && typeof searchStr === 'string') {
+      const trimmed = searchStr.trim().slice(0, 100); // Limit length to prevent regex DoS
+      if (trimmed) {
+        const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'i');
+        query.$or = [
+          { email: regex },
+          { note: regex },
+          { phoneNumber: regex },
+          { senderName: regex },
+        ];
+      }
+    }
 
     // Fetch ALL logs matching the query first (for sorting)
     const allLogs = await EmailLog.find(query).lean();
@@ -63,8 +76,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     
     // Apply pagination AFTER sorting
-    const logs = sortedLogs.slice(skip, skip + limitNum);
+    const rawLogs = sortedLogs.slice(skip, skip + limitNum);
     const total = sortedLogs.length;
+
+    // Normalize: ensure every log has interviewScheduledStatus (some older docs may lack it)
+    const logs = rawLogs.map((log: any) => ({
+      ...log,
+      interviewScheduledStatus: log.interviewScheduledStatus ?? 'not_scheduled',
+      phoneNumber: log.phoneNumber ?? '',
+      note: log.note ?? '',
+    }));
 
     // Get statistics
     const stats = await EmailLog.aggregate([
@@ -80,6 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     ]);
 
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     return res.status(200).json({
       logs,
       pagination: {

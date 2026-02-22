@@ -114,6 +114,16 @@ export default function EmailLogsViewer() {
     return () => mq.removeEventListener('change', set);
   }, []);
 
+  useEffect(() => {
+    if (showFollowUpModal) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [showFollowUpModal]);
+
   const fetchLogs = async () => {
     setLoading(true);
     try {
@@ -123,20 +133,29 @@ export default function EmailLogsViewer() {
         ...Object.fromEntries(
           Object.entries(filters).filter(([_, v]) => v !== '')
         ),
-      });
-
+       });
+       
       const response = await fetch(`/api/email-logs?${params}`, {
+        cache: 'no-store',
         headers: {
           'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
         },
       });
 
       const data = await response.json();
-      
-      // Server already sorted the data, just use it directly
-      setLogs(data.logs);
-      setStats(data.stats);
-      setTotalPages(data.pagination.pages);
+
+      // Defensive: ensure logs is always an array; normalize each log for missing fields
+      const rawLogs = Array.isArray(data?.logs) ? data.logs : [];
+      const normalizedLogs = rawLogs.map((log: any) => ({
+        ...log,
+        interviewScheduledStatus: log.interviewScheduledStatus ?? 'not_scheduled',
+        phoneNumber: log.phoneNumber ?? '',
+        note: log.note ?? '',
+      }));
+
+      setLogs(normalizedLogs);
+      setStats(data?.stats ?? null);
+      setTotalPages(data?.pagination?.pages ?? 1);
     } catch (error) {
       console.error('Failed to fetch logs:', error);
     } finally {
@@ -423,27 +442,27 @@ export default function EmailLogsViewer() {
           </div>
 
           {/* Stats */}
-          {stats && (
+          {(stats || loading) && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
-              <div className="bg-green-500/20 border-2 border-green-400/50 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                <div className="text-green-300 text-xs sm:text-sm font-bold">Total Sent</div>
-                <div className="text-white text-xl sm:text-2xl md:text-3xl font-bold">{stats.totalSent}</div>
+              <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${loading ? 'bg-cyan-500/10 border-cyan-500/30 shimmer' : 'bg-green-500/20 border-green-400/50'}`}>
+                <div className={`text-xs sm:text-sm font-bold ${loading ? 'invisible' : 'text-green-300'}`}>Total Sent</div>
+                <div className={`font-bold text-xl sm:text-2xl md:text-3xl ${loading ? 'invisible' : 'text-white'}`}>{loading ? '0' : stats?.totalSent}</div>
               </div>
-              <div className="bg-red-500/20 border-2 border-red-400/50 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                <div className="text-red-300 text-xs sm:text-sm font-bold">Failed</div>
-                <div className="text-white text-xl sm:text-2xl md:text-3xl font-bold">{stats.totalFailed}</div>
+              <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${loading ? 'bg-cyan-500/10 border-cyan-500/30 shimmer' : 'bg-red-500/20 border-red-400/50'}`}>
+                <div className={`text-xs sm:text-sm font-bold ${loading ? 'invisible' : 'text-red-300'}`}>Failed</div>
+                <div className={`font-bold text-xl sm:text-2xl md:text-3xl ${loading ? 'invisible' : 'text-white'}`}>{loading ? '0' : stats?.totalFailed}</div>
               </div>
-              <div className="bg-purple-500/20 border-2 border-purple-400/50 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                <div className="text-purple-300 text-xs sm:text-sm font-bold">Follow-ups</div>
-                <div className="text-white text-xl sm:text-2xl md:text-3xl font-bold">{stats.followUpsSent}</div>
+              <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${loading ? 'bg-cyan-500/10 border-cyan-500/30 shimmer' : 'bg-purple-500/20 border-purple-400/50'}`}>
+                <div className={`text-xs sm:text-sm font-bold ${loading ? 'invisible' : 'text-purple-300'}`}>Follow-ups</div>
+                <div className={`font-bold text-xl sm:text-2xl md:text-3xl ${loading ? 'invisible' : 'text-white'}`}>{loading ? '0' : stats?.followUpsSent}</div>
               </div>
-              <div className="bg-cyan-500/20 border-2 border-cyan-400/50 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                <div className="text-cyan-300 text-xs sm:text-sm font-bold">Frontend</div>
-                <div className="text-white text-xl sm:text-2xl md:text-3xl font-bold">{stats.frontendEmails}</div>
+              <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${loading ? 'bg-cyan-500/10 border-cyan-500/30 shimmer' : 'bg-cyan-500/20 border-cyan-400/50'}`}>
+                <div className={`text-xs sm:text-sm font-bold ${loading ? 'invisible' : 'text-cyan-300'}`}>Frontend</div>
+                <div className={`font-bold text-xl sm:text-2xl md:text-3xl ${loading ? 'invisible' : 'text-white'}`}>{loading ? '0' : stats?.frontendEmails}</div>
               </div>
-              <div className="bg-blue-500/20 border-2 border-blue-400/50 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                <div className="text-blue-300 text-xs sm:text-sm font-bold">MERN</div>
-                <div className="text-white text-xl sm:text-2xl md:text-3xl font-bold">{stats.mernEmails}</div>
+              <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${loading ? 'bg-cyan-500/10 border-cyan-500/30 shimmer' : 'bg-blue-500/20 border-blue-400/50'}`}>
+                <div className={`text-xs sm:text-sm font-bold ${loading ? 'invisible' : 'text-blue-300'}`}>MERN</div>
+                <div className={`font-bold text-xl sm:text-2xl md:text-3xl ${loading ? 'invisible' : 'text-white'}`}>{loading ? '0' : stats?.mernEmails}</div>
               </div>
             </div>
           )}
@@ -523,41 +542,33 @@ export default function EmailLogsViewer() {
             </div>
           </div>
 
-          {/* Follow-up list (desktop only): logs where interview status is not "scheduled" */}
-          {!isMobileView && (() => {
-            const followUpList = logs.filter(
-              log => (log.interviewScheduledStatus || 'not_scheduled') !== 'scheduled'
-            );
-            if (followUpList.length === 0) return null;
-            return (
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="w-5 h-5 text-orange-400" />
-                  <h2 className="text-lg font-bold text-white uppercase">Follow-up list ({followUpList.length})</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-                  {followUpList.map(log => (
-                    <LogCard
-                      key={log._id}
-                      log={log}
-                      isSelected={selectedLogs.has(log._id)}
-                      onSelect={() => handleSelectLog(log._id)}
-                      onClick={() => setDetailLog(log)}
-                    />
-                  ))}
-                </div>
+          {/* Logs: table for mobile, cards for desktop */}
+          {loading ? (
+            <div className="bg-black/40 rounded-xl border-2 border-cyan-500/30 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-4 w-4 rounded bg-cyan-500/30 shimmer" />
+                <div className="h-4 w-32 bg-cyan-500/20 rounded shimmer" />
               </div>
-            );
-          })()}
-
-          {/* Logs: Cards (desktop) or Mobile component */}
-          {isMobileView ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="p-4 rounded-xl border-2 border-cyan-500/30 bg-cyan-500/10 shimmer overflow-hidden">
+                    <div className="h-4 w-3/4 bg-cyan-500/20 rounded mb-3" />
+                    <div className="flex gap-2 mb-2">
+                      <div className="h-5 w-16 bg-cyan-500/20 rounded-full" />
+                      <div className="h-5 w-20 bg-cyan-500/20 rounded" />
+                    </div>
+                    <div className="h-3 w-1/2 bg-cyan-500/10 rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : isMobileView ? (
             <EmailLogsViewerMobile
               logs={logs}
-              followUpList={logs.filter(log => (log.interviewScheduledStatus || 'not_scheduled') !== 'scheduled')}
               selectedLogs={selectedLogs}
               onSelectLog={handleSelectLog}
               onCardClick={setDetailLog}
+              onSelectAll={handleSelectAll}
               emptyMessage="No emails found"
             />
           ) : (

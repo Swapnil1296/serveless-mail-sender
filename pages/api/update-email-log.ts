@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '@/lib/mongodb';
 import EmailLog from '@/models/EmailLog';
+import { sanitizeText, sanitizePhone, isValidObjectId } from '@/lib/sanitize';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
@@ -10,18 +11,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { logId, note, phoneNumber, interviewScheduledStatus } = req.body;
 
-    if (!logId) {
-      return res.status(400).json({ error: 'Log ID is required' });
+    if (!logId || !isValidObjectId(logId)) {
+      return res.status(400).json({ error: 'Valid log ID is required' });
     }
 
     await dbConnect();
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updatedAt: new Date(),
     };
 
-    if (note !== undefined) updateData.note = note;
-    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (note !== undefined) updateData.note = sanitizeText(note, 2000);
+    if (phoneNumber !== undefined) updateData.phoneNumber = sanitizePhone(phoneNumber);
     if (interviewScheduledStatus !== undefined) {
       const valid = ['scheduled', 'not_scheduled', 'rejected', 'waiting_for_response'];
       if (valid.includes(interviewScheduledStatus)) {
