@@ -32,14 +32,7 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       icon: <Mail className="w-8 h-8" />,
       route: '/projects/email-sender',
     },
-    {
-      id: 'interview-preparation-kit',
-      name: 'Interview Prep Kit',
-      slug: 'INT_CORE_v1',
-      description: 'Heuristic-based interview preparation modules',
-      icon: <NotebookPen className="w-8 h-8" />,
-      route: '/projects/interview-prep',
-    },
+   
     {
       id: 'expense-tracker',
       name: 'Expense Tracker',
@@ -65,20 +58,20 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
       route: '/projects/naukari-scraper',
     },
     {
-      id: 'mcq-quiz',
-      name: 'MCQ Quiz',
-      slug: 'MCQ_QUIZ_v1',
-      description: 'Practice MCQs with topic filter and explanations',
-      icon: <HelpCircle className="w-8 h-8" />,
-      route: '/projects/mcq',
+      id: 'interview-preparation-kit',
+      name: 'Interview Prep Kit',
+      slug: 'INT_CORE_v1',
+      description: 'Heuristic-based interview preparation modules',
+      icon: <NotebookPen className="w-8 h-8" />,
+      route: '/projects/interview-prep',
     },
     {
-      id: 'interview-platform',
-      name: 'Interview Prep Platform',
-      slug: 'INTERVIEW_V1',
-      description: 'Adaptive MERN interview prep with dashboard, quizzes, analytics',
+      id: 'quiz-hub',
+      name: 'Quiz Hub',
+      slug: 'QUIZ_HUB_v1',
+      description: 'Quiz Hub with dashboard, quizzes, analytics',
       icon: <NotebookPen className="w-8 h-8" />,
-      route: '/projects/interview-hub',
+      route: '/projects/quiz-hub',
     },
   ];
 
