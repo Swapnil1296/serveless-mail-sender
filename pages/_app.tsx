@@ -6,32 +6,55 @@ import { useEffect, useRef, useState } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { LogOut, MoreVertical } from 'lucide-react';
 import RouteLoader from '@/components/RouteLoader';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 const navLinks = [
   { href: '/projects/email-sender', paths: ['/projects/email-sender', '/projects/email-logs'], icon: '📧', label: 'Email' },
   { href: '/projects/interview-prep', paths: ['/projects/interview-prep'], icon: '📝', label: 'Interview' },
   { href: '/projects/format-converter', paths: ['/projects/format-converter'], icon: '🔄', label: 'Converter' },
   { href: '/projects/resume-creator', paths: ['/projects/resume-creator'], icon: '📄', label: 'Resume' },
-  { href: '/projects/quiz-hub', paths: ['/projects/quiz-hub'], icon: '📋', label: 'Quizs' },
+  { href: '/projects/quiz-hub', paths: ['/projects/quiz-hub'], icon: '📋', label: 'Quiz' },
 ];
 
-function NavLink({ href, paths, icon, label, isActive, onClick }: {
-  href: string; paths: string[]; icon: string; label: string; isActive: boolean; onClick?: () => void;
+function NavLink({
+  href,
+  paths,
+  icon,
+  label,
+  isActive,
+  onClick,
+  compact = false,
+}: {
+  href: string;
+  paths: string[];
+  icon: string;
+  label: string;
+  isActive: boolean;
+  onClick?: () => void;
+  compact?: boolean;
 }) {
-  const activeClass = isActive
-    ? 'bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 text-white border-2 border-cyan-400/50'
-    : 'text-cyan-300 border-2 border-cyan-500/30 hover:border-cyan-400/50';
+  const base =
+    'relative rounded-lg font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-2';
+  const active =
+    'bg-cyan-600/30 text-white border border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]';
+  const inactive =
+    'text-gray-200 border border-slate-600 hover:text-white hover:border-cyan-500 hover:bg-slate-700/50';
+  const size = compact
+    ? 'px-4 py-3 text-sm w-full justify-start'
+    : 'px-3 py-2 text-xs sm:text-sm justify-center';
 
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`relative px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all overflow-hidden group w-full sm:w-auto text-center sm:text-left ${activeClass} bg-gradient-to-r from-teal-900 to-teal-800 text-white border-2 border-teal-500/50 hover:border-cyan-400/70 hover:text-white`}
+      className={`${base} ${isActive ? active : inactive} ${size}`}
     >
-      <span className="relative z-10 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 ">
-        <span>{icon}</span>
-        <span>{label}</span>
-      </span>
+      {isActive && (
+        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" aria-hidden />
+      )}
+      <span>{icon}</span>
+      <span>{label}</span>
     </Link>
   );
 }
@@ -71,43 +94,49 @@ function Navigation() {
   }
 
   return (
-    <nav className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-50 overflow-visible">
-      {/* Animated background grid */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px',
-        }}></div>
-      </div>
+    <nav className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      {/* Top accent line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent" />
 
-      {/* Glowing top border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
-
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 relative">
-        <div className="flex items-center justify-between gap-2">
-          {/* Logo with glow effect */}
-          <Link href="/" className="group relative">
-            <div className="absolute inset-0 bg-cyan-500/20 blur-xl group-hover:bg-cyan-500/30 transition-all rounded-lg"></div>
-            <div className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-500/50 rounded-lg hover:border-cyan-400 transition-all">
-              <span className="text-xl sm:text-2xl">🚀</span>
-              <div>
-                <div className="text-sm sm:text-base md:text-xl font-bold bg-clip-text text-blue-600 bg-gradient-to-r from-cyan-400 to-purple-400 tracking-wider">
-                  PROJECT HUB
-                </div>
-                <div className="text-[8px] sm:text-xs text-cyan-300/70 uppercase tracking-widest -mt-1">
-                  {user?.username}
-                </div>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="group flex items-center gap-2 sm:gap-3 shrink-0"
+          >
+            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/40 group-hover:border-cyan-400/60 transition-colors">
+              <span className="text-lg sm:text-xl">🚀</span>
+            </div>
+            <div>
+              <span className="block text-sm sm:text-base font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
+                PROJECT HUB
+              </span>
+              <span className="block text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest">
+                {user?.username}
+              </span>
             </div>
           </Link>
 
-          {/* Three-dot menu button (desktop dropdown + mobile slide-out trigger) */}
+          {/* Desktop: Inline nav links (xl+) */}
+          <div className="hidden xl:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.href}
+                {...link}
+                isActive={link.paths.includes(router.pathname)}
+              />
+            ))}
+          </div>
+
+          {/* Right: Menu button (lg-xl) or full nav (xl+) + Logout */}
           <div className="flex items-center gap-2">
-            <div ref={menuRef} className="relative">
+            {/* Menu button - shows on lg when nav is hidden, always on mobile */}
+            <div ref={menuRef} className="relative xl:hidden">
               <button
                 type="button"
                 onClick={toggleModal}
-                className="p-2.5 rounded-lg border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400/70 hover:text-cyan-200 hover:bg-cyan-500/10 transition-all"
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-600/60 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all"
                 aria-label={modalOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={modalOpen}
                 aria-haspopup="true"
@@ -115,23 +144,19 @@ function Navigation() {
                 <MoreVertical className="w-5 h-5" />
               </button>
 
-              {/* Desktop: Dropdown panel - high z-index so it appears above sub-navs */}
+              {/* Desktop dropdown (lg only, xl has inline nav) */}
               <div
-                className={`hidden lg:block absolute right-0 top-full mt-2 min-w-[200px] rounded-lg border-2 border-cyan-500/50 bg-black/98 shadow-[0_0_30px_rgba(6,182,212,0.2)] py-2 z-[9999] transition-all duration-200 ${
-                  modalOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                className={`hidden lg:block xl:hidden absolute right-0 top-full mt-2 w-52 rounded-xl border border-slate-600/60 bg-slate-900/98 backdrop-blur-md shadow-xl py-2 z-[9999] transition-all duration-200 ${
+                  modalOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-1 pointer-events-none'
                 }`}
               >
-                <div className="absolute inset-0 opacity-20 rounded-lg" style={{
-                  backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
-                  backgroundSize: '16px 16px',
-                }} />
-                <div className="relative flex flex-col gap-1 px-1 ">
+                <div className="px-2 space-y-1">
                   {navLinks.map((link) => (
                     <NavLink
                       key={link.href}
                       {...link}
                       isActive={link.paths.includes(router.pathname)}
-                      
+                      compact
                       onClick={closeModal}
                     />
                   ))}
@@ -139,50 +164,42 @@ function Navigation() {
               </div>
             </div>
 
-            {/* Logout - always visible */}
+            {/* Logout */}
             <button
               onClick={logout}
-              className="relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm md:text-base uppercase tracking-wider transition-all overflow-hidden group text-red-300 border-2 border-red-500/30 hover:border-red-400/50 hover:text-red-200"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-400 hover:text-red-300 border border-slate-600/60 hover:border-red-500/40 transition-all"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </span>
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile: Collapsible modal overlay */}
+      {/* Mobile drawer */}
       <div
-        className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${
+        className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-200 ${
           modalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={closeModal}
           aria-hidden="true"
         />
-
-        {/* Modal panel - slide from right, mobile-first */}
         <div
-          className={`absolute top-0 right-0 h-full w-full max-w-xs bg-black/95 border-l-2 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.2)] flex flex-col transition-transform duration-300 ease-out ${
+          className={`absolute top-0 right-0 h-full w-full max-w-sm bg-slate-900/98 backdrop-blur-xl border-l border-slate-600/60 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
             modalOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-          <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-          }} />
-          <div className="relative flex flex-col gap-2 p-4 pt-16">
+          <div className="pt-6 pb-8 px-4 space-y-2">
+            <p className="text-xs uppercase tracking-widest text-slate-500 px-4 mb-4">Navigate</p>
             {navLinks.map((link) => (
               <NavLink
                 key={link.href}
                 {...link}
                 isActive={link.paths.includes(router.pathname)}
+                compact
                 onClick={closeModal}
               />
             ))}
@@ -191,20 +208,17 @@ function Navigation() {
                 closeModal();
                 logout();
               }}
-              className="relative px-4 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all overflow-hidden group text-red-300 border-2 border-red-500/30 hover:border-red-400/50 hover:text-red-200 w-full"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 mt-4 rounded-lg text-sm font-bold uppercase tracking-wider text-slate-400 hover:text-red-300 border border-slate-600/60 hover:border-red-500/40 transition-all"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <LogOut className="w-4 h-4" />
-                Logout
-              </span>
+              <LogOut className="w-4 h-4" />
+              Logout
             </button>
           </div>
         </div>
       </div>
 
-      {/* Glowing bottom border */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+      {/* Bottom accent */}
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-slate-600/50 to-transparent" />
     </nav>
   );
 }
@@ -226,14 +240,17 @@ function AppContent({ Component, pageProps }: AppProps) {
       <RouteLoader />
       <Navigation />
       <Component {...pageProps} />
+      <PWAInstallPrompt />
     </>
   );
 }
 
 export default function App(props: AppProps) {
   return (
-    <AuthProvider>
-      <AppContent {...props} />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent {...props} />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

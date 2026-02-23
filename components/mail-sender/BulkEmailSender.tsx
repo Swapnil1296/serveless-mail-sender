@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Send, Briefcase, Code, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { showAlert } from '@/lib/alerts';
+import SciFiLoader from '@/components/SciFiLoader';
 
 interface EmailResult {
   email: string;
@@ -415,14 +416,9 @@ export default function BulkEmailSender() {
             {loading &&
               typeof document !== 'undefined' &&
               createPortal(
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
-                  <div className="text-center py-6 px-6 bg-black/70 rounded-2xl border-2 border-purple-500/50 shadow-2xl shrink-0 w-[260px] sm:w-[300px] box-border">
-                    <div className="inline-block relative">
-                      <div className="w-14 h-14 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto" />
-                    </div>
-                    <p className="text-white font-bold text-base sm:text-lg mt-4 uppercase tracking-wide">
-                      TRANSMITTING DATA
-                    </p>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
+                  <div className="text-center py-8 px-8 bg-slate-900/95 rounded-xl border border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.15)] shrink-0 w-[280px] sm:w-[320px] box-border">
+                    <SciFiLoader label="TRANSMITTING DATA" size="lg" />
                   </div>
                 </div>,
                 document.body

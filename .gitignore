@@ -35,3 +35,13 @@ next-env.d.ts
 
 # Resumes (add your own)
 /public/resumes/*.pdf
+
+# PWA - next-pwa generated files
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+/public/worker-*.js
+/public/worker-*.js.map
+/public/swe-worker-*.js
+/public/swe-worker-*.js.map

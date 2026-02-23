@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
+import SciFiLoader from '@/components/SciFiLoader';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -19,12 +20,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block relative">
-            <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
-          </div>
-          <p className="text-cyan-300 mt-4 font-bold uppercase tracking-wider">Loading...</p>
-        </div>
+        <SciFiLoader label="VERIFYING ACCESS" size="lg" />
       </div>
     );
   }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Mail, Send, CheckCircle, XCircle, RefreshCw, Trash2, Clock, X } from 'lucide-react';
+import SciFiLoader from '@/components/SciFiLoader';
 import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 import { showAlert } from '@/lib/alerts';
@@ -101,6 +102,7 @@ export default function EmailLogsViewer() {
   const [selectedPendingEmails, setSelectedPendingEmails] = useState<Set<string>>(new Set());
   const [detailLog, setDetailLog] = useState<EmailLog | null>(null);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLogs();
@@ -126,6 +128,7 @@ export default function EmailLogsViewer() {
 
   const fetchLogs = async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -144,6 +147,10 @@ export default function EmailLogsViewer() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data?.error || data?.message || `Request failed: ${response.status}`);
+      }
+
       // Defensive: ensure logs is always an array; normalize each log for missing fields
       const rawLogs = Array.isArray(data?.logs) ? data.logs : [];
       const normalizedLogs = rawLogs.map((log: any) => ({
@@ -157,7 +164,9 @@ export default function EmailLogsViewer() {
       setStats(data?.stats ?? null);
       setTotalPages(data?.pagination?.pages ?? 1);
     } catch (error) {
-      console.error('Failed to fetch logs:', error);
+      const msg = error instanceof Error ? error.message : 'Failed to load email logs';
+      setFetchError(msg);
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -441,6 +450,20 @@ export default function EmailLogsViewer() {
             </div>
           </div>
 
+          {/* Error Banner */}
+          {fetchError && (
+            <div className="mb-6 rounded-xl border-2 border-red-500/50 bg-red-500/10 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <p className="text-red-300 text-sm">{fetchError}</p>
+              <button
+                onClick={fetchLogs}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold uppercase tracking-wider bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400 transition-all"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          )}
+
           {/* Stats */}
           {(stats || loading) && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
@@ -545,6 +568,9 @@ export default function EmailLogsViewer() {
           {/* Logs: table for mobile, cards for desktop */}
           {loading ? (
             <div className="bg-black/40 rounded-xl border-2 border-cyan-500/30 p-4">
+              <div className="flex flex-col items-center py-8 mb-4">
+                <SciFiLoader label="SYNCING LOGS" size="md" />
+              </div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-4 w-4 rounded bg-cyan-500/30 shimmer" />
                 <div className="h-4 w-32 bg-cyan-500/20 rounded shimmer" />

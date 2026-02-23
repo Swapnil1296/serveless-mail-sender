@@ -118,9 +118,22 @@ export default function InterviewHub() {
         </div>
 
         {error && (
-          <div className="mb-4 p-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-300 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            {error}
+          <div className="mb-4 p-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                if (activeTab === 'dashboard') fetchDashboard();
+                else if (activeTab === 'practice') fetchQuestions();
+                else if (activeTab === 'bookmarks') fetchBookmarks();
+              }}
+              className="px-4 py-2 rounded-lg font-bold uppercase tracking-wider text-xs bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400 transition-all"
+            >
+              Retry
+            </button>
           </div>
         )}
 

@@ -189,3 +189,15 @@ body::before {
 .animate-glitch-2 {
   animation: glitch-2 2.5s infinite;
 }
+
+/* Sci-fi / Mechanical loader */
+@keyframes sciFi-scan {
+  0%, 100% { opacity: 0.3; transform: translateY(-50%) scaleX(0.5); }
+  50% { opacity: 1; transform: translateY(-50%) scaleX(1); }
+}
+@keyframes sciFi-pulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+}
+.animate-sciFi-scan { animation: sciFi-scan 1.5s ease-in-out infinite; }
+.animate-sciFi-pulse { animation: sciFi-pulse 1s ease-in-out infinite; }
