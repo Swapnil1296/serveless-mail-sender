@@ -240,7 +240,7 @@ export default function FormatConverterPage() {
             <div className="mt-8 p-6 bg-slate-900/60 border border-cyan-500/20 rounded-xl">
               <h2 className="text-lg font-semibold text-cyan-400 mb-4">Preview (FormattedText render)</h2>
               <div className="prose prose-invert max-w-none bg-slate-800/50 p-6 rounded-lg border border-cyan-500/10">
-                <FormattedText text={preview} />
+                <FormattedText text={preview} contentType={undefined} />
               </div>
             </div>
           )}

@@ -2,9 +2,9 @@ import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { LogOut, Menu, X } from 'lucide-react';
+import { LogOut, MoreVertical } from 'lucide-react';
 import RouteLoader from '@/components/RouteLoader';
 
 const navLinks = [
@@ -26,9 +26,9 @@ function NavLink({ href, paths, icon, label, isActive, onClick }: {
     <Link
       href={href}
       onClick={onClick}
-      className={`relative px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all overflow-hidden group w-full sm:w-auto text-center sm:text-left ${activeClass}`}
+      className={`relative px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all overflow-hidden group w-full sm:w-auto text-center sm:text-left ${activeClass} bg-gradient-to-r from-teal-900 to-teal-800 text-white border-2 border-teal-500/50 hover:border-cyan-400/70 hover:text-white`}
     >
-      <span className="relative z-10 flex items-center justify-center sm:justify-start gap-1 sm:gap-2">
+      <span className="relative z-10 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 ">
         <span>{icon}</span>
         <span>{label}</span>
       </span>
@@ -40,6 +40,7 @@ function Navigation() {
   const router = useRouter();
   const { isAuthenticated, logout, user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Only show navigation on project pages
   const isProjectPage = router.pathname.startsWith('/projects/');
@@ -52,12 +53,25 @@ function Navigation() {
     setModalOpen(false);
   }, [router.pathname]);
 
+  // Close dropdown when clicking outside (desktop)
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setModalOpen(false);
+      }
+    };
+    if (modalOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [modalOpen]);
+
   if (!isProjectPage || !isAuthenticated) {
     return null;
   }
 
   return (
-    <nav className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-50 overflow-hidden">
+    <nav className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-0 z-50 overflow-visible">
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0" style={{
@@ -87,25 +101,45 @@ function Navigation() {
             </div>
           </Link>
 
-          {/* Mobile: Hamburger button */}
-          <button
-            type="button"
-            onClick={toggleModal}
-            className="lg:hidden p-2.5 rounded-lg border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400/70 hover:text-cyan-200 transition-all"
-            aria-label={modalOpen ? 'Close menu' : 'Open menu'}
-          >
-            {modalOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Three-dot menu button (desktop dropdown + mobile slide-out trigger) */}
+          <div className="flex items-center gap-2">
+            <div ref={menuRef} className="relative">
+              <button
+                type="button"
+                onClick={toggleModal}
+                className="p-2.5 rounded-lg border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400/70 hover:text-cyan-200 hover:bg-cyan-500/10 transition-all"
+                aria-label={modalOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={modalOpen}
+                aria-haspopup="true"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
 
-          {/* Desktop: Inline nav links */}
-          <div className="hidden lg:flex gap-2 xl:gap-4 flex-wrap">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.href}
-                {...link}
-                isActive={link.paths.includes(router.pathname)}
-              />
-            ))}
+              {/* Desktop: Dropdown panel - high z-index so it appears above sub-navs */}
+              <div
+                className={`hidden lg:block absolute right-0 top-full mt-2 min-w-[200px] rounded-lg border-2 border-cyan-500/50 bg-black/98 shadow-[0_0_30px_rgba(6,182,212,0.2)] py-2 z-[9999] transition-all duration-200 ${
+                  modalOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                }`}
+              >
+                <div className="absolute inset-0 opacity-20 rounded-lg" style={{
+                  backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
+                  backgroundSize: '16px 16px',
+                }} />
+                <div className="relative flex flex-col gap-1 px-1 ">
+                  {navLinks.map((link) => (
+                    <NavLink
+                      key={link.href}
+                      {...link}
+                      isActive={link.paths.includes(router.pathname)}
+                      
+                      onClick={closeModal}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Logout - always visible */}
             <button
               onClick={logout}
               className="relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm md:text-base uppercase tracking-wider transition-all overflow-hidden group text-red-300 border-2 border-red-500/30 hover:border-red-400/50 hover:text-red-200"
