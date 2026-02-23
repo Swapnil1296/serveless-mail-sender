@@ -19,7 +19,11 @@ const AttemptSchema = new Schema(
     isCorrect: { type: Boolean, required: true },
     timeSpentMs: { type: Number, default: 0 },
     quizSessionId: { type: Schema.Types.ObjectId, ref: 'QuizSession' },
-    attemptMode: { type: String, enum: ['practice', 'quiz', 'daily', 'wrong_retry'], default: 'quiz' },
+    attemptMode: {
+      type: String,
+      enum: ['practice', 'quiz', 'daily', 'wrong_retry', 'random_10', 'random_25', 'random_50', 'timed', 'adaptive', 'topic'],
+      default: 'quiz',
+    },
   },
   { timestamps: true }
 );
