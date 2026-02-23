@@ -9,7 +9,6 @@ const withPWA = require('next-pwa')({
     {
       urlPattern: /^\/api\/.*/i,
       handler: 'NetworkOnly',
-      options: { networkTimeoutSeconds: 10 },
     },
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
