@@ -548,5 +548,405 @@ export const awsQbank = [
         "keyFeatures": [],
         "actionWords": [],
         "codeExample": " Example & Detail:\r\n Retrieving cost data for a specific period using the CLI:\r\naws ce get-cost-and-usage --time-period Start=2025-01-01,End=2025-01-31 \\\r\n  --granularity MONTHLY --metrics \"BlendedCost\"\r\n\r"
+    },
+    {
+        "id": 56,
+        "topic": "aws",
+        "question": "Explain VPC architecture: Public vs Private Subnets. When would you place an EC2 instance in each?",
+        "answer": "A VPC (Virtual Private Cloud) is your <mark>isolated network segment</mark> within AWS—think of it as your own private data center in the cloud. Subnets divide your VPC's IP range into smaller segments.\n\n👉 Public Subnets: Have a route to an Internet Gateway (IGW). Instances here get public IPs and can receive inbound internet traffic. Use for: Load Balancers, NAT Gateways, bastion hosts, web servers that need direct internet access.\n\n👉 Private Subnets: No direct route to the internet. Instances cannot be reached from the public internet. Use for: Application servers, databases (RDS, DynamoDB), backend Lambda—anything that must not be directly exposed.\n\nWhy this design? Security in depth. Your database should never sit in a public subnet. Your ALB sits in public subnets across multiple AZs; your app tiers sit in private subnets and reach the internet via NAT Gateway for updates or external API calls. Cost trade-off: NAT Gateway costs ~$0.045/hr plus data processing—every outbound byte from private subnets flows through it.",
+        "tags": ["VPC", "Networking", "Security"],
+        "keyFeatures": [],
+        "actionWords": ["Public Subnet", "Private Subnet", "Internet Gateway", "NAT Gateway", "isolated network segment"],
+        "codeExample": ""
+    },
+    {
+        "id": 57,
+        "topic": "aws",
+        "question": "Security Groups vs NACLs: What are the key differences and when do you use each?",
+        "answer": "Both control traffic, but at different layers and with different behavior.\n\n👉 Security Groups: <mark>Stateful</mark>—apply to ENIs (instance level). If you allow inbound port 80, return traffic is automatically allowed. Rules are evaluated together (any rule can allow). Default: deny all inbound, allow all outbound. You typically manage these for application-level access.\n\n👉 NACLs (Network ACLs): <mark>Stateless</mark>—apply at subnet level. You must explicitly allow both inbound AND outbound. Rules are evaluated in order (first match wins). Default: allow all. Use for subnet-wide guardrails—e.g., block a known malicious IP range, enforce compliance (no outbound to certain ports).\n\nProduction pattern: Security Groups for fine-grained app logic; NACLs for coarse subnet-level policies or compliance. Never rely solely on NACLs for app security—they are a secondary layer.",
+        "tags": ["VPC", "Security Groups", "NACL"],
+        "keyFeatures": [],
+        "actionWords": ["Stateful", "Stateless", "ENI", "subnet-level"],
+        "codeExample": ""
+    },
+    {
+        "id": 58,
+        "topic": "aws",
+        "question": "What is a NAT Gateway and why would you use it over a NAT Instance?",
+        "answer": "A NAT Gateway allows instances in <mark>private subnets</mark> to initiate outbound traffic to the internet (e.g., software updates, API calls) while remaining unreachable from the internet.\n\n👉 How it works: AWS-managed service in a public subnet. You create one per AZ for HA. Private subnet route table points 0.0.0.0/0 to the NAT Gateway. Traffic flows: private instance → NAT GW → IGW → internet.\n\n👉 NAT Gateway vs NAT Instance: NAT Gateway is managed, highly available within an AZ, scales to 45 Gbps, no patching. NAT Instance is a self-managed EC2—you patch, monitor, scale. Trade-off: NAT Gateway costs ~$32/month per AZ + $0.045/GB; NAT Instance can be cheaper at very low traffic but adds ops burden. In production, <mark>always prefer NAT Gateway</mark> unless you have extreme cost constraints.",
+        "tags": ["VPC", "NAT Gateway", "Networking"],
+        "keyFeatures": [],
+        "actionWords": ["NAT Gateway", "private subnets", "managed service", "outbound-only"],
+        "codeExample": "aws ec2 create-nat-gateway --subnet-id subnet-xxx --allocation-id eipalloc-xxx"
+    },
+    {
+        "id": 59,
+        "topic": "aws",
+        "question": "Explain Multi-AZ vs Multi-Region. When do you choose each?",
+        "answer": "Multi-AZ: <mark>Automatic failover within a region</mark>—e.g., RDS primary in us-east-1a, standby in us-east-1b. Protects against AZ-level failures (power, network, hardware). Typical RTO: 60–120 seconds. No application code changes; DNS/endpoints handle failover.\n\nMulti-Region: Active or passive DR across regions (e.g., us-east-1 and eu-west-1). Protects against region-wide disasters. Requires: data replication (DynamoDB Global Tables, S3 CRR, RDS read replicas), DNS failover (Route 53), application awareness.\n\nWhen Multi-AZ: Standard HA for production—you want resilience to AZ outages. When Multi-Region: Regulatory (data residency), global latency (users in multiple continents), or disaster recovery (RPO/RTO in minutes). Cost: Multi-AZ adds ~2x for DB; Multi-Region adds replication + duplicate resources.",
+        "tags": ["High Availability", "Multi-AZ", "Multi-Region", "DR"],
+        "keyFeatures": [],
+        "actionWords": ["Multi-AZ", "Multi-Region", "RTO", "RPO", "failover"],
+        "codeExample": ""
+    },
+    {
+        "id": 60,
+        "topic": "aws",
+        "question": "How does S3 eventual consistency work and when does it bite you?",
+        "answer": "S3 uses <mark>eventual consistency</mark> for overwrite PUTs and DELETEs—meaning after a successful write, a subsequent read might return the old data for a short period. S3 achieves this by replicating to multiple locations; propagation takes time.\n\n👉 When it matters: Read-after-write for the same key. Example: User uploads image, you redirect to the image URL—user might see 404. Or: two processes overwrite the same key; one read might get stale data.\n\n👉 Mitigations: Use unique keys (UUID, timestamp) to avoid overwrites. For read-after-write, poll with exponential backoff or use S3 Select/versioning. New Object PUTs (not overwrites) are read-after-write consistent. For critical workflows, consider DynamoDB or versioned S3 with conditional writes.",
+        "tags": ["S3", "Consistency", "Storage"],
+        "keyFeatures": [],
+        "actionWords": ["eventual consistency", "read-after-write", "overwrite PUT", "unique keys"],
+        "codeExample": ""
+    },
+    {
+        "id": 61,
+        "topic": "aws",
+        "question": "Design a scalable e-commerce system on AWS. What services and patterns would you use?",
+        "answer": "👉 Frontend: CloudFront + S3 for static assets; low latency globally.\n\n👉 API Layer: API Gateway + Lambda (or ECS for stateful/long-running) in private subnets. Auto Scaling based on request count.\n\n👉 Database: DynamoDB for cart, session, product catalog (high read, flexible schema); RDS Aurora for orders, payments (ACID). Use DynamoDB DAX or ElastiCache for hot product caching.\n\n👉 Async: SQS for order processing, SNS for notifications (email, SMS). Decouple checkout from inventory and shipping.\n\n👉 Storage: S3 for product images, with CloudFront. Consider S3 Intelligent-Tiering for cost.\n\n👉 Security: WAF on CloudFront; IAM roles for all services; Secrets Manager for DB credentials; VPC with private subnets.\n\n👉 Observability: CloudWatch Logs, X-Ray for tracing, alarms on latency and error rates.",
+        "tags": ["System Design", "E-commerce", "Scalability"],
+        "keyFeatures": [],
+        "actionWords": ["CloudFront", "API Gateway", "DynamoDB", "SQS", "decouple"],
+        "codeExample": ""
+    },
+    {
+        "id": 62,
+        "topic": "aws",
+        "question": "How would you design a highly available API serving 1M users?",
+        "answer": "👉 Global entry: Route 53 for DNS; latency-based or geolocation routing.\n\n👉 Edge: CloudFront for caching static and cacheable API responses; WAF for protection.\n\n👉 Compute: API Gateway + Lambda, or ALB + ECS/Fargate. Multi-AZ deployment; Auto Scaling with target tracking (e.g., 70% CPU or 1000 req/s per target).\n\n👉 Data: RDS Multi-AZ or Aurora with read replicas; DynamoDB with on-demand or provisioned capacity. ElastiCache for session and response caching.\n\n👉 Async: SQS for non-blocking work; dead-letter queues for retries.\n\n👉 Observability: CloudWatch, X-Ray, structured logging. Alarms on 4xx/5xx, latency p99.\n\n👉 Cost under load: Reserved capacity for DB; spot for batch jobs; right-size instances; use Graviton where possible.",
+        "tags": ["System Design", "API", "High Availability"],
+        "keyFeatures": [],
+        "actionWords": ["Multi-AZ", "Auto Scaling", "CloudFront", "caching", "1M users"],
+        "codeExample": ""
+    },
+    {
+        "id": 63,
+        "topic": "aws",
+        "question": "Explain IAM least privilege and how you implement it in production.",
+        "answer": "Least privilege: grant only the <mark>minimum permissions</mark> required for a task—no broad wildcards like s3:* or ec2:*.\n\n👉 Implementation: Use IAM roles (not long-term keys) for EC2, Lambda, ECS. Attach policies scoped to specific resources (e.g., arn:aws:s3:::my-bucket/*). Use conditions (IP, MFA, tags) to further restrict. Prefer AWS managed policies where they fit; create custom policies for app-specific needs.\n\n👉 Production practices: No root usage; MFA for humans; separate dev/prod accounts or OUs; SCPs at org level to deny risky actions; regular access reviews with IAM Access Analyzer. Rotate credentials; use Secrets Manager for DB/API keys.",
+        "tags": ["IAM", "Security", "Least Privilege"],
+        "keyFeatures": [],
+        "actionWords": ["least privilege", "IAM roles", "resource scoping", "conditions"],
+        "codeExample": ""
+    },
+    {
+        "id": 64,
+        "topic": "aws",
+        "question": "What is the difference between KMS and Secrets Manager? When to use each?",
+        "answer": "👉 KMS (Key Management Service): Manages <mark>encryption keys</mark>. You use it to encrypt/decrypt data, or as the backing key for S3 SSE, EBS encryption, etc. Keys never leave KMS. Use when: you need to encrypt data at rest, sign/verify, or generate data keys for client-side encryption.\n\n👉 Secrets Manager: Stores and rotates <mark>secrets</mark> (DB credentials, API keys). Built on KMS for encryption. Use when: you need centralized secret storage, automatic rotation (RDS, Redshift), and runtime retrieval by Lambda, ECS, etc.\n\n👉 Choice: Need to encrypt your own data? KMS. Need to store and rotate DB passwords or API keys? Secrets Manager. Both integrate with IAM for access control.",
+        "tags": ["KMS", "Secrets Manager", "Security"],
+        "keyFeatures": [],
+        "actionWords": ["KMS", "Secrets Manager", "encryption keys", "secret rotation"],
+        "codeExample": ""
+    },
+    {
+        "id": 65,
+        "topic": "aws",
+        "question": "Explain Blue-Green deployment on AWS. What services enable it?",
+        "answer": "Blue-Green: maintain two identical environments; switch traffic from one to the other for <mark>zero-downtime deployments</mark>.\n\n👉 On AWS: Use ALB with two target groups (blue, green). Deploy new version to the idle group, run tests, then shift traffic via ALB routing. Rollback = switch back. For RDS: use Blue/Green deployments (clone + switchover). For Lambda: deploy new version, use weighted alias to shift traffic gradually.\n\n👉 CodeDeploy: Supports blue/green for EC2 and Lambda. For ECS: create new task definition, update service to use it; ECS does rolling update. For serverless: SAM/CloudFormation with canary or linear deployment.\n\n👉 Trade-off: 2x compute during deployment; requires stateless app and backward-compatible DB migrations.",
+        "tags": ["Deployment", "Blue-Green", "Zero Downtime"],
+        "keyFeatures": [],
+        "actionWords": ["Blue-Green", "target groups", "CodeDeploy", "zero-downtime"],
+        "codeExample": ""
+    },
+    {
+        "id": 66,
+        "topic": "aws",
+        "question": "How would you handle a sudden 10x traffic spike?",
+        "answer": "👉 Auto Scaling: Target tracking (CPU, request count) or step scaling. Ensure max capacity is high enough; use predictive scaling if patterns are known.\n\n👉 Database: RDS—read replicas + connection pooling (RDS Proxy). DynamoDB—on-demand or pre-provisioned high capacity. ElastiCache to absorb read load.\n\n👉 Caching: CloudFront, API Gateway cache, ElastiCache. Cache more aggressively; use stale-while-revalidate.\n\n👉 Async: Offload non-critical work to SQS; Lambda consumers scale automatically.\n\n👉 Bottlenecks: NAT Gateway can saturate—use one per AZ. Check RDS connection limits. Consider serverless (Lambda, Fargate) for variable load. Have runbooks and alarms; consider chaos engineering for validation.",
+        "tags": ["Scalability", "Traffic Spike", "Auto Scaling"],
+        "keyFeatures": [],
+        "actionWords": ["10x spike", "Auto Scaling", "read replicas", "caching", "SQS"],
+        "codeExample": ""
+    },
+    {
+        "id": 67,
+        "topic": "aws",
+        "question": "ALB vs NLB: When do you choose each?",
+        "answer": "👉 ALB (Application Load Balancer): Layer 7—understands HTTP/HTTPS. Path-based routing, host-based routing, Lambda integration, WAF. Use for: web APIs, microservices, containerized apps. Supports sticky sessions, redirects, gRPC.\n\n👉 NLB (Network Load Balancer): Layer 4—TCP/UDP. Ultra-low latency, handles millions of connections, static IPs, preserves source IP. Use for: gaming, IoT, long-lived connections, non-HTTP protocols, extreme performance.\n\n👉 Trade-off: ALB for application logic (routing, auth); NLB when you need raw performance and Layer 4. You can put NLB in front of ALB for static IPs + WAF.",
+        "tags": ["Load Balancer", "ALB", "NLB"],
+        "keyFeatures": [],
+        "actionWords": ["ALB Layer 7", "NLB Layer 4", "path-based routing", "low latency"],
+        "codeExample": ""
+    },
+    {
+        "id": 68,
+        "topic": "aws",
+        "question": "Design a serverless architecture for a document processing pipeline.",
+        "answer": "👉 Ingestion: S3 bucket; event notification triggers Lambda on object create.\n\n👉 Processing: Lambda extracts text (e.g., Textract), does validation, writes metadata to DynamoDB. For heavy compute: Step Functions orchestrates Lambda + Batch or Lambda fan-out.\n\n👉 Queue: SQS between ingestion and processing for decoupling and retries; DLQ for failed items.\n\n👉 Storage: S3 for raw + processed files; DynamoDB for metadata and status. Optionally Glacier for archive.\n\n👉 Notifications: SNS when processing completes; Lambda sends email or pushes to API.\n\n👉 Security: IAM roles per function; S3 bucket policies; VPC if Lambda needs private resources. KMS for encryption.",
+        "tags": ["Serverless", "Lambda", "System Design"],
+        "keyFeatures": [],
+        "actionWords": ["S3 events", "Lambda", "Step Functions", "SQS", "Textract"],
+        "codeExample": ""
+    },
+    {
+        "id": 69,
+        "topic": "aws",
+        "question": "How does Route 53 latency-based routing work and when is it useful?",
+        "answer": "Latency-based routing sends the user to the <mark>region with the lowest latency</mark> from their location. Route 53 uses its own latency data between users and your endpoints.\n\n👉 How: Create a latency record set with multiple endpoints (one per region). Route 53 returns the IP for the region with the lowest measured latency for that user.\n\n👉 Use when: You have the same app in multiple regions (e.g., us-east-1, eu-west-1, ap-south-1) and want automatic routing. Works with CloudFront, ALB, EC2.\n\n👉 Caveats: Latency ≠ geographic distance; Route 53's data is approximate. For data residency, use geolocation routing. Health checks ensure failed regions are not returned.",
+        "tags": ["Route 53", "Networking", "Global"],
+        "keyFeatures": [],
+        "actionWords": ["latency-based routing", "multi-region", "health checks"],
+        "codeExample": ""
+    },
+    {
+        "id": 70,
+        "topic": "aws",
+        "question": "What are Lambda cold starts and how do you mitigate them?",
+        "answer": "Cold start: first request to a new Lambda instance incurs <mark>initialization time</mark>—loading runtime, your code, initializing connections. Can add 100ms–several seconds for Java/.NET or large dependencies.\n\n👉 Mitigations: Provisioned concurrency keeps a pool of warm instances. Use smaller runtimes (Node, Python) where possible. Reduce package size—exclude unused deps, use Lambda Layers for shared code. Initialize DB/HTTP clients outside the handler; reuse connections. For predictable traffic, schedule a warm-up (e.g., EventBridge ping every 5 min).\n\n👉 Trade-off: Provisioned concurrency costs even when idle. For bursty, latency-sensitive APIs, it may be necessary; for batch jobs, cold starts are often acceptable.",
+        "tags": ["Lambda", "Performance", "Serverless"],
+        "keyFeatures": [],
+        "actionWords": ["cold start", "Provisioned Concurrency", "package size", "connection reuse"],
+        "codeExample": ""
+    },
+    {
+        "id": 71,
+        "topic": "aws",
+        "question": "Explain DynamoDB partition key design. How do you avoid hot partitions?",
+        "answer": "DynamoDB partitions data by <mark>partition key</mark>. All items with the same partition key are stored together. Throughput is spread across partitions.\n\n👉 Hot partition: One partition key receives disproportionate traffic—e.g., partition key = status with value 'ACTIVE' for millions of items. All reads/writes hit one partition; you throttle.\n\n👉 Design: Choose a high-cardinality partition key (user_id, order_id) so workload spreads. Use composite keys (partition + sort) for access patterns. For time-series, consider partition key = date + some shard (e.g., 2025-02-23#shard1). Avoid monotonically increasing keys (timestamp alone) that create sequential write hotspots.\n\n👉 Access patterns: Design for your read/write patterns. Use GSIs for alternate access; be aware GSI keys can also hot-partition.",
+        "tags": ["DynamoDB", "Data Modeling", "Scalability"],
+        "keyFeatures": [],
+        "actionWords": ["partition key", "hot partition", "high-cardinality", "composite key"],
+        "codeExample": ""
+    },
+    {
+        "id": 72,
+        "topic": "aws",
+        "question": "Design a secure multi-tenant SaaS system on AWS.",
+        "answer": "👉 Isolation options: Tenant per account (strongest, complex); tenant per VPC (network isolation); tenant per schema/table (DB isolation); row-level (shared table, tenant_id in key).\n\n👉 Recommendation: Shared infra with <mark>tenant_id in every partition key</mark>. DynamoDB: partition key = tenant_id, sort key = resource_id. RDS: tenant_id column + row-level security or app-level filtering.\n\n👉 API: API Gateway + Lambda; JWT or Cognito with tenant claim. Validate tenant access in authorizer. Use WAF rules per tenant if needed.\n\n👉 Data: Encryption at rest (KMS); in transit (TLS). S3 with bucket policies; IAM conditions by tenant tag. Audit with CloudTrail.\n\n👉 Cost: Tag all resources by tenant for chargeback. Use Reserved Instances/Savings Plans for base load.",
+        "tags": ["Multi-Tenant", "SaaS", "Security"],
+        "keyFeatures": [],
+        "actionWords": ["tenant isolation", "tenant_id", "row-level security", "Cognito"],
+        "codeExample": ""
+    },
+    {
+        "id": 73,
+        "topic": "aws",
+        "question": "What disaster recovery strategies does AWS support? RTO/RPO trade-offs?",
+        "answer": "👉 Backup & Restore (RPO: hours, RTO: hours): Restore from backups. Lowest cost.\n\n👉 Pilot Light: Minimal DR region—DB replica, critical data synced. Scale up on failover. RPO: minutes, RTO: tens of minutes.\n\n👉 Warm Standby: Scaled-down copy in DR region. RPO: minutes, RTO: minutes.\n\n👉 Active-Active: Full capacity in both regions; users routed to both. RPO: near zero, RTO: near zero. Highest cost and complexity.\n\n👉 Services: RDS cross-region replicas, DynamoDB Global Tables, S3 CRR, Route 53 failover. Trade-off: cost vs RTO/RPO. Match strategy to business impact.",
+        "tags": ["Disaster Recovery", "RTO", "RPO"],
+        "keyFeatures": [],
+        "actionWords": ["RTO", "RPO", "Pilot Light", "Warm Standby", "Active-Active"],
+        "codeExample": ""
+    },
+    {
+        "id": 74,
+        "topic": "aws",
+        "question": "How do you implement encryption at rest and in transit on AWS?",
+        "answer": "👉 At rest: S3—SSE-S3, SSE-KMS, or SSE-C. EBS—encryption enabled; snapshots inherit. RDS—enable encryption (uses KMS). DynamoDB—encryption by default with AWS-owned keys; can use KMS CMK.\n\n👉 In transit: TLS everywhere. ALB/CloudFront terminate SSL; use ACM for certs. API Gateway enforces HTTPS. VPC—traffic between AZs is encrypted at the physical layer; for explicit encryption use TLS in your app.\n\n👉 Best practice: Enable encryption by default. Use KMS CMK for audit and control. Rotate keys; use key policies for separation.",
+        "tags": ["Encryption", "Security", "KMS"],
+        "keyFeatures": [],
+        "actionWords": ["encryption at rest", "encryption in transit", "SSE", "TLS", "KMS"],
+        "codeExample": ""
+    },
+    {
+        "id": 75,
+        "topic": "aws",
+        "question": "What is VPC Peering and when do you use it?",
+        "answer": "VPC Peering: <mark>direct routing</mark> between two VPCs (same or different accounts/regions). No VPN or internet; traffic stays on AWS backbone.\n\n👉 Use when: Share resources across VPCs—e.g., dev VPC needs to hit prod RDS in another VPC, or multiple teams have separate VPCs. Transitive peering is not supported—if A peers with B and B with C, A cannot reach C through B.\n\n👉 Limitations: CIDR blocks must not overlap. Region-spanning requires regional peering. For many VPCs, consider Transit Gateway instead of a mesh of peer connections.",
+        "tags": ["VPC", "Peering", "Networking"],
+        "keyFeatures": [],
+        "actionWords": ["VPC Peering", "transitive peering", "Transit Gateway"],
+        "codeExample": ""
+    },
+    {
+        "id": 76,
+        "topic": "aws",
+        "question": "How does CloudWatch differ from CloudTrail? When do you use each?",
+        "answer": "👉 CloudWatch: <mark>Metrics, logs, and alarms</mark>. Monitor CPU, request count, custom metrics. Store and query logs. Trigger alarms and auto-scaling. Use for: performance, capacity, application debugging.\n\n👉 CloudTrail: <mark>API audit trail</mark>. Records who did what, when, from where. Delivers logs to S3. Use for: security audits, compliance, forensics.\n\n👉 Together: CloudTrail can send events to CloudWatch for real-time alarming (e.g., root login, security group change). CloudWatch for ops; CloudTrail for security and compliance.",
+        "tags": ["CloudWatch", "CloudTrail", "Monitoring"],
+        "keyFeatures": [],
+        "actionWords": ["CloudWatch metrics", "CloudTrail audit", "compliance", "alarms"],
+        "codeExample": ""
+    },
+    {
+        "id": 77,
+        "topic": "aws",
+        "question": "Design a global low-latency system. Which services and patterns?",
+        "answer": "👉 Edge: CloudFront—cache static and dynamic content at edge locations. Lambda@Edge for request/response customization.\n\n👉 DNS: Route 53—latency-based or geoproximity routing to nearest region.\n\n👉 Compute: Deploy in multiple regions (us, eu, apac). API Gateway + Lambda or regional ALB + ECS. Users hit nearest region.\n\n👉 Data: DynamoDB Global Tables for multi-region, low-latency reads/writes. RDS—read replicas per region. S3 + CloudFront for static assets.\n\n👉 Consistency: Global Tables use eventual consistency. For strong consistency, route to primary region (adds latency). Cache with short TTLs.",
+        "tags": ["Global", "Low Latency", "CloudFront"],
+        "keyFeatures": [],
+        "actionWords": ["CloudFront", "edge", "DynamoDB Global Tables", "multi-region"],
+        "codeExample": ""
+    },
+    {
+        "id": 78,
+        "topic": "aws",
+        "question": "How do you optimize cost under heavy traffic on AWS?",
+        "answer": "👉 Compute: Reserved Instances/Savings Plans for baseline; Spot for batch/interruptible. Right-size instances; use Graviton. Lambda for variable, spiky workload.\n\n👉 Storage: S3 Intelligent-Tiering; lifecycle policies to Glacier. Delete unused EBS snapshots and AMIs.\n\n👉 Data transfer: Keep traffic in-region; use VPC endpoints for S3/DynamoDB. CloudFront reduces origin load and data transfer.\n\n👉 Database: RDS—right-size; use read replicas vs scaling up. DynamoDB—on-demand for spiky; provisioned with auto-scaling for predictable. ElastiCache to reduce DB load.\n\n👉 Monitoring: Cost Explorer, budgets, tags. Identify top cost drivers; use Trusted Advisor.",
+        "tags": ["Cost Optimization", "Traffic"],
+        "keyFeatures": [],
+        "actionWords": ["Reserved Instances", "Spot", "S3 lifecycle", "VPC endpoints", "right-size"],
+        "codeExample": ""
+    },
+    {
+        "id": 79,
+        "topic": "aws",
+        "question": "ECS vs EKS: When do you choose one over the other?",
+        "answer": "👉 ECS: AWS-native, simpler. No control plane to manage. Deep integration with ALB, IAM, CloudWatch. Fargate for serverless containers. Use when: you want minimal Kubernetes overhead, standard AWS workflows, Fargate.\n\n👉 EKS: Managed Kubernetes. Portable—same APIs, Helm, ecosystem. Use when: you need Kubernetes features (operators, CRDs, multi-cloud), have existing K8s skills, or require vendor neutrality.\n\n👉 Trade-off: ECS is easier and often cheaper; EKS offers portability and ecosystem. For many AWS-only workloads, ECS + Fargate is sufficient.",
+        "tags": ["ECS", "EKS", "Containers"],
+        "keyFeatures": [],
+        "actionWords": ["ECS", "EKS", "Fargate", "Kubernetes", "portability"],
+        "codeExample": ""
+    },
+    {
+        "id": 80,
+        "topic": "aws",
+        "question": "What is an Internet Gateway and how does it differ from a NAT Gateway?",
+        "answer": "👉 Internet Gateway (IGW): Allows <mark>bidirectional</mark> traffic between your VPC and the internet. Attached to VPC; one per VPC. Required for instances with public IPs to be reachable from the internet. No bandwidth charge; you pay for data transfer.\n\n👉 NAT Gateway: Allows <mark>outbound-only</mark> traffic from private subnets. Instances can initiate connections to the internet but cannot receive unsolicited inbound. You pay per hour + data processed.\n\n👉 Use: IGW for public subnets (load balancers, bastion). NAT Gateway in public subnet for private subnet instances that need outbound internet.",
+        "tags": ["VPC", "IGW", "NAT Gateway"],
+        "keyFeatures": [],
+        "actionWords": ["Internet Gateway", "NAT Gateway", "bidirectional", "outbound-only"],
+        "codeExample": ""
+    },
+    {
+        "id": 81,
+        "topic": "aws",
+        "question": "Explain RDS Aurora architecture. Why is it often chosen over standard RDS?",
+        "answer": "Aurora is a <mark>cloud-native</mark> MySQL/PostgreSQL-compatible DB. Storage is decoupled—6-way replicated across AZs; compute scales independently.\n\n👉 Architecture: Writer + up to 15 read replicas (shared storage). Failover typically &lt;30 seconds. Auto-scaling storage; no need to provision.\n\n👉 Why Aurora: Higher throughput (especially for I/O); better failover; read scaling with replicas; Global Database for cross-region. Cost: ~20% more than RDS for comparable instances, but often better price/performance for heavy workloads.\n\n👉 When not: Small, low-I/O workloads—RDS MySQL/Postgres can be cheaper. Or if you need a specific engine not supported by Aurora.",
+        "tags": ["RDS", "Aurora", "Database"],
+        "keyFeatures": [],
+        "actionWords": ["Aurora", "shared storage", "6-way replication", "read replicas"],
+        "codeExample": ""
+    },
+    {
+        "id": 82,
+        "topic": "aws",
+        "question": "How do you secure an API Gateway? Authentication options?",
+        "answer": "👉 IAM: Use SigV4. Good for service-to-service. Clients need AWS credentials.\n\n👉 Cognito: User pools for user sign-in; JWT validation. Use for mobile/web apps with user login.\n\n👉 Lambda Authorizer: Custom logic—validate API keys, JWT from third-party IdP, or custom headers. Full control.\n\n👉 API Key: Simple throttle/usage tracking. Not a strong auth mechanism; use with other methods.\n\n👉 Best practice: Use Cognito or Lambda Authorizer for user-facing APIs. IAM for internal services. Enable WAF; use VPC link for private backends; enable access logging.",
+        "tags": ["API Gateway", "Security", "Authentication"],
+        "keyFeatures": [],
+        "actionWords": ["IAM", "Cognito", "Lambda Authorizer", "JWT", "WAF"],
+        "codeExample": ""
+    },
+    {
+        "id": 83,
+        "topic": "aws",
+        "question": "What is S3 Cross-Region Replication (CRR) and when do you use it?",
+        "answer": "CRR: Automatically <mark>replicates objects</mark> from a source bucket in one region to a destination bucket in another.\n\n👉 Use when: Compliance (data residency), DR (failover to another region), low-latency access (copy data closer to users), or operational replication.\n\n👉 Requirements: Versioning enabled on both buckets. Source and destination must be in different accounts or same account. IAM permissions for replication. Can filter by prefix/tag.\n\n👉 Consistency: Asynchronous; typically completes within 15 minutes. Delete markers and certain deletes can be replicated. RPO depends on replication lag.",
+        "tags": ["S3", "Replication", "DR"],
+        "keyFeatures": [],
+        "actionWords": ["CRR", "versioning", "asynchronous", "data residency"],
+        "codeExample": ""
+    },
+    {
+        "id": 84,
+        "topic": "aws",
+        "question": "How does Auto Scaling work? What scaling policies do you use?",
+        "answer": "Auto Scaling maintains desired capacity by launching/terminating instances based on policies.\n\n👉 Target tracking: Maintain a target metric (e.g., 70% CPU, 1000 req/s per target). Simple, reactive.\n\n👉 Step scaling: Scale by steps based on alarm breaches (e.g., +2 if CPU &gt; 80%, +5 if &gt; 90%). More aggressive response.\n\n👉 Scheduled: Scale at fixed times (e.g., business hours). Use when patterns are predictable.\n\n👉 Predictive: Uses ML to scale ahead of predicted demand. Good for known patterns.\n\n👉 Cooldown/instances: Prevent flapping. Use default cooldown or per-scaling activity. Ensure health checks and lifecycle hooks for graceful shutdown.",
+        "tags": ["Auto Scaling", "EC2", "Scalability"],
+        "keyFeatures": [],
+        "actionWords": ["target tracking", "step scaling", "scheduled", "predictive scaling"],
+        "codeExample": ""
+    },
+    {
+        "id": 85,
+        "topic": "aws",
+        "question": "What is an EBS volume and how do volume types differ?",
+        "answer": "EBS: <mark>Block storage</mark> for EC2. Persists independently of instance. Attached to one instance at a time (except Multi-Attach io2).\n\n👉 gp3: General purpose; 3000 IOPS/125 MBps baseline; scalable. Default for most workloads.\n\n👉 io2: High-performance; up to 256,000 IOPS. For critical DBs.\n\n👉 st1: Throughput-optimized HDD; low cost, high throughput. Big data, data warehouses.\n\n👉 sc1: Cold HDD; lowest cost. Infrequently accessed.\n\n👉 Choose by: IOPS vs throughput vs cost. Most apps: gp3. Heavy random I/O: io2. Sequential throughput: st1.",
+        "tags": ["EBS", "Storage", "EC2"],
+        "keyFeatures": [],
+        "actionWords": ["gp3", "io2", "IOPS", "throughput"],
+        "codeExample": ""
+    },
+    {
+        "id": 86,
+        "topic": "aws",
+        "question": "Explain SQS standard vs FIFO queues. When to use each?",
+        "answer": "👉 Standard: <mark>Best-effort ordering</mark>; at-least-once delivery; nearly unlimited throughput. May duplicate messages. Use when: order not critical, high throughput, e.g., event fan-out, decoupling.\n\n👉 FIFO: Strict order per message group; exactly-once processing (with deduplication); 300 msg/s without batching, 3000 with. Use when: order matters (e.g., financial transactions), no duplicates allowed.\n\n👉 Trade-off: FIFO adds latency and throughput limits. Use message groups in FIFO to parallelize while preserving order within a group.",
+        "tags": ["SQS", "Messaging", "Decoupling"],
+        "keyFeatures": [],
+        "actionWords": ["Standard", "FIFO", "exactly-once", "message group"],
+        "codeExample": ""
+    },
+    {
+        "id": 87,
+        "topic": "aws",
+        "question": "What is a VPC Endpoint? Gateway vs Interface endpoints?",
+        "answer": "VPC Endpoints allow private connectivity to AWS services <mark>without internet or NAT</mark>.\n\n👉 Gateway Endpoint: For S3 and DynamoDB. Free; route table entry to prefix list. No ENI, no security groups. Use for S3/DynamoDB access from private subnets.\n\n👉 Interface Endpoint: ENI in your subnet; uses PrivateLink. For most other services (e.g., SQS, SNS, CloudWatch, KMS). Costs per AZ and data. Requires security group. Use when Gateway Endpoint is not available.\n\n👉 Benefit: Traffic stays on AWS network; no NAT costs; often lower latency; improves security posture.",
+        "tags": ["VPC", "VPC Endpoint", "PrivateLink"],
+        "keyFeatures": [],
+        "actionWords": ["Gateway Endpoint", "Interface Endpoint", "PrivateLink", "prefix list"],
+        "codeExample": ""
+    },
+    {
+        "id": 88,
+        "topic": "aws",
+        "question": "How do you implement logging for a production AWS workload?",
+        "answer": "👉 Application logs: CloudWatch Logs. Structured JSON; log groups per service. Use Log Insights for querying. Set retention; export to S3 for long-term/analytics.\n\n👉 Access logs: ALB, CloudFront, S3—enable and ship to S3. Use Athena or OpenSearch for analysis.\n\n👉 Audit: CloudTrail to S3; optional to CloudWatch Logs for real-time alerts. Enable in all regions.\n\n👉 Best practices: Correlation IDs across services; avoid logging PII/secrets; use log levels; centralized in one account/region for multi-account.",
+        "tags": ["Logging", "CloudWatch", "CloudTrail"],
+        "keyFeatures": [],
+        "actionWords": ["CloudWatch Logs", "CloudTrail", "structured logging", "retention"],
+        "codeExample": ""
+    },
+    {
+        "id": 89,
+        "topic": "aws",
+        "question": "What is AWS WAF and how do you use it with CloudFront/ALB?",
+        "answer": "WAF: <mark>Web Application Firewall</mark>—filter HTTP/HTTPS requests based on rules. Protects against common exploits (SQLi, XSS), rate limiting, geo-blocking.\n\n👉 Integration: Attach to CloudFront, ALB, or API Gateway. Rules in Web ACL; each rule has conditions and actions (allow, block, count).\n\n👉 Use: Managed rule groups (AWS, marketplace) for OWASP, known bad IPs. Custom rules for your app (e.g., block certain paths, rate limit by IP). Use count mode first to tune.\n\n👉 Cost: Per rule and per request. Start with essential managed rules; add custom as needed.",
+        "tags": ["WAF", "Security", "CloudFront"],
+        "keyFeatures": [],
+        "actionWords": ["WAF", "Web ACL", "managed rules", "rate limiting"],
+        "codeExample": ""
+    },
+    {
+        "id": 90,
+        "topic": "aws",
+        "question": "Explain DynamoDB Streams and use cases.",
+        "answer": "DynamoDB Streams: <mark>Change log</mark> of item-level changes (insert, update, delete). Ordered per partition key; 24-hour retention.\n\n👉 Use cases: Trigger Lambda for event-driven processing (e.g., update search index, send notification). Replicate to another table or data store. Audit trail. Implement CQRS or materialized views.\n\n👉 Processing: Lambda is the natural consumer. Process in order per partition key; use batch size and error handling. Enable stream with KEYS_ONLY, NEW_IMAGE, OLD_IMAGE, or NEW_AND_OLD_IMAGES.",
+        "tags": ["DynamoDB", "Streams", "Event-Driven"],
+        "keyFeatures": [],
+        "actionWords": ["DynamoDB Streams", "change log", "Lambda trigger", "event-driven"],
+        "codeExample": ""
+    },
+    {
+        "id": 91,
+        "topic": "aws",
+        "question": "What is the difference between Spot Instances and Reserved Instances?",
+        "answer": "👉 Spot: Excess capacity at up to 90% discount. Can be interrupted with 2-minute notice. Use for: batch, CI/CD, stateless workers, fault-tolerant workloads.\n\n👉 Reserved: 1- or 3-year commitment for steady-state workload. Significant discount vs On-Demand. Standard (no flexibility), Convertible (can change instance type), or Savings Plans (compute spend). Use for: baseline production capacity.\n\n👉 Strategy: Reserve baseline; use Spot for variable/interruptible; On-Demand for the gap. Diversify instance types for Spot to reduce interruption risk.",
+        "tags": ["EC2", "Cost", "Spot", "Reserved"],
+        "keyFeatures": [],
+        "actionWords": ["Spot", "Reserved Instances", "Savings Plans", "interruptible"],
+        "codeExample": ""
+    },
+    {
+        "id": 92,
+        "topic": "aws",
+        "question": "How do you achieve high availability for an RDS database?",
+        "answer": "👉 Multi-AZ: Synchronous replica in another AZ. Automatic failover on failure. Single endpoint; RDS handles DNS switch.\n\n👉 Read replicas: Async replication; use for read scaling. Can promote to standalone. For cross-region DR, use cross-region replicas.\n\n👉 Aurora: 6-way storage replication; &lt;30s failover. Up to 15 read replicas with shared storage.\n\n👉 Application: Connection pooling (RDS Proxy) for failover; retry logic. Use read replicas for read-heavy workloads; route writes to primary.",
+        "tags": ["RDS", "High Availability", "Database"],
+        "keyFeatures": [],
+        "actionWords": ["Multi-AZ", "Read Replicas", "RDS Proxy", "failover"],
+        "codeExample": ""
+    },
+    {
+        "id": 93,
+        "topic": "aws",
+        "question": "What is AWS X-Ray and when do you use it?",
+        "answer": "X-Ray: <mark>Distributed tracing</mark>—visualize request flow across services (Lambda, API Gateway, EC2, RDS, DynamoDB).\n\n👉 Use when: Debugging latency, finding bottlenecks, understanding service dependencies. See end-to-end trace with spans and annotations.\n\n👉 Integration: Enable in Lambda, API Gateway; SDK in custom apps. Propagates trace context across services.\n\n👉 Output: Service map, trace list, segment details. Integrates with CloudWatch. Use for production observability alongside logs and metrics.",
+        "tags": ["X-Ray", "Tracing", "Observability"],
+        "keyFeatures": [],
+        "actionWords": ["X-Ray", "distributed tracing", "service map", "latency"],
+        "codeExample": ""
+    },
+    {
+        "id": 94,
+        "topic": "aws",
+        "question": "Explain the AWS Shared Responsibility Model.",
+        "answer": "AWS secures <mark>the cloud</mark>—physical infrastructure, hypervisor, host OS. You secure <mark>in the cloud</mark>—your data, apps, OS patching, network config, IAM.\n\n👉 AWS: Hardware, regions, AZs, physical security. Managed services: RDS, Lambda—AWS handles OS, patching, platform. You manage: data, access, encryption keys, security groups.\n\n👉 Why it matters: Security incidents often stem from customer misconfig (public S3, weak IAM, unpatched AMIs). Know your responsibilities; use security best practices and Well-Architected reviews.",
+        "tags": ["Security", "Shared Responsibility"],
+        "keyFeatures": [],
+        "actionWords": ["Shared Responsibility", "security of the cloud", "security in the cloud"],
+        "codeExample": ""
+    },
+    {
+        "id": 95,
+        "topic": "aws",
+        "question": "How would you migrate an on-premises database to AWS with minimal downtime?",
+        "answer": "👉 DMS (Database Migration Service): Supports homogeneous (same engine) and heterogeneous (different engine) migrations. CDC for ongoing replication; switch over when ready.\n\n👉 Process: Set up DMS replication instance; create source and target endpoints; run full load + CDC task. Validate; cut over during maintenance window.\n\n👉 Alternatives: For homogenous, native tools (e.g., MySQL dump + replica). For large DBs: use Snowball or DataSync for initial data; DMS for CDC. Test rollback; have runbooks.",
+        "tags": ["Migration", "DMS", "Database"],
+        "keyFeatures": [],
+        "actionWords": ["DMS", "CDC", "full load", "cutover"],
+        "codeExample": ""
     }
 ]

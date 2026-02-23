@@ -1929,6 +1929,23 @@ export const reactQuesionData = [
       "Hydration"
     ],
     "codeExample": ""
+  },
+  {
+    "id": 1137,
+    "topic": "reactJs",
+    "question": "How and why does using an object lookup map instead of nested ternary operators improve performance and scalability in JavaScript? Explain with examples and runtime behavior?",
+    "answer": "<b>A lookup map performs a direct hash table access, which is a constant-time operation. Regardless of how many mappings exist, the JavaScript engine resolves the value in O(1) time.</b>\n\n<b>In contrast, nested ternary operators evaluate conditions sequentially. This means the execution time grows linearly with the number of conditions, resulting in O(n) time complexity in the worst case.</b>\n\n       🔸 Example 1: Nested Ternary (Conditional Execution):\n\n[See code example below]\n\n       🔍 How this executes:\n\n   - JavaScript evaluates conditions <b>top to bottom</b>\n   -   Worst case  :\n\n  * `genderCode === '1'` → false\n  * `genderCode === '2'` → false\n  * `genderCode === '3'` → false\n   - Multiple comparisons + branches\n\n       ⏱ Time Complexity:\n\n   - <b>O(n)</b> where `n` = number of conditions\n   - Execution time increases as conditions grow\n\n       🧠 CPU Impact:\n\n   - Heavy <b>branching</b>\n   - Branch misprediction can cause pipeline flushes\n   -   Costly in  :\n\n  * React renders\n  * Loops\n  * Validation logic\n\n       🔹 Example 2: Lookup Map (Direct Resolution):\n\n[See code example below]\n\n       🔍 How this executes:\n\n   - One <b>hash table lookup</b>\n   - No conditional checks\n   - No branching logic\n\n       ⏱ Time Complexity:\n\n   - <b>O(1)</b> constant time\n   - Execution time stays the same even if mappings increase\n\n       🧠 CPU Impact:\n\n   - <b>Branchless execution</b>\n   - Cache-friendly\n   - Predictable runtime\n\n       🔹 Side-by-Side Execution Comparison:\n\n   -   Condition checks  : Sequential | None\n   -   Time complexity  : O(n) | O(1)\n   -   CPU branches  : Many | None\n   -   Scalability  : Poor | Excellent\n   -   Engine optimization  : De-optimizes | Optimized\n\n       🔹 Example 3: Scaling Scenario (Real-World):\n\n       ❌ Ternary (bad scaling):\n\n[See code example below]\n\n   -   Every new case increases  :\n\n  * Execution time\n  * Branch depth\n  * Bug risk\n\n       ✅ Lookup Map (scales cleanly):\n\n[See code example below]\n\n   - Adding cases does <b>not</b> affect runtime\n   - No logic changes, only data changes\n\n       🔹 Space vs Time Trade-off (Interview Gold):\n\n   - The lookup map uses <b>O(n)</b> space, but this is a one-time cost.\n   - In return, it guarantees <b>O(1)</b> lookup time and predictable execution, which is a favorable trade-off in modern applications.\n\n       🔹 React-Specific Example (Very Strong):\n\n       ❌ Ternary inside render:\n\n[See code example below]\n\n   - Re-evaluated every render\n   - Branching inside JSX\n\n       ✅ Lookup map outside render:\n\n[See code example below]\n\n[See code example below]\n\n✔️ Less work per render\n✔️ Cleaner JSX\n✔️ Better reconciliation performance\n\n       🔹 Interview Closing Statement (Memorable):\n\n   - <b>The optimization is about execution flow, not syntax.</b>\n   - Lookup maps convert conditional logic into constant-time data access, reduce CPU branching, and scale without increasing runtime cost.",
+    "tags": [
+      "react"
+    ],
+    "actionWords": [
+      "top to bottom",
+      "O(n)",
+      "branching",
+      "hash table lookup",
+      "O(1)"
+    ],
+    "codeExample": "js\ngender:\n  genderCode === '1'\n    ? 'male'\n    : genderCode === '2'\n      ? 'female'\n      : genderCode === '3'\n        ? 'transgender'\n        : 'unknown'\n\njs\nconst genderMap = {\n  '1': 'male',\n  '2': 'female',\n  '3': 'transgender'\n};\n\ngender: genderMap[genderCode] ?? 'unknown'\n\njs\nstatus === 'A' ? 'active'\n: status === 'I' ? 'inactive'\n: status === 'S' ? 'suspended'\n: status === 'D' ? 'deleted'\n: status === 'B' ? 'blocked'\n: 'unknown'\n\njs\nconst statusMap = {\n  A: 'active',\n  I: 'inactive',\n  S: 'suspended',\n  D: 'deleted',\n  B: 'blocked'\n};\n\nstatusMap[status] ?? 'unknown'\n\njsx\n<span>\n  {code === '1' ? 'male' : code === '2' ? 'female' : 'transgender'}\n</span>\n\njs\nconst genderMap = { '1': 'male', '2': 'female', '3': 'transgender' };\n\njsx\n<span>{genderMap[code]}</span>"
   }
 
 
