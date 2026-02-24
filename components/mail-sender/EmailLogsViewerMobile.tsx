@@ -96,8 +96,8 @@ export function EmailLogsViewerMobile({
             <p className="text-gray-400 font-medium">{emptyMessage}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border-2 border-cyan-500/30 bg-black/40">
-            <table className="w-full min-w-[400px] text-left">
+          <div className="overflow-x-auto rounded-xl border-2 border-cyan-500/30 bg-black/40 w-full max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <table className="w-full min-w-[320px] text-left">
               <thead>
                 <tr className="border-b border-cyan-500/30">
                   <th className="p-2 w-10">

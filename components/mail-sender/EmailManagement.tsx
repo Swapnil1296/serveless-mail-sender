@@ -9,7 +9,7 @@ export default function EmailManagement() {
   const [activeTab, setActiveTab] = useState<'sender' | 'logs'>('sender');
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black w-full max-w-full overflow-x-hidden min-w-0">
       {/* Tab Navigation */}
       <div className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-[72px] z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">

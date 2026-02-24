@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Send, CheckCircle, XCircle, RefreshCw, Trash2, Clock, X } from 'lucide-react';
 import SciFiLoader from '@/components/SciFiLoader';
 import { format } from 'date-fns/format';
@@ -103,10 +103,17 @@ export default function EmailLogsViewer() {
   const [detailLog, setDetailLog] = useState<EmailLog | null>(null);
   const [isMobileView, setIsMobileView] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
     fetchLogs();
   }, [page, filters]);
+
+  // Reset to page 1 when search or other filters change so results make sense
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1);
+  };
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -127,18 +134,19 @@ export default function EmailLogsViewer() {
   }, [showFollowUpModal]);
 
   const fetchLogs = async () => {
+    const thisFetchId = ++fetchIdRef.current;
     setLoading(true);
     setFetchError(null);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([_, v]) => v !== '')
-        ),
-       });
-       
-      const response = await fetch(`/api/email-logs?${params}`, {
+      const params = new URLSearchParams();
+      params.set('page', page.toString());
+      params.set('limit', '20');
+      if (filters.search?.trim()) params.set('search', filters.search.trim());
+      if (filters.status) params.set('status', filters.status);
+      if (filters.jobType) params.set('jobType', filters.jobType);
+      if (filters.followUpSent) params.set('followUpSent', filters.followUpSent);
+
+      const response = await fetch(`/api/email-logs?${params.toString()}`, {
         cache: 'no-store',
         headers: {
           'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
@@ -146,6 +154,9 @@ export default function EmailLogsViewer() {
       });
 
       const data = await response.json();
+
+      // Ignore response if a newer request has already been sent (prevents stale search results)
+      if (thisFetchId !== fetchIdRef.current) return;
 
       if (!response.ok) {
         throw new Error(data?.error || data?.message || `Request failed: ${response.status}`);
@@ -164,11 +175,12 @@ export default function EmailLogsViewer() {
       setStats(data?.stats ?? null);
       setTotalPages(data?.pagination?.pages ?? 1);
     } catch (error) {
+      if (thisFetchId !== fetchIdRef.current) return;
       const msg = error instanceof Error ? error.message : 'Failed to load email logs';
       setFetchError(msg);
       setLogs([]);
     } finally {
-      setLoading(false);
+      if (thisFetchId === fetchIdRef.current) setLoading(false);
     }
   };
 
@@ -388,8 +400,8 @@ export default function EmailLogsViewer() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-2 sm:p-4 md:p-8 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-black p-2 sm:p-4 md:p-8 overflow-x-hidden w-full max-w-full min-w-0">
+      <div className="max-w-7xl mx-auto w-full min-w-0">
         <div className="bg-gradient-to-br from-cyan-950/40 via-purple-950/40 to-black/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border-2 border-cyan-500/30 p-4 sm:p-6 md:p-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8 relative">
@@ -494,14 +506,14 @@ export default function EmailLogsViewer() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             <input
               type="text"
-              placeholder="Search emails..."
+              placeholder="Search by recipient email..."
               value={filters.search}
-              onChange={e => setFilters({ ...filters, search: e.target.value })}
+              onChange={e => handleFilterChange('search', e.target.value)}
               className="px-3 sm:px-4 py-2 sm:py-3 bg-black/40 border-2 border-cyan-500/50 rounded-lg sm:rounded-xl text-white text-sm sm:text-base placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
             />
             <select
               value={filters.status}
-              onChange={e => setFilters({ ...filters, status: e.target.value })}
+              onChange={e => handleFilterChange('status', e.target.value)}
               className="px-3 sm:px-4 py-2 sm:py-3 bg-black/40 border-2 border-cyan-500/50 rounded-lg sm:rounded-xl text-white text-sm sm:text-base focus:border-cyan-400 focus:outline-none"
             >
               <option value="">All Status</option>
@@ -510,7 +522,7 @@ export default function EmailLogsViewer() {
             </select>
             <select
               value={filters.jobType}
-              onChange={e => setFilters({ ...filters, jobType: e.target.value })}
+              onChange={e => handleFilterChange('jobType', e.target.value)}
               className="px-3 sm:px-4 py-2 sm:py-3 bg-black/40 border-2 border-cyan-500/50 rounded-lg sm:rounded-xl text-white text-sm sm:text-base focus:border-cyan-400 focus:outline-none"
             >
               <option value="">All Job Types</option>
@@ -519,7 +531,7 @@ export default function EmailLogsViewer() {
             </select>
             <select
               value={filters.followUpSent}
-              onChange={e => setFilters({ ...filters, followUpSent: e.target.value })}
+              onChange={e => handleFilterChange('followUpSent', e.target.value)}
               className="px-3 sm:px-4 py-2 sm:py-3 bg-black/40 border-2 border-cyan-500/50 rounded-lg sm:rounded-xl text-white text-sm sm:text-base focus:border-cyan-400 focus:outline-none"
             >
               <option value="">All Follow-ups</option>

@@ -37,18 +37,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (status) query.status = status;
     if (jobType) query.jobType = jobType;
     if (followUpSent !== undefined) query.followUpSent = followUpSent === 'true';
+    // Search filters by recipient email only, so e.g. "swapnil" shows swapnillandage79@gmail.com, not sender name
     const searchStr = Array.isArray(search) ? search[0] : search;
     if (searchStr && typeof searchStr === 'string') {
       const trimmed = searchStr.trim().slice(0, 100); // Limit length to prevent regex DoS
       if (trimmed) {
         const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(escaped, 'i');
-        query.$or = [
-          { email: regex },
-          { note: regex },
-          { phoneNumber: regex },
-          { senderName: regex },
-        ];
+        query.email = { $regex: escaped, $options: 'i' };
       }
     }
 
@@ -87,19 +82,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       note: log.note ?? '',
     }));
 
-    // Get statistics
-    const stats = await EmailLog.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalSent: { $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] } },
-          totalFailed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
-          followUpsSent: { $sum: { $cond: ['$followUpSent', 1, 0] } },
-          frontendEmails: { $sum: { $cond: [{ $eq: ['$jobType', 'frontend'] }, 1, 0] } },
-          mernEmails: { $sum: { $cond: [{ $eq: ['$jobType', 'mern'] }, 1, 0] } },
-        },
+    // Get statistics (use same query so stats reflect filtered results when searching)
+    const statsPipeline: any[] = [];
+    if (Object.keys(query).length > 0) {
+      statsPipeline.push({ $match: query });
+    }
+    statsPipeline.push({
+      $group: {
+        _id: null,
+        totalSent: { $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] } },
+        totalFailed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
+        followUpsSent: { $sum: { $cond: ['$followUpSent', 1, 0] } },
+        frontendEmails: { $sum: { $cond: [{ $eq: ['$jobType', 'frontend'] }, 1, 0] } },
+        mernEmails: { $sum: { $cond: [{ $eq: ['$jobType', 'mern'] }, 1, 0] } },
       },
-    ]);
+    });
+    const stats = await EmailLog.aggregate(statsPipeline);
 
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     return res.status(200).json({
