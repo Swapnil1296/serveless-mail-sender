@@ -3,8 +3,9 @@ import { verifyToken, getTokenFromRequest } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { PROJECT_SLUGS } from '@/lib/constants';
+import { withEncryption } from '@/lib/withEncryption';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -44,3 +45,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 }
+
+export default withEncryption(handler);

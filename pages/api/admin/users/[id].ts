@@ -3,7 +3,8 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth';
 import { validateProjectSlugs } from '@/lib/validation';
-import { PROJECT_SLUGS } from '@/lib/constants';
+import { withEncryption } from '@/lib/withEncryption';
+import { emitVisibilityUpdated } from '@/lib/socketServer';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
@@ -22,6 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const slugs = validateProjectSlugs(visibleProjects);
     user.visibleProjects = slugs;
     await user.save();
+    emitVisibilityUpdated(String(user._id));
     return res.status(200).json({
       success: true,
       user: {
@@ -37,4 +39,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
-export default requireAdmin(handler);
+export default withEncryption(requireAdmin(handler));

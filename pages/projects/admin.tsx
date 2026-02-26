@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAuthHeaders } from '@/lib/api';
+import apiClient, { ApiClientError } from '@/lib/apiClient';
 import { PROJECT_SLUGS } from '@/lib/constants';
 import { Settings, Save, Loader2, Shield, User as UserIcon, KeyRound } from 'lucide-react';
 
@@ -42,13 +42,11 @@ export default function AdminPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/admin/users', { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error(res.status === 403 ? 'Forbidden' : 'Failed to load users');
-        const data = await res.json();
-        setUsers(data.users || []);
+        const res = await apiClient.get<{ users: ApiUser[] }>('/api/admin/users');
+        setUsers(res.data?.users ?? []);
         setDirty({});
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load');
+        setError(e instanceof ApiClientError ? e.message : 'Failed to load');
       } finally {
         setLoading(false);
       }
@@ -66,14 +64,14 @@ export default function AdminPage() {
     setSavingId(userId);
     setError('');
     try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ visibleProjects }),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      const data = await res.json();
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, visibleProjects: data.user.visibleProjects } : u)));
+      const res = await apiClient.put<{ user: { visibleProjects: string[] } }>(
+        `/api/admin/users/${userId}`,
+        { visibleProjects }
+      );
+      const data = res.data;
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, visibleProjects: data?.user?.visibleProjects ?? u.visibleProjects } : u))
+      );
       setDirty((d) => {
         const next = { ...d };
         delete next[userId];
@@ -81,7 +79,7 @@ export default function AdminPage() {
       });
       await refreshUser();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Update failed');
+      setError(e instanceof ApiClientError ? e.message : 'Update failed');
     } finally {
       setSavingId(null);
     }
@@ -96,19 +94,13 @@ export default function AdminPage() {
     setChangePasswordMessage(null);
     setChangePasswordLoading(true);
     try {
-      const res = await fetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
+      await apiClient.post('/api/auth/change-password', { currentPassword, newPassword });
       setChangePasswordMessage('success');
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
       setChangePasswordMessage('error');
-      setError(err instanceof Error ? err.message : 'Failed to change password');
+      setError(err instanceof ApiClientError ? err.message : 'Failed to change password');
     } finally {
       setChangePasswordLoading(false);
     }

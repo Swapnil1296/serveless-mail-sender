@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import apiClient, { ApiClientError } from '@/lib/apiClient';
+import { useVisibilitySync } from '@/hooks/useVisibilitySync';
 
 export interface User {
   id: string;
@@ -36,12 +38,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      const response = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      const res = await apiClient.get<{ success: boolean; user?: User }>('/api/auth/me');
+      const data = res.data;
+      if (data?.success && data.user) {
         setUser(data.user);
       } else {
         localStorage.removeItem('auth_token');
@@ -63,37 +62,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [checkAuth]);
 
   const login = async (username: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Login failed');
+    try {
+      const res = await apiClient.post<{ token: string; user: User }>('/api/auth/login', {
+        username,
+        password,
+      });
+      const data = res.data;
+      if (data?.token) {
+        localStorage.setItem('auth_token', data.token);
+        setUser(data.user ?? null);
+        await checkAuth();
+      } else {
+        throw new Error('Login failed');
+      }
+    } catch (e) {
+      throw new Error(e instanceof ApiClientError ? e.message : 'Login failed');
     }
-
-    localStorage.setItem('auth_token', data.token);
-    setUser(data.user);
-    await checkAuth();
   };
 
   const signup = async (username: string, email: string, password: string) => {
-    const response = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Signup failed');
+    try {
+      const res = await apiClient.post<{ token: string; user: User }>('/api/auth/signup', {
+        username,
+        email,
+        password,
+      });
+      const data = res.data;
+      if (data?.token) {
+        localStorage.setItem('auth_token', data.token);
+        setUser(data.user ?? null);
+        await checkAuth();
+      } else {
+        throw new Error('Signup failed');
+      }
+    } catch (e) {
+      throw new Error(e instanceof ApiClientError ? e.message : 'Signup failed');
     }
-
-    localStorage.setItem('auth_token', data.token);
-    setUser(data.user);
-    await checkAuth();
   };
 
   const logout = () => {
@@ -105,6 +109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshUser = useCallback(async () => {
     await checkAuth();
   }, [checkAuth]);
+
+  const token =
+    typeof window !== 'undefined' && user ? localStorage.getItem('auth_token') : null;
+  useVisibilitySync(refreshUser, token);
 
   const isAdmin = user?.role === 'admin';
   const visibleProjects = user?.visibleProjects ?? [];

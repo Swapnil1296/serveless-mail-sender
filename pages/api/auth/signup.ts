@@ -4,8 +4,9 @@ import User from '@/models/User';
 import { hashPassword, generateToken } from '@/lib/auth';
 import { validateEmail, validateUsername, validatePassword } from '@/lib/validation';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rateLimit';
+import { withEncryption } from '@/lib/withEncryption';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const sendJson = (status: number, body: object) => {
     if (!res.headersSent) {
       res.setHeader('Content-Type', 'application/json');
@@ -84,3 +85,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return sendJson(500, { error: 'Internal server error' });
   }
 }
+
+export default withEncryption(handler);

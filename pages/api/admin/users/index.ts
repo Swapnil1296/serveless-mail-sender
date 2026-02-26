@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth';
+import { withEncryption } from '@/lib/withEncryption';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -27,4 +28,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json({ success: true, users: list });
 }
 
-export default requireAdmin(handler);
+export default withEncryption(requireAdmin(handler));

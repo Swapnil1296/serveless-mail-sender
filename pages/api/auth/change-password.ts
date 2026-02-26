@@ -3,8 +3,9 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAuth, verifyPassword, hashPassword, getTokenFromRequest, verifyToken } from '@/lib/auth';
 import { validatePassword } from '@/lib/validation';
+import { withEncryption } from '@/lib/withEncryption';
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function changePasswordHandler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -51,4 +52,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json({ success: true });
 }
 
-export default requireAuth(handler);
+export default withEncryption(requireAuth(changePasswordHandler));
