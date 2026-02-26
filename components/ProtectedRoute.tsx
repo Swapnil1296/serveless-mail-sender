@@ -5,17 +5,34 @@ import SciFiLoader from '@/components/SciFiLoader';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  /** If set, only users with this project in visibleProjects (or admin) can access */
+  projectSlug?: string;
+  /** If set, only this role can access (e.g. 'admin') */
+  requiredRole?: 'admin' | 'user';
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, loading } = useAuth();
+export default function ProtectedRoute({ children, projectSlug, requiredRole }: ProtectedRouteProps) {
+  const { isAuthenticated, loading, user, isAdmin, visibleProjects } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (loading) return;
+    if (!isAuthenticated) {
       router.push('/');
+      return;
     }
-  }, [isAuthenticated, loading, router]);
+    if (requiredRole === 'admin' && !isAdmin) {
+      router.push('/');
+      return;
+    }
+    if (projectSlug && !isAdmin) {
+      const allowed = Array.isArray(visibleProjects) && visibleProjects.includes(projectSlug);
+      if (!allowed) {
+        router.push('/');
+        return;
+      }
+    }
+  }, [isAuthenticated, loading, router, requiredRole, isAdmin, projectSlug, visibleProjects]);
 
   if (loading) {
     return (
@@ -27,6 +44,15 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (requiredRole === 'admin' && !isAdmin) {
+    return null;
+  }
+
+  if (projectSlug && !isAdmin) {
+    const allowed = Array.isArray(visibleProjects) && visibleProjects.includes(projectSlug);
+    if (!allowed) return null;
   }
 
   return <>{children}</>;

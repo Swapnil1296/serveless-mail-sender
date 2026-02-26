@@ -7,7 +7,7 @@ export default function InterviewQuizPage() {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute projectSlug="interview-quiz">
       <Head>
         <title>Quiz - Interview Prep Platform</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -7,7 +7,7 @@ export default function ResumeCreatorPage() {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute projectSlug="resume-creator">
       <Head>
         <title>ATS Resume Creator - Project Dashboard</title>
         <meta

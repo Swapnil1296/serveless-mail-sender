@@ -7,7 +7,7 @@ export default function NaukariScraperPage() {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute projectSlug="naukari-scraper">
       <Head>
         <title>Naukri Scraper - Project Dashboard</title>
         <meta name="description" content="Automated Naukri.com Job Application System" />

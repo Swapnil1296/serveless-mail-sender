@@ -9,52 +9,53 @@ export default function EmailManagement() {
   const [activeTab, setActiveTab] = useState<'sender' | 'logs'>('sender');
 
   return (
-    <div className="min-h-screen bg-black w-full max-w-full overflow-x-hidden min-w-0">
-      {/* Tab Navigation */}
-      <div className="bg-black/95 backdrop-blur-md border-b-2 border-cyan-500/30 sticky top-[72px] z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex gap-4">
+    <div className="h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] flex flex-col bg-black w-full max-w-full overflow-hidden min-w-0">
+      {/* Tab Navigation - compact, solid background (mobile-first) */}
+      <div
+        className="flex-shrink-0 border-b border-cyan-500/40 z-40"
+        style={{ background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)' }}
+      >
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => setActiveTab('sender')}
-              className={`relative px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all overflow-hidden group ${
+              className={`relative px-3 py-2 sm:px-4 sm:py-2 rounded-md font-bold uppercase tracking-wider transition-all overflow-hidden group text-xs sm:text-sm ${
                 activeTab === 'sender'
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/50'
-                  : 'text-cyan-300 border-2 border-cyan-500/30 hover:border-cyan-400/50 hover:text-cyan-200'
+                  ? 'bg-cyan-600 text-white border border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                  : 'bg-slate-800/80 text-slate-300 border border-slate-600 hover:border-cyan-500/50 hover:text-cyan-200'
               }`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <span className="relative z-10 flex items-center gap-2">
-                <Mail className="w-5 h-5" />
+              <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                <Mail className="w-4 h-4 sm:w-4 sm:h-4 shrink-0" />
                 <span>Email Sender</span>
               </span>
               {activeTab === 'sender' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 animate-pulse" />
               )}
             </button>
 
             <button
               onClick={() => setActiveTab('logs')}
-              className={`relative px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all overflow-hidden group ${
+              className={`relative px-3 py-2 sm:px-4 sm:py-2 rounded-md font-bold uppercase tracking-wider transition-all overflow-hidden group text-xs sm:text-sm ${
                 activeTab === 'logs'
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-2 border-purple-400/50 shadow-lg shadow-purple-500/50'
-                  : 'text-cyan-300 border-2 border-cyan-500/30 hover:border-purple-400/50 hover:text-purple-200'
+                  ? 'bg-purple-600 text-white border border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                  : 'bg-slate-800/80 text-slate-300 border border-slate-600 hover:border-purple-500/50 hover:text-purple-200'
               }`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <span className="relative z-10 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+              <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                <FileText className="w-4 h-4 sm:w-4 sm:h-4 shrink-0" />
                 <span>Email Logs</span>
               </span>
               {activeTab === 'logs' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-400 animate-pulse" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div>
+      {/* Content - scrollable area so no page scroll */}
+      <div className="flex-1 min-h-0 overflow-auto">
         {activeTab === 'sender' ? <BulkEmailSender /> : <EmailLogsViewer />}
       </div>
     </div>

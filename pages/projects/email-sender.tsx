@@ -7,7 +7,7 @@ export default function EmailManagementPage() {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
   
   return (
-    <ProtectedRoute>
+    <ProtectedRoute projectSlug="email-sender">
       <Head>
         <title>Email Management - Project Dashboard</title>
         <meta name="description" content="Email sender and logs management" />

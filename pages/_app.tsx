@@ -2,20 +2,22 @@ import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { LogOut, MoreVertical, X } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import RouteLoader from '@/components/RouteLoader';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
-const navLinks = [
-  { href: '/projects/email-sender', paths: ['/projects/email-sender', '/projects/email-logs'], icon: '📧', label: 'Email' },
-  { href: '/projects/interview-prep', paths: ['/projects/interview-prep'], icon: '📝', label: 'Interview' },
-  { href: '/projects/format-converter', paths: ['/projects/format-converter'], icon: '🔄', label: 'Converter' },
-  { href: '/projects/resume-creator', paths: ['/projects/resume-creator'], icon: '📄', label: 'Resume' },
-  { href: '/projects/quiz-hub', paths: ['/projects/quiz-hub'], icon: '📋', label: 'Quiz' },
+const navLinks: { href: string; paths: string[]; icon: string; label: string; slug: string }[] = [
+  { href: '/projects/email-sender', paths: ['/projects/email-sender', '/projects/email-logs'], icon: '📧', label: 'Email', slug: 'email-sender' },
+  { href: '/projects/interview-prep', paths: ['/projects/interview-prep'], icon: '📝', label: 'Interview', slug: 'interview-prep' },
+  { href: '/projects/format-converter', paths: ['/projects/format-converter'], icon: '🔄', label: 'Converter', slug: 'format-converter' },
+  { href: '/projects/resume-creator', paths: ['/projects/resume-creator'], icon: '📄', label: 'Resume', slug: 'resume-creator' },
+  { href: '/projects/quiz-hub', paths: ['/projects/quiz-hub'], icon: '📋', label: 'Quiz', slug: 'quiz-hub' },
+  { href: '/projects/naukari-scraper', paths: ['/projects/naukari-scraper'], icon: '🔍', label: 'Naukri', slug: 'naukari-scraper' },
+  { href: '/projects/expense-tracker', paths: ['/projects/expense-tracker'], icon: '💰', label: 'Expenses', slug: 'expense-tracker' },
 ];
 
 function NavLink({
@@ -64,12 +66,12 @@ const DRAWER_DURATION_MS = 300;
 
 function Navigation() {
   const router = useRouter();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, isAdmin, visibleProjects } = useAuth();
+  const allowedLinks = isAdmin ? navLinks : navLinks.filter((link) => visibleProjects.includes(link.slug));
   const [modalOpen, setModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [drawerExiting, setDrawerExiting] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -112,18 +114,8 @@ function Navigation() {
     setModalOpen(false);
   }, [router.pathname]);
 
-  // Close dropdown when clicking outside (desktop)
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setModalOpen(false);
-      }
-    };
-    if (modalOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [modalOpen]);
+  // Close modal when clicking overlay (handled by overlay onClick)
+  const handleOverlayClick = () => setModalOpen(false);
 
   if (!isProjectPage || !isAuthenticated) {
     return null;
@@ -132,20 +124,24 @@ function Navigation() {
   const showDrawer = modalOpen || drawerExiting;
   const drawerOpen = drawerVisible && !drawerExiting;
 
-  const mobileDrawerContent = (
+  // Single collapsible modal for all screen sizes (mobile-first)
+  const navModalContent = (
     <div
-      className={`fixed inset-0 lg:hidden transition-opacity duration-300 ease-out ${
+      className={`fixed inset-0 transition-opacity duration-300 ease-out ${
         drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
       style={{ zIndex: 2147483647 }}
       aria-hidden={!drawerOpen}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
     >
       <div
         className={`absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity duration-300 ease-out ${
           drawerOpen ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ boxShadow: 'inset 0 0 80px rgba(6,182,212,0.03)' }}
-        onClick={closeModal}
+        onClick={handleOverlayClick}
         aria-hidden="true"
       />
       <div
@@ -164,7 +160,7 @@ function Navigation() {
           <div className="flex items-center justify-between mb-2">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/90 px-2 flex items-center gap-2">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              SYSTEM NAV
+              MENU
             </p>
             <button
               type="button"
@@ -175,7 +171,7 @@ function Navigation() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          {navLinks.map((link) => (
+          {allowedLinks.map((link) => (
             <NavLink
               key={link.href}
               {...link}
@@ -232,78 +228,18 @@ function Navigation() {
             </div>
           </Link>
 
-          {/* Desktop: Inline nav links (xl+) */}
-          <div className="hidden xl:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.href}
-                {...link}
-                isActive={link.paths.includes(router.pathname)}
-              />
-            ))}
-          </div>
-
-          {/* Right: Menu button (lg-xl) or full nav (xl+) + Logout */}
+          {/* Right: Menu button (opens modal on all screen sizes) + Logout */}
           <div className="flex items-center gap-2">
-            {/* Menu button - shows on lg when nav is hidden, always on mobile */}
-            <div ref={menuRef} className="relative xl:hidden">
-              <button
-                type="button"
-                onClick={toggleModal}
-                className="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-600/60 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all"
-                aria-label={modalOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={modalOpen}
-                aria-haspopup="true"
-              >
-                <MoreVertical className="w-5 h-5" />
-              </button>
-
-              {/* Desktop dropdown (lg only, xl has inline nav) - sci-fi style */}
-              <div
-                className={`hidden lg:block xl:hidden absolute right-0 top-full mt-2 w-56 rounded-lg overflow-hidden z-[9999] transition-all duration-300 ease-out ${
-                  modalOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'
-                }`}
-                style={{
-                  background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
-                  border: '1px solid rgba(6,182,212,0.5)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(6,182,212,0.1)',
-                }}
-              >
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/90 to-transparent" />
-                <div className="px-3 py-3">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/90 mb-3 flex items-center gap-2">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                    SYSTEM NAV
-                  </p>
-                  <div className="space-y-1.5">
-                    {navLinks.map((link) => (
-                      <NavLink
-                        key={link.href}
-                        {...link}
-                        isActive={link.paths.includes(router.pathname)}
-                        compact
-                        onClick={closeModal}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-cyan-500/20">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        closeModal();
-                        logout();
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-mono font-bold uppercase tracking-wider text-slate-200 bg-slate-800/90 hover:bg-red-950/80 border border-slate-600 hover:border-red-500/60 transition-all hover:shadow-[0_0_12px_rgba(239,68,68,0.2)]"
-                    >
-                      <LogOut className="w-4 h-4 shrink-0" />
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Logout */}
+            <button
+              type="button"
+              onClick={toggleModal}
+              className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg border border-slate-600/60 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-all"
+              aria-label={modalOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={modalOpen}
+              aria-haspopup="true"
+            >
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
             <button
               onClick={logout}
               className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-400 hover:text-red-300 border border-slate-600/60 hover:border-red-500/40 transition-all"
@@ -318,7 +254,7 @@ function Navigation() {
       {/* Bottom accent */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-slate-600/50 to-transparent" />
     </nav>
-    {mounted && showDrawer && typeof document !== 'undefined' && createPortal(mobileDrawerContent, document.body)}
+    {mounted && showDrawer && typeof document !== 'undefined' && createPortal(navModalContent, document.body)}
     </>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { X, Lock, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { showAlert } from '@/lib/alerts';
@@ -104,15 +105,21 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-cyan-500 border-2 border-cyan-400 text-black font-black uppercase text-xs tracking-[0.4em] hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-wait transition-all relative overflow-hidden group shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+            className="w-full py-4 bg-cyan-500 border-2 border-cyan-400 text-black font-black uppercase text-xs tracking-[0.4em] hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-wait transition-all relative overflow-hidden group shadow-[0_0_20px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2"
           >
+            {loading && (
+              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin shrink-0 relative z-10" aria-hidden />
+            )}
             <span className="relative z-10">{loading ? 'AUTHENTICATING...' : 'EXECUTE_LOGIN'}</span>
             <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-10 text-center border-t border-white/5 pt-6">
+        <div className="mt-10 text-center border-t border-white/5 pt-6 space-y-2">
+          <p className="text-cyan-400/70 text-sm">
+            New user? <Link href="/signup" className="text-cyan-400 hover:underline font-semibold" onClick={onClose}>Sign up</Link>
+          </p>
           <p className="text-cyan-400/20 text-[8px] font-black tracking-widest uppercase">
             WARNING: UNAUTHORIZED_ACCESS_STRICTLY_PROHIBITED // IP_LOGGED
           </p>

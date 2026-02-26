@@ -12,7 +12,7 @@ import Contact from "./Contact";
 import Footer from "./Footer";
 import PersonalProjects from "./PersonalProjects";
 
-export default function Landing({ isAuthenticated, loading, onButtonClick }) {
+export default function Landing({ isAuthenticated, loading, isAdmin, onButtonClick }) {
   const [darkMode] = useState(true); // Force dark mode for cyberpunk
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -37,6 +37,7 @@ export default function Landing({ isAuthenticated, loading, onButtonClick }) {
         scrollPosition={scrollPosition}
         isAuthenticated={isAuthenticated}
         loading={loading}
+        isAdmin={isAdmin}
         onButtonClick={onButtonClick}
       />
 

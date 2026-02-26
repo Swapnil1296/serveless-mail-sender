@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Head from 'next/head';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { convertToQuestionFormat } from '@/components/intervew-prep/utils/formatConverter';
 import FormattedText from '@/components/intervew-prep/components/helpers/FormattedText';
 import { Copy, RefreshCw, FileCode } from 'lucide-react';
@@ -53,6 +54,14 @@ Server logic:
 3. If no: process and store result`;
 
 export default function FormatConverterPage() {
+  return (
+    <ProtectedRoute projectSlug="format-converter">
+      <FormatConverterContent />
+    </ProtectedRoute>
+  );
+}
+
+function FormatConverterContent() {
   const [input, setInput] = useState(DEFAULT_INPUT);
   const [question, setQuestion] = useState('What is Idempotency?');
   const [topic, setTopic] = useState('system-design');

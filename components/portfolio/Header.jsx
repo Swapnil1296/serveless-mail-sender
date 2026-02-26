@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
-import { Lock, Terminal } from "lucide-react";
+import { Lock, Terminal, Settings } from "lucide-react";
 
-const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonClick }) => {
+const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, isAdmin, onButtonClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
@@ -63,7 +64,29 @@ const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonCl
               </motion.button>
             ))}
 
-            {/* Uplink Button Integration */}
+            {/* Auth: Login / Sign up when not authenticated */}
+            {!isAuthenticated && !loading && (
+              <>
+                <motion.a
+                  href="/login"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(6,182,212,0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2.5 border-2 border-cyan-400/50 text-cyan-400 hover:border-cyan-400 transition-all text-[10px] font-black tracking-widest uppercase"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  LOGIN
+                </motion.a>
+                <motion.a
+                  href="/signup"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(6,182,212,0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500/20 border-2 border-cyan-400/50 hover:border-cyan-400 transition-all text-[10px] font-black tracking-widest text-white uppercase neon-text-cyan"
+                >
+                  SIGN UP
+                </motion.a>
+              </>
+            )}
+            {(isAuthenticated || loading) && (
             <motion.button
               onClick={onButtonClick}
               disabled={loading}
@@ -80,6 +103,17 @@ const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonCl
                 {loading ? 'SYNCING' : (isAuthenticated ? 'DASHBOARD' : 'ADMIN_ACCESS')}
               </span>
             </motion.button>
+            )}
+
+            {isAuthenticated && isAdmin && (
+              <Link
+                href="/projects/admin"
+                className="flex items-center gap-2 px-4 py-2.5 bg-transparent border-2 border-white/20 text-white/90 hover:text-white hover:border-white transition-all text-[10px] font-black tracking-widest uppercase"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                ADMIN
+              </Link>
+            )}
 
             <motion.a
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(6,182,212,0.4)" }}
@@ -145,14 +179,42 @@ const Header = ({ darkMode, scrollPosition, isAuthenticated, loading, onButtonCl
               ))}
 
               <div className="grid grid-cols-1 gap-4 px-4 pt-4 border-t border-white/5">
-                <button
-                  onClick={onButtonClick}
-                  disabled={loading}
-                  className="flex items-center justify-center gap-3 py-4 bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 font-black tracking-widest text-xs uppercase neon-text-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]"
-                >
-                  {isAuthenticated ? <Terminal className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
-                  {isAuthenticated ? 'ACCESS_PROJECT_NODES' : 'INITIALIZE_ADMIN_AUTH'}
-                </button>
+                {!isAuthenticated && !loading ? (
+                  <>
+                    <a
+                      href="/login"
+                      className="flex items-center justify-center gap-3 py-4 border-2 border-cyan-500/50 text-cyan-400 font-black tracking-widest text-xs uppercase"
+                    >
+                      <Lock className="w-5 h-5" /> LOGIN
+                    </a>
+                    <a
+                      href="/signup"
+                      className="flex items-center justify-center gap-3 py-4 bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 font-black tracking-widest text-xs uppercase neon-text-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                    >
+                      SIGN UP
+                    </a>
+                  </>
+                ) : (
+                <>
+                  <button
+                    onClick={onButtonClick}
+                    disabled={loading}
+                    className="flex items-center justify-center gap-3 py-4 bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-400 font-black tracking-widest text-xs uppercase neon-text-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                  >
+                    {isAuthenticated ? <Terminal className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                    {isAuthenticated ? 'ACCESS_PROJECT_NODES' : 'INITIALIZE_ADMIN_AUTH'}
+                  </button>
+                  {isAdmin && (
+                    <Link
+                      href="/projects/admin"
+                      className="flex items-center justify-center gap-3 py-4 border-2 border-white/20 text-white/90 font-black tracking-widest text-xs uppercase hover:text-white hover:border-white transition-all"
+                    >
+                      <Settings className="w-5 h-5" />
+                      ADMIN
+                    </Link>
+                  )}
+                </>
+                )}
                 <a
                   href="https://drive.google.com/file/d/1fa6ZZkbo0xYR-YHXy_jQIn0nYYraaVe3/view?usp=sharing"
                   download

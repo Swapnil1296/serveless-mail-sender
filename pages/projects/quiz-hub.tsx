@@ -7,7 +7,7 @@ export default function InterviewHubPage() {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute projectSlug="quiz-hub">
       <Head>
         <title>Interview Prep Platform - Dashboard</title>
         <meta name="description" content="Adaptive MERN interview preparation with quizzes, analytics, and practice" />

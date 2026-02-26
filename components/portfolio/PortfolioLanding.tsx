@@ -10,7 +10,7 @@ import Landing from './Landing';
 export default function PortfolioLanding() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isAdmin } = useAuth();
 
   const handleLoginSuccess = () => {
     setShowDashboard(true);
@@ -39,6 +39,7 @@ export default function PortfolioLanding() {
         <Landing
           isAuthenticated={isAuthenticated}
           loading={loading}
+          isAdmin={isAdmin}
           onButtonClick={handleButtonClick}
         />
       </div>

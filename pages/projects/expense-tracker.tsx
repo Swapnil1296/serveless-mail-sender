@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import { Wallet, HandCoins, CreditCard } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import ExpenseTracker from '@/components/expense-tracker/ExpenseTracker';
 import Lendings from '@/components/expense-tracker/Lendings';
 import Owings from '@/components/expense-tracker/Owings';
@@ -9,6 +10,7 @@ export default function ExpenseTrackerPage() {
   const [activeTab, setActiveTab] = useState<'expenses' | 'lendings' | 'owings'>('expenses');
 
   return (
+    <ProtectedRoute projectSlug="expense-tracker">
     <>
       <Head>
         <title>Expense Tracker | Project Hub</title>
@@ -81,5 +83,6 @@ export default function ExpenseTrackerPage() {
         </div>
       </div>
     </>
+    </ProtectedRoute>
   );
 }

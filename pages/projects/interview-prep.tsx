@@ -1,5 +1,6 @@
 import React from 'react'
 import Head from 'next/head';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { PrepLandingPage } from '@/components/intervew-prep/PrepLandingPage';
 import { getAbsoluteUrl } from '@/lib/siteConfig';
 
@@ -7,6 +8,7 @@ const InterveiPrep = () => {
   const ogImage = getAbsoluteUrl('/cyberpunk.png');
   
   return (
+    <ProtectedRoute projectSlug="interview-prep">
     <>
       <Head>
         <title>Interview Preparation - Technical Questions</title>
@@ -28,6 +30,7 @@ const InterveiPrep = () => {
       </Head>
       <PrepLandingPage />
     </>
+    </ProtectedRoute>
   )
 }
 

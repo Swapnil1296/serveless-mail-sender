@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import { X, Mail, NotebookPen, Plus, Wallet, FileText, HelpCircle } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { X, Mail, NotebookPen, Plus, Wallet, FileText } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardModalProps {
   isOpen: boolean;
@@ -16,69 +17,90 @@ interface Project {
   icon: React.ReactNode;
   route: string;
   slug: string;
+  visibilitySlug: string; // used for role-based visibility (e.g. email-sender)
 }
+
+const ALL_PROJECTS: Project[] = [
+  {
+    id: 'email-management',
+    name: 'Email Management',
+    slug: 'COMMS_v2',
+    visibilitySlug: 'email-sender',
+    description: 'Bulk email sender and protocol log viewer',
+    icon: <Mail className="w-8 h-8" />,
+    route: '/projects/email-sender',
+  },
+  {
+    id: 'expense-tracker',
+    name: 'Expense Tracker',
+    slug: 'FIN_TRK_v1',
+    visibilitySlug: 'expense-tracker',
+    description: 'Track expenses, lendings, and owings',
+    icon: <Wallet className="w-8 h-8" />,
+    route: '/projects/expense-tracker',
+  },
+  {
+    id: 'resume-creator',
+    name: 'ATS Resume Creator',
+    slug: 'RESUME_AI_v1',
+    visibilitySlug: 'resume-creator',
+    description: 'Generate ATS-friendly resume from 5 job descriptions using AI',
+    icon: <FileText className="w-8 h-8" />,
+    route: '/projects/resume-creator',
+  },
+  {
+    id: 'naukari-scraper',
+    name: 'Naukari Scraper',
+    slug: 'NAUK_SCR_V1',
+    visibilitySlug: 'naukari-scraper',
+    description: 'Scrap jobs from naukari',
+    icon: <Wallet className="w-8 h-8" />,
+    route: '/projects/naukari-scraper',
+  },
+  {
+    id: 'interview-preparation-kit',
+    name: 'Interview Prep Kit',
+    slug: 'INT_CORE_v1',
+    visibilitySlug: 'interview-prep',
+    description: 'Heuristic-based interview preparation modules',
+    icon: <NotebookPen className="w-8 h-8" />,
+    route: '/projects/interview-prep',
+  },
+  {
+    id: 'quiz-hub',
+    name: 'Quiz Hub',
+    slug: 'QUIZ_HUB_v1',
+    visibilitySlug: 'quiz-hub',
+    description: 'Quiz Hub with dashboard, quizzes, analytics',
+    icon: <NotebookPen className="w-8 h-8" />,
+    route: '/projects/quiz-hub',
+  },
+  {
+    id: 'interview-quiz',
+    name: 'Interview Quiz',
+    slug: 'INT_QUIZ_v1',
+    visibilitySlug: 'interview-quiz',
+    description: 'Practice interview quizzes',
+    icon: <NotebookPen className="w-8 h-8" />,
+    route: '/projects/interview-quiz',
+  },
+];
 
 export default function DashboardModal({ isOpen, onClose }: DashboardModalProps) {
   const router = useRouter();
+  const { isAdmin, visibleProjects } = useAuth();
 
-  if (!isOpen) return null;
-
-  const projects: Project[] = [
-    {
-      id: 'email-management',
-      name: 'Email Management',
-      slug: 'COMMS_v2',
-      description: 'Bulk email sender and protocol log viewer',
-      icon: <Mail className="w-8 h-8" />,
-      route: '/projects/email-sender',
-    },
-   
-    {
-      id: 'expense-tracker',
-      name: 'Expense Tracker',
-      slug: 'FIN_TRK_v1',
-      description: 'Track expenses, lendings, and owings',
-      icon: <Wallet className="w-8 h-8" />,
-      route: '/projects/expense-tracker',
-    },
-    {
-      id: 'resume-creator',
-      name: 'ATS Resume Creator',
-      slug: 'RESUME_AI_v1',
-      description: 'Generate ATS-friendly resume from 5 job descriptions using AI',
-      icon: <FileText className="w-8 h-8" />,
-      route: '/projects/resume-creator',
-    },
-    {
-      id: 'naukari-scraper',
-      name: 'Naukari Scraper',
-      slug: 'NAUK_SCR_V1',
-      description: 'Scrap jobs from naukari',
-      icon: <Wallet className="w-8 h-8" />,
-      route: '/projects/naukari-scraper',
-    },
-    {
-      id: 'interview-preparation-kit',
-      name: 'Interview Prep Kit',
-      slug: 'INT_CORE_v1',
-      description: 'Heuristic-based interview preparation modules',
-      icon: <NotebookPen className="w-8 h-8" />,
-      route: '/projects/interview-prep',
-    },
-    {
-      id: 'quiz-hub',
-      name: 'Quiz Hub',
-      slug: 'QUIZ_HUB_v1',
-      description: 'Quiz Hub with dashboard, quizzes, analytics',
-      icon: <NotebookPen className="w-8 h-8" />,
-      route: '/projects/quiz-hub',
-    },
-  ];
+  const projects = useMemo(() => {
+    if (isAdmin) return ALL_PROJECTS;
+    return ALL_PROJECTS.filter((p) => visibleProjects.includes(p.visibilitySlug));
+  }, [isAdmin, visibleProjects]);
 
   const handleProjectClick = (route: string) => {
     router.push(route);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4 font-mono">
@@ -145,11 +167,13 @@ export default function DashboardModal({ isOpen, onClose }: DashboardModalProps)
             </button>
           ))}
 
-          {/* Locked/Empty Node - placeholder for future projects */}
-          <div className="relative p-8 bg-white/5 border-2 border-white/5 opacity-30 text-left flex flex-col items-center justify-center border-dashed sm:col-span-2 lg:col-span-1">
-            <Plus className="w-12 h-12 text-white/40 mb-4" />
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase">RESTRICTED_ACCESS</span>
-          </div>
+          {/* Locked/Empty Node - placeholder for future projects (admin only) */}
+          {isAdmin && (
+            <div className="relative p-8 bg-white/5 border-2 border-white/5 opacity-30 text-left flex flex-col items-center justify-center border-dashed sm:col-span-2 lg:col-span-1">
+              <Plus className="w-12 h-12 text-white/40 mb-4" />
+              <span className="text-[10px] font-black tracking-[0.3em] uppercase">RESTRICTED_ACCESS</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

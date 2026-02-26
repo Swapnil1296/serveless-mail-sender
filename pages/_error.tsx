@@ -1,12 +1,15 @@
 import { NextPageContext } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 
 interface ErrorProps {
   statusCode?: number;
 }
 
+/**
+ * Minimal error page with no external icon deps so Next.js can always load it
+ * when "missing required error components" would otherwise occur.
+ */
 function Error({ statusCode }: ErrorProps) {
   const is404 = statusCode === 404;
   const title = is404 ? 'Page Not Found' : 'Something went wrong';
@@ -22,8 +25,8 @@ function Error({ statusCode }: ErrorProps) {
       </Head>
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/10 border-2 border-red-500/30 mb-6">
-            <AlertTriangle className="w-12 h-12 text-red-400" />
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/10 border-2 border-red-500/30 mb-6 text-red-400 text-4xl" aria-hidden>
+            !
           </div>
           <p className="text-cyan-400 font-mono text-6xl mb-2">{statusCode || '?'}</p>
           <h1 className="text-2xl font-bold text-white mb-3">{title}</h1>
@@ -33,14 +36,12 @@ function Error({ statusCode }: ErrorProps) {
               href="/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold uppercase tracking-wider bg-cyan-500/20 border-2 border-cyan-500/50 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/30 transition-all"
             >
-              <Home className="w-4 h-4" />
               Home
             </Link>
             <button
               onClick={() => typeof window !== 'undefined' && window.location.reload()}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold uppercase tracking-wider bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-purple-400 hover:bg-purple-500/30 transition-all"
             >
-              <RefreshCw className="w-4 h-4" />
               Retry
             </button>
           </div>
