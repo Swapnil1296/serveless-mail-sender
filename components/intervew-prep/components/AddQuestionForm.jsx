@@ -122,7 +122,7 @@ const AddQuestionForm = ({ dataSources }) => {
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg"
+            className="w-full p-3 border border-gray-300 rounded-lg bg-cyan-500 text-black"
             placeholder="Enter the question here"
             required
           />
@@ -136,7 +136,7 @@ const AddQuestionForm = ({ dataSources }) => {
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg"
+            className="w-full p-3 border border-gray-300 rounded-lg bg-cyan-500 text-black"
             rows="6"
             placeholder="Enter the answer here. Use markdown like **bold** or *italic*."
             required
@@ -152,7 +152,7 @@ const AddQuestionForm = ({ dataSources }) => {
             type="text"
             value={actionWords}
             onChange={(e) => setActionWords(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg"
+            className="w-full p-3 border border-gray-300 rounded-lg bg-cyan-500 text-black"
             placeholder="e.g., control, modify, useful"
           />
         </div>
@@ -166,7 +166,7 @@ const AddQuestionForm = ({ dataSources }) => {
             type="text"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg"
+            className="w-full p-3 border border-gray-300 rounded-lg bg-cyan-500 text-black"
             placeholder="e.g., HOC, React"
           />
         </div>
