@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Lock, Briefcase, Terminal } from 'lucide-react';
 import LoginModal from '../LoginModal';
 import DashboardModal from '../mail-sender/DashboardModal';
+import LandingChatBot from '../landing-chatbot/LandingChatBot';
 import { useAuth } from '@/contexts/AuthContext';
 import Landing from './Landing';
 
@@ -57,6 +57,8 @@ export default function PortfolioLanding() {
         isOpen={showDashboard}
         onClose={() => setShowDashboard(false)}
       />
+
+      <LandingChatBot />
     </div>
   );
 }
