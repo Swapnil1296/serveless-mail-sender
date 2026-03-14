@@ -61,6 +61,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, [checkAuth]);
 
+  // PWA/bfcache fix: when page is restored from back-forward cache or tab becomes visible,
+  // re-validate auth against localStorage so we don't show stale "logged in" state after logout
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleRevalidate = () => checkAuth();
+
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) handleRevalidate(); // restored from bfcache
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') handleRevalidate();
+    };
+
+    window.addEventListener('pageshow', onPageShow);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [checkAuth]);
+
   const login = async (username: string, password: string) => {
     try {
       const res = await apiClient.post<{ token: string; user: User }>('/api/auth/login', {

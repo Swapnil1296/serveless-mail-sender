@@ -1,13 +1,14 @@
 {
   "name": "Project Hub - Swapnil Landage",
-  "short_name": "Easy Interview",
+  "short_name": "Project Hub",
   "description": "Full Stack Developer Tools - Email, Interview Prep, Resume Creator & More",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#06b6d4",
-  "scope": "/",
   "icons": [
     {
       "src": "/cyberpunk_circle_image.png",

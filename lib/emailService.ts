@@ -59,6 +59,7 @@ const getEmailTemplate = (jobType: 'frontend' | 'mern', name: string): string =>
       <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #2563eb;">ReactJS / NextJS / Frontend Developer</h2>
+          <h3 style="color: #2563eb;">Serving Notice Period / Immediate Joiner</h3>
           <p>Dear Hiring Manager,</p>
           <p>I hope you are doing well. I am writing to express my interest in the <strong>React.js/ Next.js/ Frontend Developer</strong> role at your organization.</p>
           <p><strong>Core Frontend Skills:</strong></p>
@@ -71,7 +72,7 @@ const getEmailTemplate = (jobType: 'frontend' | 'mern', name: string): string =>
           <p>Thank you for your time and consideration.</p>
           <p>Best regards,<br>${sanitizedName}<br>Phone/WhatsApp: 7666604697<br>
           <a href="https://github.com/Swapnil1296">Github</a><br>
-          <a href="https://swapnil-landage-portfolio.netlify.app/">Portfolio</a></p>
+            <a href="https://swapnillandage.in">Portfolio</a></p>
         </body>
       </html>
     `;
@@ -81,6 +82,7 @@ const getEmailTemplate = (jobType: 'frontend' | 'mern', name: string): string =>
     <html>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <h2 style="color: #10b981;">Application for MERN Developer Role</h2>
+         <h3 style="color: #2563eb;">Serving Notice Period / Immediate Joiner</h3>
         <p>Dear Hiring Manager,</p>
         <p>I hope you are doing well. I am writing to express my interest in the <strong>MERN stack Developer</strong> position.</p>
         <p><strong>Technical Skills:</strong></p>
@@ -93,7 +95,7 @@ const getEmailTemplate = (jobType: 'frontend' | 'mern', name: string): string =>
         <p>Thank you for your time and consideration.</p>
         <p>Best regards,<br>${sanitizedName}<br>Phone/WhatsApp: 7666604697<br>
         <a href="https://github.com/Swapnil1296">Github</a><br>
-        <a href="https://swapnil-landage-portfolio.netlify.app/">Portfolio</a></p>
+          <a href="https://swapnillandage.in">Portfolio</a></p>
       </body>
     </html>
   `;
@@ -109,6 +111,7 @@ const getFollowUpTemplate = (jobType: 'frontend' | 'mern', name: string): string
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="border-left: 4px solid #2563eb; padding-left: 20px; margin-bottom: 20px;">
             <h2 style="color: #2563eb; margin: 0;">Following Up: Frontend Developer Position</h2>
+            <h3 style="color: #2563eb;">Serving Notice Period / Immediate Joiner</h3>
           </div>
           
           <p>Dear Hiring Manager,</p>
@@ -153,6 +156,7 @@ const getFollowUpTemplate = (jobType: 'frontend' | 'mern', name: string): string
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="border-left: 4px solid #10b981; padding-left: 20px; margin-bottom: 20px;">
           <h2 style="color: #10b981; margin: 0;">Following Up: MERN Stack Developer Position</h2>
+          <h3 style="color: #10b981;">Serving Notice Period / Immediate Joiner</h3>
         </div>
         
         <p>Dear Hiring Manager,</p>

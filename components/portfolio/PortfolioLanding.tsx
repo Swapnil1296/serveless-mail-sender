@@ -17,7 +17,9 @@ export default function PortfolioLanding() {
   };
 
   const handleButtonClick = () => {
-    if (isAuthenticated) {
+    // PWA fix: verify token exists; bfcache/visibility can leave stale isAuthenticated
+    const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
+    if (isAuthenticated && hasToken) {
       setShowDashboard(true);
     } else {
       setShowLoginModal(true);
