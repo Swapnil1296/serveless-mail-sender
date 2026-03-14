@@ -30,33 +30,7 @@ const ALL_PROJECTS: Project[] = [
     icon: <Mail className="w-8 h-8" />,
     route: '/projects/email-sender',
   },
-  {
-    id: 'expense-tracker',
-    name: 'Expense Tracker',
-    slug: 'FIN_TRK_v1',
-    visibilitySlug: 'expense-tracker',
-    description: 'Track expenses, lendings, and owings',
-    icon: <Wallet className="w-8 h-8" />,
-    route: '/projects/expense-tracker',
-  },
-  {
-    id: 'resume-creator',
-    name: 'ATS Resume Creator',
-    slug: 'RESUME_AI_v1',
-    visibilitySlug: 'resume-creator',
-    description: 'Generate ATS-friendly resume from 5 job descriptions using AI',
-    icon: <FileText className="w-8 h-8" />,
-    route: '/projects/resume-creator',
-  },
-  {
-    id: 'naukari-scraper',
-    name: 'Naukari Scraper',
-    slug: 'NAUK_SCR_V1',
-    visibilitySlug: 'naukari-scraper',
-    description: 'Scrap jobs from naukari',
-    icon: <Wallet className="w-8 h-8" />,
-    route: '/projects/naukari-scraper',
-  },
+  
   {
     id: 'interview-preparation-kit',
     name: 'Interview Prep Kit',
@@ -66,7 +40,7 @@ const ALL_PROJECTS: Project[] = [
     icon: <NotebookPen className="w-8 h-8" />,
     route: '/projects/interview-prep',
   },
-  {
+   {
     id: 'quiz-hub',
     name: 'Quiz Hub',
     slug: 'QUIZ_HUB_v1',
@@ -76,14 +50,34 @@ const ALL_PROJECTS: Project[] = [
     route: '/projects/quiz-hub',
   },
   {
-    id: 'interview-quiz',
-    name: 'Interview Quiz',
-    slug: 'INT_QUIZ_v1',
-    visibilitySlug: 'interview-quiz',
-    description: 'Practice interview quizzes',
-    icon: <NotebookPen className="w-8 h-8" />,
-    route: '/projects/interview-quiz',
+    id: 'expense-tracker',
+    name: 'Expense Tracker',
+    slug: 'FIN_TRK_v1',
+    visibilitySlug: 'expense-tracker',
+    description: 'Track expenses, lendings, and owings',
+    icon: <Wallet className="w-8 h-8" />,
+    route: '/projects/expense-tracker',
   },
+ 
+  {
+    id: 'naukari-scraper',
+    name: 'Naukari Scraper',
+    slug: 'NAUK_SCR_V1',
+    visibilitySlug: 'naukari-scraper',
+    description: 'Scrap jobs from naukari',
+    icon: <Wallet className="w-8 h-8" />,
+    route: '/projects/naukari-scraper',
+  },
+   {
+    id: 'resume-creator',
+    name: 'ATS Resume Creator',
+    slug: 'RESUME_AI_v1',
+    visibilitySlug: 'resume-creator',
+    description: 'Generate ATS-friendly resume from 5 job descriptions using AI',
+    icon: <FileText className="w-8 h-8" />,
+    route: '/projects/resume-creator',
+  },
+  
 ];
 
 export default function DashboardModal({ isOpen, onClose }: DashboardModalProps) {
