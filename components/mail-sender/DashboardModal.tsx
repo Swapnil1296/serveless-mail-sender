@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { X, Mail, NotebookPen, Plus, Wallet, FileText } from 'lucide-react';
+import { X, Mail, NotebookPen, Plus, Wallet, FileText, Cpu } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -68,7 +68,16 @@ const ALL_PROJECTS: Project[] = [
     icon: <Wallet className="w-8 h-8" />,
     route: '/projects/naukari-scraper',
   },
-   {
+  {
+    id: 'mern-visualizer',
+    name: 'MERN Visualizer',
+    slug: 'MERN_VIZ_v1',
+    visibilitySlug: 'mern-visualizer',
+    description: 'Animated visualizations of React state, Node event loop, closures, workers',
+    icon: <Cpu className="w-8 h-8" />,
+    route: '/projects/mern-visualizer',
+  },
+  {
     id: 'resume-creator',
     name: 'ATS Resume Creator',
     slug: 'RESUME_AI_v1',

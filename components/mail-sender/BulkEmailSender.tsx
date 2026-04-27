@@ -26,17 +26,42 @@ interface ServerHealth {
   };
 }
 
+interface EmailHistoryLog {
+  _id?: string;
+  email: string;
+  jobType?: 'frontend' | 'mern';
+  subject?: string;
+  status?: 'success' | 'failed' | 'pending';
+  sentAt?: string;
+}
+
+interface DuplicateMatch {
+  email: string;
+  latest: EmailHistoryLog;
+  totalCount: number;
+}
+
+const EMAIL_HISTORY_CACHE_TTL_MS = 60 * 1000;
+
 export default function BulkEmailSender() {
   const [emails, setEmails] = useState('');
   const [subject, setSubject] = useState('');
   const [senderName, setSenderName] = useState('Swapnil Landage');
   const [loading, setLoading] = useState(false);
+  const [parsingFile, setParsingFile] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [results, setResults] = useState<EmailResult[]>([]);
   const [serverHealth, setServerHealth] = useState<ServerHealth | null>(null);
+  const [sentEmailHistory, setSentEmailHistory] = useState<Record<string, EmailHistoryLog[]>>({});
+  const [duplicateMatches, setDuplicateMatches] = useState<DuplicateMatch[]>([]);
+  const [pendingSendPayload, setPendingSendPayload] = useState<{ jobType: 'frontend' | 'mern'; emails: string[] } | null>(null);
+  const [historyLastFetchedAt, setHistoryLastFetchedAt] = useState<number | null>(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     checkServerHealth();
+    fetchSentEmailHistory();
   }, []);
 
   const checkServerHealth = async () => {
@@ -59,6 +84,73 @@ export default function BulkEmailSender() {
     }
   };
 
+  const fetchSentEmailHistory = async (force = false) => {
+    if (
+      !force &&
+      historyLastFetchedAt &&
+      Date.now() - historyLastFetchedAt < EMAIL_HISTORY_CACHE_TTL_MS &&
+      Object.keys(sentEmailHistory).length > 0
+    ) {
+      return;
+    }
+
+    setLoadingHistory(true);
+    try {
+      const firstResponse = await fetch('/api/email-logs?page=1&limit=200', {
+        cache: 'no-store',
+        headers: {
+          'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
+        },
+      });
+      const firstData = await firstResponse.json();
+      if (!firstResponse.ok) {
+        throw new Error(firstData?.error || 'Failed to load email history');
+      }
+
+      const allLogs = Array.isArray(firstData?.logs) ? [...firstData.logs] : [];
+      const totalPages = Number(firstData?.pagination?.pages || 1);
+
+      for (let page = 2; page <= totalPages; page++) {
+        const response = await fetch(`/api/email-logs?page=${page}&limit=200`, {
+          cache: 'no-store',
+          headers: {
+            'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '',
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.error || 'Failed to load email history');
+        }
+        if (Array.isArray(data?.logs)) {
+          allLogs.push(...data.logs);
+        }
+      }
+
+      const historyMap: Record<string, EmailHistoryLog[]> = {};
+      allLogs.forEach((log: EmailHistoryLog) => {
+        const key = String(log?.email || '').trim().toLowerCase();
+        if (!key) return;
+        if (!historyMap[key]) historyMap[key] = [];
+        historyMap[key].push(log);
+      });
+
+      Object.keys(historyMap).forEach(email => {
+        historyMap[email].sort(
+          (a, b) => new Date(b?.sentAt || 0).getTime() - new Date(a?.sentAt || 0).getTime()
+        );
+      });
+
+      setSentEmailHistory(historyMap);
+      setHistoryLastFetchedAt(Date.now());
+    } catch (error) {
+      console.error('Failed to fetch sent email history:', error);
+      // Keep non-blocking behavior: sender still works even if history fails.
+      setSentEmailHistory({});
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     let value = e.target.value;
     if (value.endsWith(' ')) {
@@ -67,6 +159,75 @@ export default function BulkEmailSender() {
     setEmails(value);
     if (errors.emails) {
       setErrors(prev => ({ ...prev, emails: '' }));
+    }
+  };
+
+  const extractEmailsFromText = (text: string): string[] => {
+    const matches = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+    return [...new Set(matches.map(email => email.trim().toLowerCase()))];
+  };
+
+  const normalizeAndDeduplicateEmails = () => {
+    const extractedFromInput = extractEmailsFromText(emails.replace(/,/g, '\n'));
+    if (extractedFromInput.length === 0) {
+      showAlert.warning('No valid email addresses found to normalize.', 'Nothing to normalize');
+      return;
+    }
+
+    setEmails(extractedFromInput.join(', '));
+    if (errors.emails) {
+      setErrors(prev => ({ ...prev, emails: '' }));
+    }
+    showAlert.success(`Normalized ${extractedFromInput.length} unique email(s).`, 'Recipients updated');
+  };
+
+  const handleEmailFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const lowerName = file.name.toLowerCase();
+    const isAllowedType =
+      lowerName.endsWith('.txt') ||
+      lowerName.endsWith('.doc') ||
+      lowerName.endsWith('.docx') ||
+      lowerName.endsWith('.pdf');
+
+    if (!isAllowedType) {
+      showAlert.error('Please upload a .txt, .doc, .docx, or .pdf file.', 'Unsupported file type');
+      event.target.value = '';
+      return;
+    }
+
+    setParsingFile(true);
+    try {
+      const buffer = await file.arrayBuffer();
+      // Use UTF-8 first, then latin1 fallback to recover text fragments from binary docs/pdf.
+      const utf8Text = new TextDecoder('utf-8', { fatal: false }).decode(buffer);
+      const latin1Text = new TextDecoder('latin1').decode(buffer);
+      const extractedEmails = extractEmailsFromText(`${utf8Text}\n${latin1Text}`);
+
+      if (extractedEmails.length === 0) {
+        showAlert.warning('No email addresses were found in the uploaded file.', 'No emails found');
+        return;
+      }
+
+      const existingEmails = emails
+        .split(',')
+        .map(e => e.trim())
+        .filter(Boolean);
+      const merged = [...new Set([...existingEmails, ...extractedEmails])];
+
+      setEmails(merged.join(', '));
+      if (errors.emails) {
+        setErrors(prev => ({ ...prev, emails: '' }));
+      }
+      showAlert.success(`Imported ${extractedEmails.length} email(s) from file.`, 'Import successful');
+    } catch (error) {
+      console.error('Email file parsing failed:', error);
+      showAlert.error('Unable to parse the selected file. Please try a different file.', 'Parse failed');
+    } finally {
+      setParsingFile(false);
+      event.target.value = '';
     }
   };
 
@@ -103,30 +264,7 @@ export default function BulkEmailSender() {
     );
   };
 
-  const sendEmails = async (jobType: 'frontend' | 'mern') => {
-    const emailList = emails
-      .split(',')
-      .map(e => e.trim())
-      .filter(e => e);
-
-    const uniqueEmails = [...new Set(emailList)];
-
-    if (!validateInputs(uniqueEmails)) {
-      return;
-    }
-
-    // Validate emails before calling API
-    const invalidEmails = uniqueEmails.filter(e => !isValidEmail(e));
-    if (invalidEmails.length > 0) {
-      showInvalidEmailsAlert(invalidEmails);
-      return;
-    }
-
-    if (serverHealth && !serverHealth.resumes[jobType]?.exists) {
-      showAlert.warning(`⚠️ ${jobType.toUpperCase()} resume not found!`, `${jobType.toUpperCase()} Resume Not Found`);
-      return;
-    }
-
+  const runBulkSend = async (jobType: 'frontend' | 'mern', uniqueEmails: string[]) => {
     setLoading(true);
     setResults([]);
 
@@ -164,6 +302,7 @@ export default function BulkEmailSender() {
       if (data.summary.success > 0) {
         showAlert.success(`📧 Sent ${data.summary.success} emails successfully!`, 'Email Sent');
         setEmails('');
+        fetchSentEmailHistory(true);
       }
 
       if (data.summary.failed > 0) {
@@ -178,6 +317,48 @@ export default function BulkEmailSender() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const sendEmails = async (jobType: 'frontend' | 'mern') => {
+    const emailList = emails
+      .split(',')
+      .map(e => e.trim().toLowerCase())
+      .filter(e => e);
+
+    const uniqueEmails = [...new Set(emailList)];
+
+    if (!validateInputs(uniqueEmails)) {
+      return;
+    }
+
+    // Validate emails before calling API
+    const invalidEmails = uniqueEmails.filter(e => !isValidEmail(e));
+    if (invalidEmails.length > 0) {
+      showInvalidEmailsAlert(invalidEmails);
+      return;
+    }
+
+    if (serverHealth && !serverHealth.resumes[jobType]?.exists) {
+      showAlert.warning(`⚠️ ${jobType.toUpperCase()} resume not found!`, `${jobType.toUpperCase()} Resume Not Found`);
+      return;
+    }
+
+    const alreadySentMatches = uniqueEmails
+      .filter(email => sentEmailHistory[email]?.length > 0)
+      .map(email => ({
+        email,
+        latest: sentEmailHistory[email][0],
+        totalCount: sentEmailHistory[email].length,
+      }));
+
+    if (alreadySentMatches.length > 0) {
+      setDuplicateMatches(alreadySentMatches);
+      setPendingSendPayload({ jobType, emails: uniqueEmails });
+      setShowDuplicateModal(true);
+      return;
+    }
+
+    await runBulkSend(jobType, uniqueEmails);
   };
 
   return (
@@ -331,6 +512,42 @@ export default function BulkEmailSender() {
               <label className="block text-[10px] sm:text-xs font-bold text-pink-300 mb-1.5 uppercase">
                 Recipient addresses * (comma separated)
               </label>
+              <div className="mb-2 text-[10px] sm:text-xs text-cyan-300 uppercase tracking-wide">
+                {loadingHistory
+                  ? 'Loading sent-email history...'
+                  : `History index ready: ${Object.keys(sentEmailHistory).length} unique recipient(s)`}
+              </div>
+              {duplicateMatches.length > 0 && !showDuplicateModal && (
+                <div className="mb-2 text-[10px] sm:text-xs text-yellow-300 uppercase tracking-wide">
+                  Last check found {duplicateMatches.length} previously-contacted recipient(s)
+                </div>
+              )}
+              <div className="mb-3">
+                <label
+                  htmlFor="email-file-upload"
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-pink-600/20 hover:bg-pink-600/30 border border-pink-400/40 rounded-md text-pink-200 text-xs sm:text-sm font-bold uppercase cursor-pointer transition-colors"
+                >
+                  {parsingFile ? 'Parsing file...' : 'Upload email file (.txt, .doc, .docx, .pdf)'}
+                </label>
+                <input
+                  id="email-file-upload"
+                  type="file"
+                  accept=".txt,.doc,.docx,.pdf"
+                  onChange={handleEmailFileUpload}
+                  className="hidden"
+                  disabled={parsingFile || loading}
+                />
+              </div>
+              <div className="mb-3">
+                <button
+                  type="button"
+                  onClick={normalizeAndDeduplicateEmails}
+                  disabled={loading || parsingFile || !emails.trim()}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-400/40 rounded-md text-cyan-200 text-xs sm:text-sm font-bold uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Normalize & Deduplicate
+                </button>
+              </div>
               <textarea
                 value={emails}
                 onChange={handleEmailChange}
@@ -435,6 +652,88 @@ export default function BulkEmailSender() {
           </div>
         </div>
       </div>
+
+      {showDuplicateModal && (
+        <div className="fixed inset-0 z-[9998] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="w-full sm:max-w-2xl bg-gradient-to-br from-slate-950 via-black to-slate-950 border border-yellow-500/40 rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-base sm:text-xl font-bold text-yellow-300 uppercase mb-2">
+              Already Contacted Recipients Found
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mb-4">
+              Some recipients have previous email logs. Review details before continuing.
+            </p>
+
+            <div className="space-y-2 sm:space-y-3">
+              {duplicateMatches.map(match => (
+                <div
+                  key={match.email}
+                  className="bg-black/50 border border-yellow-500/30 rounded-lg p-3"
+                >
+                  <p className="text-cyan-200 text-xs sm:text-sm font-mono break-all">{match.email}</p>
+                  <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] sm:text-xs text-slate-300">
+                    <p>Last status: <span className="text-white uppercase">{match.latest?.status || 'N/A'}</span></p>
+                    <p>Job type: <span className="text-white uppercase">{match.latest?.jobType || 'N/A'}</span></p>
+                    <p>Total sends: <span className="text-white">{match.totalCount}</span></p>
+                    <p>Last sent: <span className="text-white">{match.latest?.sentAt ? new Date(match.latest.sentAt).toLocaleString() : 'N/A'}</span></p>
+                  </div>
+                  {match.latest?.subject && (
+                    <p className="mt-1 text-[11px] sm:text-xs text-slate-400 truncate">
+                      Subject: {match.latest.subject}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDuplicateModal(false);
+                  setPendingSendPayload(null);
+                }}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-500 text-slate-200 text-sm font-bold uppercase hover:bg-slate-800/40 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!pendingSendPayload) return;
+                  setShowDuplicateModal(false);
+                  await runBulkSend(pendingSendPayload.jobType, pendingSendPayload.emails);
+                  setPendingSendPayload(null);
+                }}
+                className="w-full px-4 py-2.5 rounded-lg border border-yellow-400/60 bg-yellow-500/20 text-yellow-200 text-sm font-bold uppercase hover:bg-yellow-500/30 transition-colors"
+              >
+                Continue Sending Anyway
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!pendingSendPayload) return;
+                  const duplicateEmailSet = new Set(duplicateMatches.map(match => match.email));
+                  const newRecipientsOnly = pendingSendPayload.emails.filter(email => !duplicateEmailSet.has(email));
+
+                  if (newRecipientsOnly.length === 0) {
+                    showAlert.warning('All recipients were already contacted previously.', 'No new recipients');
+                    setShowDuplicateModal(false);
+                    setPendingSendPayload(null);
+                    return;
+                  }
+
+                  setShowDuplicateModal(false);
+                  await runBulkSend(pendingSendPayload.jobType, newRecipientsOnly);
+                  setPendingSendPayload(null);
+                }}
+                className="w-full px-4 py-2.5 rounded-lg border border-cyan-400/60 bg-cyan-500/20 text-cyan-200 text-sm font-bold uppercase hover:bg-cyan-500/30 transition-colors"
+              >
+                Send Only New ({pendingSendPayload ? pendingSendPayload.emails.length - duplicateMatches.length : 0})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

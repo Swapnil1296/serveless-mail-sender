@@ -18,6 +18,7 @@ const navLinks: { href: string; paths: string[]; icon: string; label: string; sl
   { href: '/projects/quiz-hub', paths: ['/projects/quiz-hub'], icon: '📋', label: 'Quiz', slug: 'quiz-hub' },
   { href: '/projects/naukari-scraper', paths: ['/projects/naukari-scraper'], icon: '🔍', label: 'Naukri', slug: 'naukari-scraper' },
   { href: '/projects/expense-tracker', paths: ['/projects/expense-tracker'], icon: '💰', label: 'Expenses', slug: 'expense-tracker' },
+  { href: '/projects/mern-visualizer', paths: ['/projects/mern-visualizer'], icon: '⚡', label: 'MERN Viz', slug: 'mern-visualizer' },
 ];
 
 function NavLink({
