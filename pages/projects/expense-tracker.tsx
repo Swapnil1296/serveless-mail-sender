@@ -68,8 +68,8 @@ export default function ExpenseTrackerPage() {
                 }`}
               >
                 <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-                <span className="hidden xs:inline">Owings</span>
-                <span className="xs:hidden">Owe</span>
+                <span className="hidden xs:inline">Borrow</span>
+                <span className="xs:hidden">Borrowed</span>
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '@/lib/mongodb';
 import Lending from '@/models/Lending';
+import Repayment from '@/models/Repayment';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
@@ -8,13 +9,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const lendings = await Lending.find().sort({ createdAt: -1 }).lean();
-      const total = lendings.reduce((sum, lending) => sum + (lending.returned ? 0 : lending.amount), 0);
+      
+      // Get all repayments
+      const repayments = await Repayment.find().lean();
+      
+      // Calculate repayments for each lending
+      const lendingsWithRepayments = await Promise.all(
+        lendings.map(async (lending) => {
+          const lendingRepayments = repayments.filter(
+            (r: any) => r.lendingId.toString() === lending._id.toString()
+          );
+          const totalRepaid = lendingRepayments.reduce((sum: number, r: any) => sum + r.amount, 0);
+          const pendingAmount = lending.amount - totalRepaid;
+          
+          return {
+            ...lending,
+            totalRepaid,
+            pendingAmount,
+          };
+        })
+      );
+      
+      const total = lendingsWithRepayments.reduce((sum, lending) => sum + lending.pendingAmount, 0);
       const totalLent = lendings.reduce((sum, lending) => sum + lending.amount, 0);
+      const totalRepaid = lendingsWithRepayments.reduce((sum, lending) => sum + lending.totalRepaid, 0);
       
       return res.status(200).json({ 
-        lendings, 
+        lendings: lendingsWithRepayments, 
         total,
         totalLent,
+        totalRepaid,
         count: lendings.length 
       });
     } catch (error) {

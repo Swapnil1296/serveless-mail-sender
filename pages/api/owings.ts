@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '@/lib/mongodb';
 import Owing from '@/models/Owing';
+import Payment from '@/models/Payment';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
@@ -8,13 +9,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const owings = await Owing.find().sort({ createdAt: -1 }).lean();
-      const total = owings.reduce((sum, owing) => sum + (owing.paid ? 0 : owing.amount), 0);
+      
+      // Get all payments
+      const payments = await Payment.find().lean();
+      
+      // Calculate payments for each owing
+      const owingsWithPayments = await Promise.all(
+        owings.map(async (owing) => {
+          const owingPayments = payments.filter(
+            (p: any) => p.owingId.toString() === owing._id.toString()
+          );
+          const totalPaid = owingPayments.reduce((sum: number, p: any) => sum + p.amount, 0);
+          const pendingAmount = owing.amount - totalPaid;
+          
+          return {
+            ...owing,
+            totalPaid,
+            pendingAmount,
+          };
+        })
+      );
+      
+      const total = owingsWithPayments.reduce((sum, owing) => sum + owing.pendingAmount, 0);
       const totalOwed = owings.reduce((sum, owing) => sum + owing.amount, 0);
+      const totalPaid = owingsWithPayments.reduce((sum, owing) => sum + owing.totalPaid, 0);
       
       return res.status(200).json({ 
-        owings, 
+        owings: owingsWithPayments, 
         total,
         totalOwed,
+        totalPaid,
         count: owings.length 
       });
     } catch (error) {
