@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Calculate payments for each owing
       const owingsWithPayments = await Promise.all(
-        owings.map(async (owing) => {
+        owings.map(async (owing: any) => {
           const owingPayments = payments.filter(
             (p: any) => p.owingId.toString() === owing._id.toString()
           );
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
       
       const total = owingsWithPayments.reduce((sum, owing) => sum + owing.pendingAmount, 0);
-      const totalOwed = owings.reduce((sum, owing) => sum + owing.amount, 0);
+      const totalOwed = owings.reduce((sum: number, owing: any) => sum + owing.amount, 0);
       const totalPaid = owingsWithPayments.reduce((sum, owing) => sum + owing.totalPaid, 0);
       
       return res.status(200).json({ 

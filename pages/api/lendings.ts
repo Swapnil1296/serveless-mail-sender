@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Calculate repayments for each lending
       const lendingsWithRepayments = await Promise.all(
-        lendings.map(async (lending) => {
+        lendings.map(async (lending: any) => {
           const lendingRepayments = repayments.filter(
             (r: any) => r.lendingId.toString() === lending._id.toString()
           );
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
       
       const total = lendingsWithRepayments.reduce((sum, lending) => sum + lending.pendingAmount, 0);
-      const totalLent = lendings.reduce((sum, lending) => sum + lending.amount, 0);
+      const totalLent = lendings.reduce((sum: number, lending: any) => sum + lending.amount, 0);
       const totalRepaid = lendingsWithRepayments.reduce((sum, lending) => sum + lending.totalRepaid, 0);
       
       return res.status(200).json({ 
