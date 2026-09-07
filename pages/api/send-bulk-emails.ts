@@ -101,8 +101,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Resume path - map to actual filenames
     const resumeFiles: Record<string, string> = {
-      frontend: 'Swapnil-Landage-3YEO-FE.pdf',
-      mern: 'Swapnil-Landage-3YOE-MERN.pdf'
+      frontend: 'Swapnil-Landage-4YEO-FE.pdf',
+      mern: 'Swapnil-Landage-4YOE-MERN.pdf'
     };
     
     const resumePath = path.join(

@@ -1,8 +1,8 @@
 // Configuration file for resume paths and other constants
 
 export const RESUME_FILES: Record<'frontend' | 'mern', string> = {
-  frontend: 'Swapnil-Landage-3YEO-FE.pdf',
-  mern: 'Swapnil-Landage-3YOE-MERN.pdf',
+  frontend: 'Swapnil-Landage-4YEO-FE.pdf',
+  mern: 'Swapnil-Landage-4YOE-MERN.pdf',
 };
 
 export const MAX_EMAILS_PER_REQUEST = parseInt(

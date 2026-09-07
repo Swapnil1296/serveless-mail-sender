@@ -53,56 +53,58 @@ export const validateEmail = (email: string): boolean => {
 // Email templates
 const getEmailTemplate = (jobType: 'frontend' | 'mern', name: string): string => {
   const sanitizedName = sanitizeInput(name || 'Swapnil Landage');
-  
+
   if (jobType === 'frontend') {
     return `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #2563eb;">ReactJS / NextJS / Frontend Developer</h2>
-          <p>Dear Hiring Manager,</p>
-          <p>I hope you are doing well. I am writing to express my interest in the <strong>React.js/ Next.js/ Frontend Developer</strong> role at your organization.</p>
-          <p><strong>Core Frontend Skills:</strong></p>
-          <ul>
-            <li>React.js, Next.js, TypeScript, Redux, Context API</li>
-            <li>HTML5, CSS3, Tailwind, responsive UI implementation</li>
-            <li>Server-side rendering (SSR), static generation (SSG)</li>
-            <li>Performance optimization, SEO, Core Web Vitals improvement</li>
-          </ul>
-          <p>Thank you for your time and consideration.</p>
-          <p>Best regards,<br>${sanitizedName}<br>Phone/WhatsApp: 7666604697<br>
-          <a href="https://github.com/Swapnil1296">Github</a><br>
-            <a href="https://swapnillandage.in">Portfolio</a></p>
-        </body>
-      </html>
+  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <p>Dear Hiring Manager,</p>
+    <p>I'm a <strong>Frontend Developer with 4+ years of experience</strong> building scalable, SEO-optimized web apps using React.js and Next.js — including work that improved page performance and SEO by <strong>30%+</strong> through SSR/SSG optimization. I'd love to bring that experience to a <strong>React.js/Next.js Frontend Developer</strong> role on your team.</p>
+    <p><strong>Core Skills:</strong></p>
+    <ul style="margin: 0 0 12px 0; padding-left: 20px;">
+      <li>React.js, Next.js, TypeScript, Redux Toolkit, Context API</li>
+      <li>SSR/SSG, performance optimization, Core Web Vitals, SEO</li>
+      <li>Responsive, accessible UI with Tailwind CSS</li>
+    </ul>
+    <p>I've attached my resume, and I'm happy to hop on a quick call this week if that's useful. Thanks so much for your time!</p>
+    <p>Best regards,<br>${sanitizedName}<br>
+    Phone/WhatsApp: 7666604697<br>
+    <a href="https://github.com/Swapnil1296">GitHub</a> | 
+    <a href="https://www.linkedin.com/in/swapnil-landage">LinkedIn</a> | 
+    <a href="https://swapnillandage.in">Portfolio</a></p>
+  </body>
+</html>
     `;
   }
-  
+
   return `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: #10b981;">Application for MERN Developer Role</h2>
-        <p>Dear Hiring Manager,</p>
-        <p>I hope you are doing well. I am writing to express my interest in the <strong>MERN stack Developer</strong> position.</p>
-        <p><strong>Technical Skills:</strong></p>
-        <ul>
-          <li><strong>Frontend:</strong> React.js, Next.js, TypeScript, Redux, Tailwind</li>
-          <li><strong>Backend:</strong> Node.js, Express.js, REST APIs, Authentication</li>
-          <li><strong>Database:</strong> MongoDB – schema design, indexing, aggregations</li>
-          <li><strong>Cloud:</strong> AWS (EC2, S3, Lambda), Azure basics</li>
-        </ul>
-        <p>Thank you for your time and consideration.</p>
-        <p>Best regards,<br>${sanitizedName}<br>Phone/WhatsApp: 7666604697<br>
-        <a href="https://github.com/Swapnil1296">Github</a><br>
-          <a href="https://swapnillandage.in">Portfolio</a></p>
-      </body>
-    </html>
+   <html>
+  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <p>Dear Hiring Manager,</p>
+    <p>I'm a <strong>Full-Stack Developer with 4+ years of experience</strong> building scalable MERN applications across insurance and e-commerce domains, including Micro Frontend (Single-SPA) architecture and containerized microservices with a track record of designing RESTful APIs and improving performance by <strong>30%+</strong>. I'd love to bring that experience to a <strong>MERN Stack Developer</strong> role on your team.</p>
+    <p><strong>Technical Skills:</strong></p>
+    <ul style="margin: 0 0 12px 0; padding-left: 20px;">
+      <li><strong>Frontend:</strong> React.js, Next.js, TypeScript, Redux Toolkit, Tailwind CSS</li>
+      <li><strong>Architecture:</strong> Micro Frontend (Single-SPA), Microservices (Node.js, Express.js, Docker)</li>
+      <li><strong>Backend:</strong> RESTful APIs, JWT Authentication</li>
+      <li><strong>Database:</strong> MongoDB, PostgreSQL – schema design, indexing, aggregations</li>
+      <li><strong>Cloud/DevOps:</strong> AWS, Docker, Azure CI/CD</li>
+    </ul>
+    <p>I've attached my resume, and I'm happy to hop on a quick call this week if that's useful. Thanks so much for your time!</p>
+    <p>Best regards,<br>${sanitizedName}<br>
+    Phone/WhatsApp: 7666604697<br>
+    <a href="https://github.com/Swapnil1296">GitHub</a> | 
+    <a href="https://www.linkedin.com/in/swapnil-landage">LinkedIn</a> | 
+    <a href="https://swapnillandage.in">Portfolio</a></p>
+  </body>
+</html>
   `;
 };
 
 // Follow-up email templates - Different for Frontend and MERN
 const getFollowUpTemplate = (jobType: 'frontend' | 'mern', name: string): string => {
   const sanitizedName = sanitizeInput(name || 'Swapnil Landage');
-  
+
   if (jobType === 'frontend') {
     return `
       <html>
@@ -139,14 +141,14 @@ const getFollowUpTemplate = (jobType: 'frontend' | 'mern', name: string): string
             <p style="margin: 5px 0;">📱 Phone/WhatsApp: <a href="tel:7666604697" style="color: #2563eb; text-decoration: none;">7666604697</a></p>
             <p style="margin: 5px 0;">
               💻 <a href="https://github.com/Swapnil1296" style="color: #2563eb; text-decoration: none;">GitHub Profile</a> | 
-              🌐 <a href="https://swapnil-landage-portfolio.netlify.app/" style="color: #2563eb; text-decoration: none;">Portfolio</a>
+              🌐 <a href="https://serveless-mail-sender-ekuqhi4oj-swapnils-projects-a1249b76.vercel.app/" style="color: #2563eb; text-decoration: none;">Portfolio</a>
             </p>
           </div>
         </body>
       </html>
     `;
   }
-  
+
   // MERN Stack Follow-up Template
   return `
     <html>
@@ -183,7 +185,7 @@ const getFollowUpTemplate = (jobType: 'frontend' | 'mern', name: string): string
           <p style="margin: 5px 0;">📱 Phone/WhatsApp: <a href="tel:7666604697" style="color: #10b981; text-decoration: none;">7666604697</a></p>
           <p style="margin: 5px 0;">
             💻 <a href="https://github.com/Swapnil1296" style="color: #10b981; text-decoration: none;">GitHub Profile</a> | 
-            🌐 <a href="https://swapnil-landage-portfolio.netlify.app/" style="color: #10b981; text-decoration: none;">Portfolio</a>
+            🌐 <a href="https://serveless-mail-sender-ekuqhi4oj-swapnils-projects-a1249b76.vercel.app/" style="color: #10b981; text-decoration: none;">Portfolio</a>
           </p>
         </div>
       </body>
@@ -210,7 +212,7 @@ export const sendEmail = async (options: SendEmailOptions): Promise<void> => {
     throw new Error(`Resume file not found: ${resumePath}`);
   }
 
-  const template = isFollowUp 
+  const template = isFollowUp
     ? getFollowUpTemplate(jobType, senderName)
     : getEmailTemplate(jobType, senderName);
 
@@ -243,7 +245,7 @@ export const sendBatchEmails = async (
       await sendEmail({ ...options, email });
       success++;
       onProgress?.(email, 'success');
-      
+
       // Rate limiting delay
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {

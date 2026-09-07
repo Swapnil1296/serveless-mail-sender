@@ -88,8 +88,8 @@ A modern, serverless bulk email application built with Next.js, featuring MongoD
 4. **Add resume files:**
    
    Your resumes are already in place:
-   - ✓ `public/resumes/Swapnil-Landage-3YEO-FE.pdf`
-   - ✓ `public/resumes/Swapnil-Landage-3YOE-MERN.pdf`
+   - ✓ `public/resumes/Swapnil-Landage-4YEO-FE.pdf`
+   - ✓ `public/resumes/Swapnil-Landage-4YOE-MERN.pdf`
    
    (The app is configured to use these filenames)
 

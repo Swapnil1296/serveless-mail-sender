@@ -3,8 +3,8 @@
 ## ✅ Status Check
 
 Your resumes are correctly placed:
-- ✓ Frontend Resume: `Swapnil-Landage-3YEO-FE.pdf` (120.60 KB)
-- ✓ MERN Resume: `Swapnil-Landage-3YOE-MERN.pdf` (119.39 KB)
+- ✓ Frontend Resume: `Swapnil-Landage-4YEO-FE.pdf` (120.60 KB)
+- ✓ MERN Resume: `Swapnil-Landage-4YOE-MERN.pdf` (119.39 KB)
 
 ## 🚀 Quick Start
 
@@ -80,11 +80,11 @@ You should see:
   "resumes": {
     "frontend": {
       "exists": true,
-      "path": "Swapnil-Landage-3YEO-FE.pdf"
+      "path": "Swapnil-Landage-4YEO-FE.pdf"
     },
     "mern": {
       "exists": true,
-      "path": "Swapnil-Landage-3YOE-MERN.pdf"
+      "path": "Swapnil-Landage-4YOE-MERN.pdf"
     }
   }
 }

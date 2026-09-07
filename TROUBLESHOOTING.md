@@ -46,8 +46,8 @@ mongod
 
 **Solution:**
 Check that these files exist:
-- `public/resumes/Swapnil-Landage-3YEO-FE.pdf`
-- `public/resumes/Swapnil-Landage-3YOE-MERN.pdf`
+- `public/resumes/Swapnil-Landage-4YEO-FE.pdf`
+- `public/resumes/Swapnil-Landage-4YOE-MERN.pdf`
 
 Run this to verify:
 ```bash
@@ -179,8 +179,8 @@ node test-health.js
 
 Should show:
 ```
-✓ Swapnil-Landage-3YEO-FE.pdf FOUND
-✓ Swapnil-Landage-3YOE-MERN.pdf FOUND
+✓ Swapnil-Landage-4YEO-FE.pdf FOUND
+✓ Swapnil-Landage-4YOE-MERN.pdf FOUND
 ```
 
 ## Still Having Issues?

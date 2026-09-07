@@ -36,8 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Map of job types to actual filenames
     const resumeFiles = {
-      frontend: 'Swapnil-Landage-3YEO-FE.pdf',
-      mern: 'Swapnil-Landage-3YOE-MERN.pdf'
+      frontend: 'Swapnil-Landage-4YEO-FE.pdf',
+      mern: 'Swapnil-Landage-4YOE-MERN.pdf'
     };
 
     for (const [jobType, filename] of Object.entries(resumeFiles)) {
