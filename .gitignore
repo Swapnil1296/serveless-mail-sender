@@ -34,9 +34,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Resumes (add your own)
-/public/resumes/*.pdf
-
 # PWA - next-pwa generated files
 /public/sw.js
 /public/sw.js.map
